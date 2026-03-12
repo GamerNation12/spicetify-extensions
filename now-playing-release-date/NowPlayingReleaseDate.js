@@ -1,4 +1,4 @@
-/* Optimized + Resilient Now Playing Release Date (NPRD)
+/* Release Date For Currently Playing Song
    - Performance: caching, debouncing, rAF batching
    - Unique: age since release, album type badge, calendar icon, anniversary highlight
    - Robustness: stronger readiness checks, resilient DOM attachment with retries + MutationObserver, guarded API usage
@@ -6,11 +6,11 @@
 
 (() => {
   const DEBUG = false;
-  const log = (...args) => { if (DEBUG) console.log('[NPRD]', ...args); };
-  const warn = (...args) => { if (DEBUG) console.warn('[NPRD]', ...args); };
-  const error = (...args) => console.error('[NPRD]', ...args);
+  const log = (...args) => { if (DEBUG) console.log('[Release Date]', ...args); };
+  const warn = (...args) => { if (DEBUG) console.warn('[Release Date]', ...args); };
+  const error = (...args) => console.error('[Release Date]', ...args);
 
-  console.log('[Now Playing Release Date] loaded');
+  console.log('[Release Date For Currently Playing Song] loaded');
 
   // Async wait with exponential backoff and cap
   async function waitUntil(predicate, opts = {}) {
@@ -250,7 +250,6 @@
       #releaseDate { display: flex; gap: 4px; white-space: nowrap; align-items: center; }
       #releaseDate { display: contents; margin-right: 8px; }
       #releaseDate a, #releaseDate p { color: var(--text-subdued); }
-      /* Hide Music video label/badge if present */
       [aria-label="Music video"], [title="Music video"], [aria-label*="Music video" i], [title*="Music video" i] { display: none !important; }
       .nprd-hidden { display: none !important; }
       .nprd-badge { padding: 1px 6px; border-radius: 10px; font-size: 10px; text-transform: capitalize; background: var(--spice-subtext); color: var(--spice-text); opacity: 0.85; }
@@ -272,7 +271,6 @@
       createSettingsMenu();
       hideElementById('settingsMenu');
 
-      // Debounced render on song change
       let scheduled = false;
       const scheduleRender = () => {
         if (scheduled) return;
@@ -294,7 +292,6 @@
 
       try { Spicetify.Player.addEventListener('songchange', scheduleRender); } catch {}
 
-      // Initial render regardless of OS
       try {
         await displayReleaseDate();
         updateSettingsMenuAlbumInfo();
@@ -304,7 +301,7 @@
         error('Initial display failed:', e);
       }
     } catch (e) {
-      error('Error initializing:', e, '\nCreate a new issue on the github repo to get this resolved');
+      error('Error initializing:', e);
     }
   }
 
@@ -356,12 +353,9 @@
     return `${full}${albumType ? ` • ${albumType}` : ''}${artist ? ` • ${artist}` : ''}`;
   }
 
-  // Hide any visible "Music video" text/badges in the now playing area
   function hideMusicVideoBadge() {
     const root = document.querySelector('.main-nowPlayingWidget-nowPlaying');
     if (!root) return;
-
-    // Attribute-based hide (fast path via CSS already), ensure any non-attributed text is hidden too
     try {
       const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
         acceptNode: (node) => node.nodeValue && /music\s*video/i.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
@@ -374,8 +368,6 @@
       }
       toHide.forEach(el => { el.classList.add('nprd-hidden'); pruneDanglingSeparatorsAround(el); });
     } catch {}
-
-    // Generic fallback: any element whose trimmed text is exactly "Music video"
     try {
       const nodes = root.querySelectorAll('*:not(script):not(style)');
       for (const el of nodes) {
@@ -387,7 +379,6 @@
     } catch {}
   }
 
-  // Remove dangling separator characters around a removed/hidden element
   function pruneDanglingSeparatorsAround(el) {
     if (!el || !el.parentNode) return;
     const isSepText = (t) => /^[\s]*[•·\-–—|]+[\s]*$/.test(t || '');
@@ -405,7 +396,6 @@
     pruneNodeIfSep(el.nextSibling);
   }
 
-  // Persistent observer to keep Music video elements hidden
   let __nprdMVObserver = null;
   function ensureMVObserver() {
     if (__nprdMVObserver) return;
@@ -422,7 +412,6 @@
     __nprdMVObserver.observe(root, { childList: true, subtree: true, characterData: true });
   }
 
-  // Attach a node to the first found selector, with retries and a short-lived MutationObserver fallback
   async function attachWithRetries(node, selectors, { attempts = 50, interval = 100, observeMs = 8000 } = {}) {
     let container = null;
     for (let i = 0; i < attempts; i++) {
@@ -437,8 +426,6 @@
       container.appendChild(node);
       return true;
     }
-
-    // Fallback: Observe for a short period for any matching selector to appear
     const found = await new Promise(resolve => {
       const start = Date.now();
       const mo = new MutationObserver(() => {
@@ -457,11 +444,8 @@
         }
       });
       mo.observe(document.body, { childList: true, subtree: true });
-      // Also stop after observeMs even if no mutations
       setTimeout(() => { mo.disconnect(); resolve(false); }, observeMs);
     });
-
-    if (!found) warn('Container not found after retries and observation');
     return found;
   }
 
@@ -471,16 +455,13 @@
       const lsPosition = localStorage.getItem('position');
       const lsSeparator = localStorage.getItem('separator');
       const lsDateFormat = localStorage.getItem('dateFormat');
-
       const formattedReleaseDate = formatDate(releaseDate, lsDateFormat);
 
-      // Preserve settings menu open state across re-render
       const settingsMenuRef = document.getElementById('settingsMenu');
       const backdropRef = document.getElementById('nprd-backdrop');
       const wasOpen = !!settingsMenuRef && settingsMenuRef.style.display !== 'none' && settingsMenuRef.style.display !== '';
 
       removeExistingReleaseDateElement();
-
       const releaseDateElement = createReleaseDateElement(lsSeparator, formattedReleaseDate, releaseDate, album);
 
       const selectors = [
@@ -488,21 +469,10 @@
         '.main-trackInfo-name',
         '.main-nowPlayingWidget .main-trackInfo-name',
         '[data-encore-id="trackInfo"]',
-        '.main-trackInfo-container .main-trackInfo-name',
-        '.main-trackInfo-container [class*="name"]',
-        '.main-nowPlayingWidget-trackInfo [class*="name"]',
       ].filter(Boolean);
 
-      const attached = await attachWithRetries(releaseDateElement, selectors, { attempts: 50, interval: 100, observeMs: 8000 });
-      if (!attached) {
-        setTimeout(() => {
-          if (!releaseDateElement.isConnected) {
-            attachWithRetries(releaseDateElement, selectors, { attempts: 50, interval: 100, observeMs: 8000 });
-          }
-        }, 1000);
-      }
+      await attachWithRetries(releaseDateElement, selectors);
 
-      // Restore settings menu visibility if it was open
       if (wasOpen && settingsMenuRef) {
         settingsMenuRef.style.display = 'flex';
         if (backdropRef) backdropRef.style.display = 'block';
@@ -512,20 +482,17 @@
 
   function createReleaseDateElement(separator, formattedReleaseDate, releaseDate, album) {
     const root = createDivElement('releaseDate');
-
     if (localStorage.getItem('showCalendarIcon') === 'true') {
       const icon = document.createElement('span');
       icon.textContent = '📅';
       icon.className = 'nprd-icon';
       root.appendChild(icon);
     }
-
     if (separator && separator.trim() !== '') {
       const sep = document.createElement('p');
       sep.textContent = separator;
       root.appendChild(sep);
     }
-
     const dateA = createAnchorElement(formattedReleaseDate);
     dateA.title = titleForDate(releaseDate, album?.album_type, album?.artists);
     if (localStorage.getItem('highlightAnniversary') === 'true' && isAnniversary(releaseDate)) {
@@ -538,10 +505,8 @@
       const age = document.createElement('span');
       age.className = 'nprd-age';
       age.textContent = `(${computeAgeString(releaseDate)})`;
-      age.title = 'Time since release';
       root.appendChild(age);
     }
-
     if (localStorage.getItem('showAlbumBadge') === 'true' && album?.album_type) {
       const badge = document.createElement('span');
       badge.className = 'nprd-badge';
@@ -558,9 +523,7 @@
     let settingsMenu = document.getElementById('settingsMenu');
     if (!settingsMenu) createSettingsMenu();
     settingsMenu = document.getElementById('settingsMenu');
-
     dateA.addEventListener('click', (ev) => { ev.preventDefault(); toggleSettingsMenu(dateA, settingsMenu); });
-
     return root;
   }
 
@@ -569,14 +532,12 @@
     if (existing) existing.remove();
 
     const settingsMenu = createDivElement('settingsMenu');
-
     const header = document.createElement('div');
     header.className = 'nprd-header';
     const title = document.createElement('h2');
-    title.textContent = 'NPRD Settings';
+    title.textContent = 'Release Date Settings';
     const closeBtn = document.createElement('button');
     closeBtn.className = 'nprd-close';
-    closeBtn.setAttribute('aria-label', 'Close settings');
     closeBtn.textContent = '✕';
     closeBtn.addEventListener('click', () => {
       const backdrop = document.getElementById('nprd-backdrop');
@@ -589,35 +550,28 @@
 
     const optionsDiv = document.createElement('div');
     optionsDiv.id = 'optionsDiv';
-
     optionsDiv.appendChild(createNativeDropdown('position', 'Position', positions));
     optionsDiv.appendChild(createNativeDropdown('dateFormat', 'Date Format', dateformat));
     optionsDiv.appendChild(createNativeDropdown('separator', 'Separator style', separatorOpts));
-
     optionsDiv.appendChild(createToggle('showCalendarIcon', 'Calendar Icon'));
     optionsDiv.appendChild(createToggle('showAge', 'Show Age Since Release'));
     optionsDiv.appendChild(createToggle('showAlbumBadge', 'Album Type Badge'));
     optionsDiv.appendChild(createToggle('highlightAnniversary', 'Anniversary Highlight'));
-
     settingsMenu.appendChild(optionsDiv);
 
     const albumInfoAnchor = document.createElement('a');
     albumInfoAnchor.id = 'nprd-album-info';
     settingsMenu.appendChild(albumInfoAnchor);
-
     document.body.appendChild(settingsMenu);
-
     updateSettingsMenuAlbumInfo();
   }
 
   function createToggle(key, labelText) {
     const container = document.createElement('div');
     container.classList.add('Dropdown-container');
-
     const label = document.createElement('label');
     label.textContent = labelText;
     container.appendChild(label);
-
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.checked = localStorage.getItem(key) === 'true';
@@ -625,7 +579,6 @@
       localStorage.setItem(key, input.checked ? 'true' : 'false');
       await displayReleaseDate();
     });
-
     container.appendChild(input);
     return container;
   }
@@ -635,63 +588,46 @@
       const container = document.getElementById('nprd-album-info');
       if (!container) return;
       container.textContent = '';
-
       const { album, releaseDate } = await getTrackDetailsRD();
       container.href = album.external_urls.spotify || '#';
 
-      let albumImage;
       if (Array.isArray(album.images) && album.images.length > 0) {
         const smallImage = [...album.images].sort((a, b) => (a.width * a.height) - (b.width * b.height))[0];
         if (smallImage?.url) {
-          albumImage = document.createElement('img');
+          const albumImage = document.createElement('img');
           albumImage.src = smallImage.url;
           albumImage.width = 50;
           albumImage.height = 50;
           albumImage.style.marginRight = '1rem';
           albumImage.style.borderRadius = '4px';
-          albumImage.style.objectFit = 'cover';
+          container.appendChild(albumImage);
         }
       }
-
+      const albumContainer = document.createElement('div');
       const albumNameElement = document.createElement('p');
       const mainArtist = Array.isArray(album.artists) ? album.artists[0]?.name : (album.artists?.name || 'Unknown Artist');
       albumNameElement.textContent = `${album.name} - ${mainArtist}`;
-
       const albumTypeElement = document.createElement('p');
       const df = localStorage.getItem('dateFormat');
       albumTypeElement.textContent = `${album.album_type || ''} • ${formatDate(releaseDate, df)}`;
-      albumTypeElement.style.cssText = 'text-transform: capitalize;';
-
-      const albumContainer = document.createElement('div');
       albumContainer.appendChild(albumNameElement);
       albumContainer.appendChild(albumTypeElement);
-
-      if (albumImage) container.appendChild(albumImage);
       container.appendChild(albumContainer);
-    } catch (e) {
-      error('Error updating album info:', e);
+    } catch {
       const container = document.getElementById('nprd-album-info');
-      if (container) {
-        const fallback = document.createElement('p');
-        fallback.textContent = 'Album information unavailable';
-        fallback.style.color = 'var(--spice-subtext)';
-        container.appendChild(fallback);
-      }
+      if (container) container.textContent = 'Album info unavailable';
     }
   }
 
   function createNativeDropdown(id, label, options) {
     const dropdownContainer = document.createElement('div');
     dropdownContainer.classList.add('Dropdown-container');
-
     const labelElement = document.createElement('label');
     labelElement.textContent = label;
     dropdownContainer.appendChild(labelElement);
-
     const selectElement = document.createElement('select');
     selectElement.id = id;
     selectElement.classList.add('releaseDateDropdown-control');
-
     const current = localStorage.getItem(id);
     for (const opt of options) {
       const optionElement = document.createElement('option');
@@ -700,19 +636,16 @@
       if (current === opt.value) optionElement.selected = true;
       selectElement.appendChild(optionElement);
     }
-
     selectElement.addEventListener('change', async () => {
       localStorage.setItem(id, selectElement.value);
       await displayReleaseDate();
       if (id === 'dateFormat') updateSettingsMenuAlbumInfo();
     });
-
     dropdownContainer.appendChild(selectElement);
     return dropdownContainer;
   }
 
   function toggleSettingsMenu(dateElement, settingsMenu) {
-    // Ensure backdrop exists
     let backdrop = document.getElementById('nprd-backdrop');
     if (!backdrop) {
       backdrop = document.createElement('div');
@@ -720,29 +653,17 @@
       backdrop.className = 'nprd-backdrop';
       document.body.appendChild(backdrop);
     }
-
-    const show = () => {
-      function close() {
-        settingsMenu.style.display = 'none';
-        backdrop.style.display = 'none';
-        document.removeEventListener('keydown', escHandler);
-      }
-      const escHandler = (e) => { if (e.key === 'Escape') close(); };
-
-      backdrop.addEventListener('click', close, { once: true });
-      document.addEventListener('keydown', escHandler);
-
-      settingsMenu.style.display = 'flex';
-      backdrop.style.display = 'block';
-    };
-
-    const hide = () => {
+    const close = () => {
       settingsMenu.style.display = 'none';
       backdrop.style.display = 'none';
     };
-
-    const isHidden = settingsMenu.style.display === '' || settingsMenu.style.display === 'none';
-    if (isHidden) show(); else hide();
+    if (settingsMenu.style.display === 'none' || settingsMenu.style.display === '') {
+      settingsMenu.style.display = 'flex';
+      backdrop.style.display = 'block';
+      backdrop.onclick = close;
+    } else {
+      close();
+    }
   }
 
   (async function main() { await initializeRD(); })();
