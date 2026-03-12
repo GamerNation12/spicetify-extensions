@@ -1,6 +1,6 @@
 [
     {
-        "name": "Release Date of Current Song",
+        "name": "Release Date",
         "description": "This extension displays the currently playing track's release date next to the artist(s)",
         "preview": "now-playing-release-date/preview.jpg",
         "main": "now-playing-release-date/NowPlayingReleaseDate.js",
@@ -8,7 +8,7 @@
         "authors":
         [
             {
-                "name": "Regrify",
+                "name": "GamerNation12",
                 "url": "https://github.com/Regrify"
             }
         ],
