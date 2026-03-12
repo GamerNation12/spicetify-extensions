@@ -1,10 +1,10 @@
 // MGN Auto-Updating Loader
 (async function loadExtension() {
-  // This points directly to the cloud link you just pasted!
   const GITHUB_RAW_URL = "https://raw.githubusercontent.com/GamerNation12/spicetify-extensions/refs/heads/main/now-playing-release-date/extension-core.js";
   
   try {
-    const response = await fetch(`${GITHUB_RAW_URL}?t=${Date.now()}`);
+    // The 'no-store' command literally disables Spotify's internal caching for this file
+    const response = await fetch(`${GITHUB_RAW_URL}?t=${Date.now()}`, { cache: 'no-store' });
     if (!response.ok) throw new Error(`GitHub returned status: ${response.status}`);
     const code = await response.text();
 
