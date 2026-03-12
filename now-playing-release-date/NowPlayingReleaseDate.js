@@ -32,22 +32,6 @@
     await waitUntil(() => Spicetify?.Player?.data?.item);
   }
 
-<<<<<<< HEAD
-=======
-  async function checkAndNotifyUpdate() {
-    const savedVersion = localStorage.getItem('nprd_saved_version');
-    
-    if (savedVersion !== CURRENT_VERSION) {
-      if (savedVersion) {
-        Spicetify.showNotification(`🎉 Release Date updated to v${CURRENT_VERSION}!`);
-      } else {
-        Spicetify.showNotification(`📅 Release Date v${CURRENT_VERSION} installed successfully!`);
-      }
-      localStorage.setItem('nprd_saved_version', CURRENT_VERSION);
-    }
-  }
-
->>>>>>> parent of 8ab8cac (Delay and guard update notification)
   const positions = [
     { value: ".main-nowPlayingWidget-nowPlaying:not(#upcomingSongDiv) .main-trackInfo-artists", text: "Artist" },
     { value: ".main-nowPlayingWidget-nowPlaying:not(#upcomingSongDiv) .main-trackInfo-name", text: "Song name" }
@@ -191,10 +175,6 @@
       updateSettingsMenuAlbumInfo();
     });
     await displayReleaseDate();
-<<<<<<< HEAD
-=======
-    checkAndNotifyUpdate(); // Triggers the popup if the version changed
->>>>>>> parent of 8ab8cac (Delay and guard update notification)
   }
 
   async function displayReleaseDate() {
