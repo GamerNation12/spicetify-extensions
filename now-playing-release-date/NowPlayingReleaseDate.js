@@ -35,20 +35,13 @@
   }
 
   async function checkAndNotifyUpdate() {
-    // Wait for the UI to be fully settled before attempting a popup
-    await new Promise(r => setTimeout(r, 2000));
-    
     const savedVersion = localStorage.getItem('nprd_saved_version');
     
     if (savedVersion !== CURRENT_VERSION) {
-      try {
-        const msg = savedVersion 
-          ? `🎉 Release Date updated to v${CURRENT_VERSION}!` 
-          : `📅 Release Date v${CURRENT_VERSION} installed successfully!`;
-        
-        Spicetify.showNotification(msg);
-      } catch (e) {
-        log('Notification system not ready or incompatible.', e);
+      if (savedVersion) {
+        Spicetify.showNotification(`🎉 Release Date updated to v${CURRENT_VERSION}!`);
+      } else {
+        Spicetify.showNotification(`📅 Release Date v${CURRENT_VERSION} installed successfully!`);
       }
       localStorage.setItem('nprd_saved_version', CURRENT_VERSION);
     }
@@ -198,7 +191,7 @@
     });
     
     await displayReleaseDate();
-    checkAndNotifyUpdate(); // Safe trigger
+    checkAndNotifyUpdate(); // Triggers the popup if the version changed
   }
 
   async function displayReleaseDate() {
