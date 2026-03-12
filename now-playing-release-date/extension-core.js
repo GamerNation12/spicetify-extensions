@@ -94,29 +94,29 @@
     const p = (async () => {
       let albumDetails = null;
       try {
-        const idObj = Spicetify.URI?.from?.(albumUri);
-        const hexId = idObj?.id ? Spicetify.URI.idToHex(idObj.id) : null;
-        const rb = Spicetify.Platform?.RequestBuilder?.build?.();
-        if (hexId && rb) {
-          const resp = await rb.withHost("https://spclient.wg.spotify.com/album-entity-view/v1").withPath(`/album/${hexId}`).send();
-          albumDetails = await resp.body;
-        }
-      } catch (e) { log('Fetch via hex failed, using fallback.', e); }
+        // Use Spicetify's built-in Cosmos API to securely fetch the real album data
+        albumDetails = await Spicetify.CosmosAsync.get(`https://api.spotify.com/v1/albums/${albumId}`);
+      } catch (e) { log('Fetch via Cosmos failed.', e); }
 
       let album, releaseDate;
-      if (albumDetails?.date) {
-        const d = albumDetails.date;
+      if (albumDetails && albumDetails.release_date) {
         album = {
           name: albumDetails.name,
-          artists: albumDetails.artist || [{name: 'Unknown Artist'}],
-          album_type: albumDetails.type || 'album',
-          external_urls: { spotify: albumDetails.canonical_uri || albumUri },
-          images: albumDetails.cover_group?.image?.map(img => ({ url: `https://i.scdn.co/image/${img.file_id}`, width: img.width, height: img.height })) || []
+          artists: albumDetails.artists || [{name: 'Unknown Artist'}],
+          album_type: albumDetails.album_type || 'album',
+          external_urls: { spotify: albumDetails.external_urls?.spotify || albumUri },
+          images: albumDetails.images || []
         };
-        releaseDate = new Date(d.year, (d.month || 1) - 1, d.day || 1);
+        
+        // Parse Spotify's release_date (YYYY-MM-DD, YYYY-MM, or YYYY)
+        const parts = albumDetails.release_date.split('-');
+        if (parts.length === 3) releaseDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        else if (parts.length === 2) releaseDate = new Date(parts[0], parts[1] - 1, 1);
+        else releaseDate = new Date(parts[0], 0, 1);
+
       } else {
         album = { ...playerData.item.album, album_type: 'album' };
-        releaseDate = new Date(); // Fallback
+        releaseDate = new Date("2000-01-01"); // Safe fallback so it doesn't say "New"
       }
       cacheSet(albumId, { album, releaseDate });
       return { trackDetails: playerData.item, album, releaseDate };
