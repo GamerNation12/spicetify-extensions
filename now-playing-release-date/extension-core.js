@@ -1,5 +1,6 @@
 /* Optimized + Resilient Now Playing Release Date (NPRD)
-    - Fix: Forced single-line layout & flex-spacing
+    - Fix: Forced single-line layout
+    - Feature: Smooth Fade-in Animation
 */
 
 (() => {
@@ -7,7 +8,7 @@
   const log = (...args) => { if (DEBUG) console.log('[NPRD]', ...args); };
   const error = (...args) => console.error('[NPRD]', ...args);
 
-  // --- Core Logic (Unchanged) ---
+  // --- Core Logic ---
   async function waitUntil(predicate, opts = {}) {
     const { initial = 50, max = 500, timeout = 20000 } = opts;
     let delay = initial;
@@ -51,7 +52,7 @@
   };
 
   if (!localStorage.getItem('position')) {
-    localStorage.setItem('position', positions[0].value); // Set to Artist by default for better fit
+    localStorage.setItem('position', positions[0].value);
     localStorage.setItem('dateFormat', dateformat[0].value);
     localStorage.setItem('separator', separatorOpts[0].value);
   }
@@ -114,7 +115,7 @@
     try { return await p; } finally { inflight.delete(albumId); }
   }
 
-  // --- Fixed Professional CSS ---
+  // --- CSS with Animation ---
   function releaseDateCSS() {
     const styleId = 'nprd-style';
     if (document.getElementById(styleId)) return null;
@@ -134,35 +135,25 @@
       .Dropdown-container { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; color: var(--spice-text); font-weight: 500; font-size: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
       .releaseDateDropdown-control { background: rgba(255,255,255,0.08); color: var(--spice-text); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 12px; font-family: inherit; cursor: pointer; transition: 0.2s; }
       
-      #nprd-album-info { 
-        margin-top: 12px; padding: 14px; background: rgba(255,255,255,0.05); border-radius: 14px; 
-        text-decoration: none !important; border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; transition: transform 0.2s, background 0.2s;
-      }
-      #nprd-album-info img { width: 54px; height: 54px; border-radius: 6px; margin-right: 14px; }
-
-      /* --- THE FIX --- */
       #releaseDate { 
         display: inline-flex !important; 
         align-items: center; 
-        white-space: nowrap !important; /* Forces one line */
+        white-space: nowrap !important;
         font-size: 0.85rem; 
         margin-left: 8px;
-        flex-shrink: 0; /* Prevents container from squeezing the date */
+        flex-shrink: 0;
+        opacity: 0; /* Starts hidden for animation */
+        transition: opacity 0.5s ease-in-out; /* The Fade Animation */
       }
+      #releaseDate.visible { opacity: 1; }
+
       #releaseDate a { color: var(--spice-subtext); text-decoration: none; cursor: pointer; }
       #releaseDate a:hover { color: var(--spice-text); text-decoration: underline; }
       
       .nprd-badge { 
-        padding: 1px 6px; 
-        border-radius: 4px; 
-        font-size: 10px; 
-        font-weight: 900; 
-        background: var(--spice-button); 
-        color: black !important; 
-        text-transform: uppercase; 
-        margin-left: 8px; 
-        line-height: 1.2;
-        display: inline-block;
+        padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 900; 
+        background: var(--spice-button); color: black !important; text-transform: uppercase; 
+        margin-left: 8px; line-height: 1.2; display: inline-block;
       }
       .nprd-age { font-weight: 400; color: var(--spice-subtext); margin-left: 6px; font-size: 0.75rem; }
       .nprd-anniv { color: #1ed760 !important; font-weight: bold; }
@@ -170,7 +161,7 @@
     return style;
   }
 
-  // --- Menu and Toggle Logic (Preserved) ---
+  // --- Menu Logic (Preserved) ---
   function createSettingsMenu() {
     if (document.getElementById('settingsMenu')) document.getElementById('settingsMenu').remove();
     const menu = document.createElement('div');
@@ -192,22 +183,7 @@
     opts.appendChild(createToggle('showCalendarIcon', 'Show Calendar Icon'));
     opts.appendChild(createToggle('highlightAnniversary', 'Anniversary Highlight'));
     menu.appendChild(opts);
-    const info = document.createElement('a'); 
-    info.id = 'nprd-album-info';
-    info.target = "_blank";
-    menu.appendChild(info);
     document.body.appendChild(menu);
-  }
-
-  async function updateSettingsMenuAlbumInfo() {
-    const container = document.getElementById('nprd-album-info');
-    if (!container) return;
-    try {
-      const { album, releaseDate } = await getTrackDetailsRD();
-      const df = localStorage.getItem('dateFormat');
-      container.href = album.external_urls.spotify;
-      container.innerHTML = `<img src="${album.images[0]?.url || ''}"><div><p style="font-weight:700; color:white; margin:0">${album.name}</p><p style="opacity:0.6; color:white; margin:0; font-size:0.8rem">${album.artists[0]?.name} • ${album.album_type.toUpperCase()}</p></div>`;
-    } catch (e) { container.innerHTML = `<p style="opacity:0.5; color:white">Album info unavailable</p>`; }
   }
 
   function createToggle(key, text) {
@@ -236,24 +212,7 @@
     return div;
   }
 
-  function toggleSettingsMenu(settingsMenu) {
-    let backdrop = document.getElementById('nprd-backdrop');
-    if (!backdrop) {
-      backdrop = document.createElement('div'); 
-      backdrop.id = 'nprd-backdrop';
-      document.body.appendChild(backdrop);
-      backdrop.onclick = () => {
-        settingsMenu.style.display = 'none';
-        backdrop.style.display = 'none';
-      };
-    }
-    const isHidden = settingsMenu.style.display === 'none' || settingsMenu.style.display === '';
-    settingsMenu.style.display = isHidden ? 'flex' : 'none';
-    backdrop.style.display = isHidden ? 'block' : 'none';
-    if (isHidden) updateSettingsMenuAlbumInfo();
-  }
-
-  // --- Fixed Display Logic ---
+  // --- Display with Fade Logic ---
   async function displayReleaseDate() {
     try {
       const { releaseDate, album } = await getTrackDetailsRD();
@@ -306,11 +265,17 @@
 
       const target = document.querySelector(lsPosition);
       if (target) {
-          // Force target to be flex so children stay on one line
           target.style.display = 'flex';
           target.style.alignItems = 'center';
           target.style.flexWrap = 'nowrap';
           target.appendChild(root);
+          
+          // Trigger the Fade-In
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              root.classList.add('visible');
+            });
+          });
       }
     } catch (e) { error(e); }
   }
@@ -333,6 +298,22 @@
   function isAnniversary(d) {
     const now = new Date();
     return now.getMonth() === d.getMonth() && now.getDate() === d.getDate();
+  }
+
+  function toggleSettingsMenu(settingsMenu) {
+    let backdrop = document.getElementById('nprd-backdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div'); 
+      backdrop.id = 'nprd-backdrop';
+      document.body.appendChild(backdrop);
+      backdrop.onclick = () => {
+        settingsMenu.style.display = 'none';
+        backdrop.style.display = 'none';
+      };
+    }
+    const isHidden = settingsMenu.style.display === 'none' || settingsMenu.style.display === '';
+    settingsMenu.style.display = isHidden ? 'flex' : 'none';
+    backdrop.style.display = isHidden ? 'block' : 'none';
   }
 
   async function initializeRD() {
