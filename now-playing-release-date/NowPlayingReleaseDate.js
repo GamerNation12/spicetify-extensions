@@ -12,6 +12,11 @@
 
   console.log('[Release Date For Currently Playing Song] loaded');
 
+  // --- State Management ---
+  let currentTrackUri = null;
+  let renderDebounce = null;
+  let domObserver = null;
+
   async function waitUntil(predicate, opts = {}) {
     const { initial = 50, max = 500, timeout = 20000 } = opts;
     let delay = initial;
@@ -29,7 +34,7 @@
   }
 
   async function waitForTrackData() {
-    await waitUntil(() => Spicetify?.Player?.data?.item);
+    await waitUntil(() => Spicetify?.Player?.data?.item?.uri);
   }
 
   const positions = [
@@ -48,21 +53,19 @@
   ];
 
   const featureDefaults = {
+    position: positions[1].value,
+    dateFormat: dateformat[0].value,
+    separator: separatorOpts[0].value,
     showAge: 'true',
     showAlbumBadge: 'true',
     showCalendarIcon: 'true',
     highlightAnniversary: 'true',
     menuBlur: 'true',
     menuOpacity: '0.9',
-    menuColor: 'var(--spice-main)'
+    menuColor: '#121212' // Fallback hex if var(--spice-main) fails in color picker
   };
 
-  // Defaults Initialization
-  if (!localStorage.getItem('position')) {
-    localStorage.setItem('position', positions[1].value);
-    localStorage.setItem('dateFormat', dateformat[0].value);
-    localStorage.setItem('separator', separatorOpts[0].value);
-  }
+  // Initialize Defaults
   for (const [k, v] of Object.entries(featureDefaults)) {
     if (localStorage.getItem(k) == null) localStorage.setItem(k, v);
   }
@@ -95,25 +98,25 @@
         const hexId = idObj?.id ? Spicetify.URI.idToHex(idObj.id) : null;
         const rb = Spicetify.Platform?.RequestBuilder?.build?.();
         if (hexId && rb) {
-          const resp = await rb.withHost("https://spclient.wg.spotify.com/metadata/4").withPath(`/album/${hexId}`).send();
+          const resp = await rb.withHost("https://spclient.wg.spotify.com/album-entity-view/v1").withPath(`/album/${hexId}`).send();
           albumDetails = await resp.body;
         }
-      } catch (e) { albumDetails = null; }
+      } catch (e) { log('Fetch via hex failed, using fallback.', e); }
 
       let album, releaseDate;
       if (albumDetails?.date) {
         const d = albumDetails.date;
         album = {
           name: albumDetails.name,
-          artists: albumDetails.artist,
-          album_type: albumDetails.type,
-          external_urls: { spotify: albumDetails.canonical_uri },
+          artists: albumDetails.artist || [{name: 'Unknown Artist'}],
+          album_type: albumDetails.type || 'album',
+          external_urls: { spotify: albumDetails.canonical_uri || albumUri },
           images: albumDetails.cover_group?.image?.map(img => ({ url: `https://i.scdn.co/image/${img.file_id}`, width: img.width, height: img.height })) || []
         };
         releaseDate = new Date(d.year, (d.month || 1) - 1, d.day || 1);
       } else {
         album = { ...playerData.item.album, album_type: 'album' };
-        releaseDate = new Date();
+        releaseDate = new Date(); // Fallback
       }
       cacheSet(albumId, { album, releaseDate });
       return { trackDetails: playerData.item, album, releaseDate };
@@ -134,7 +137,7 @@
         overflow: auto; max-height: 80vh; padding: 20px; border-radius: 12px; 
         box-shadow: 0 12px 40px rgba(0,0,0,0.7); flex-direction: column; width: min(90vw, 520px); 
         z-index: 10001; gap: 12px; border: 1px solid var(--spice-subtext);
-        transition: backdrop-filter 0.3s ease;
+        transition: backdrop-filter 0.3s ease, background-color 0.3s ease;
       }
       #nprd-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; }
       #settingsMenu h2 { color: var(--spice-text); font-size: 1.1rem; margin: 0; }
@@ -143,24 +146,51 @@
       .Dropdown-container { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; color: var(--spice-text); }
       .releaseDateDropdown-control { background: var(--spice-main); color: var(--spice-text); border: 1px solid var(--spice-subtext); border-radius: 4px; padding: 4px; }
       #releaseDate { display: contents; gap: 4px; align-items: center; white-space: nowrap; }
-      #releaseDate a, #releaseDate p { color: var(--text-subdued); text-decoration: none; }
-      .nprd-badge { padding: 1px 6px; border-radius: 10px; font-size: 10px; background: var(--spice-subtext); color: var(--spice-text); opacity: 0.8; margin-left: 4px; }
+      #releaseDate a, #releaseDate span { color: var(--spice-subtext); text-decoration: none; }
+      #releaseDate a:hover { color: var(--spice-text); }
+      .nprd-badge { padding: 1px 6px; border-radius: 10px; font-size: 10px; background: var(--spice-button-disabled); color: var(--spice-text); opacity: 0.8; margin-left: 4px; text-transform: capitalize; }
       .nprd-age { font-size: 11px; opacity: 0.7; margin-left: 4px; }
-      .nprd-anniv { animation: nprdPulse 1.6s ease-in-out 3; }
-      @keyframes nprdPulse { 0%, 100% { text-shadow: 0 0 0 var(--spice-text-bright-accent);} 50% { text-shadow: 0 0 10px var(--spice-text-bright-accent);} }
+      .nprd-anniv { animation: nprdPulse 1.6s ease-in-out infinite; color: var(--spice-button-active) !important; font-weight: bold; }
+      @keyframes nprdPulse { 0%, 100% { text-shadow: 0 0 0 var(--spice-button-active);} 50% { text-shadow: 0 0 8px var(--spice-button-active);} }
     `;
     return style;
   }
 
   function applyMenuStyles(menu) {
+    if (!menu) return;
     const blur = localStorage.getItem('menuBlur') === 'true';
     const opacity = localStorage.getItem('menuOpacity');
     const color = localStorage.getItem('menuColor');
     
-    menu.style.backgroundColor = color;
-    menu.style.opacity = opacity;
+    // Hex to RGBA to allow opacity blending with background color
+    const hexToRgb = (hex) => {
+      let r = 18, g = 18, b = 18; // fallback dark
+      if (hex.match(/^#([a-fA-F0-9]{3}){1,2}$/)) {
+        let c = hex.substring(1).split('');
+        if(c.length === 3){ c= [c[0], c[0], c[1], c[1], c[2], c[2]]; }
+        c = '0x' + c.join('');
+        r = (c>>16)&255; g = (c>>8)&255; b = c&255;
+      }
+      return `${r}, ${g}, ${b}`;
+    };
+
+    menu.style.backgroundColor = `rgba(${hexToRgb(color)}, ${opacity})`;
     menu.style.backdropFilter = blur ? 'blur(15px)' : 'none';
     menu.style.webkitBackdropFilter = blur ? 'blur(15px)' : 'none';
+  }
+
+  function setupObserver() {
+    if (domObserver) domObserver.disconnect();
+    const nowPlayingBar = document.querySelector('.main-nowPlayingWidget-nowPlaying');
+    if (!nowPlayingBar) return;
+
+    domObserver = new MutationObserver((mutations) => {
+      // If Spotify's React unmounts our element but the song is the same, re-attach it
+      if (!document.getElementById('releaseDate') && Spicetify.Player.data?.item?.uri === currentTrackUri) {
+        triggerRender();
+      }
+    });
+    domObserver.observe(nowPlayingBar, { childList: true, subtree: true });
   }
 
   async function initializeRD() {
@@ -169,63 +199,100 @@
     if (css) document.head.appendChild(css);
     createSettingsMenu();
     
-    Spicetify.Player.addEventListener('songchange', async () => {
-      document.getElementById('releaseDate')?.remove();
-      await displayReleaseDate();
-      updateSettingsMenuAlbumInfo();
+    Spicetify.Player.addEventListener('songchange', () => {
+      const newUri = Spicetify.Player.data?.item?.uri;
+      if (newUri !== currentTrackUri) {
+        currentTrackUri = newUri;
+        triggerRender();
+        updateSettingsMenuAlbumInfo();
+      }
     });
-    await displayReleaseDate();
+
+    currentTrackUri = Spicetify.Player.data?.item?.uri;
+    triggerRender();
+    
+    // Attempt to hook the observer after UI loads
+    setTimeout(setupObserver, 2000); 
+  }
+
+  function triggerRender() {
+    if (renderDebounce) clearTimeout(renderDebounce);
+    renderDebounce = setTimeout(() => {
+      requestAnimationFrame(displayReleaseDate);
+    }, 150);
   }
 
   async function displayReleaseDate() {
     try {
+      const expectedUri = currentTrackUri;
       const { releaseDate, album } = await getTrackDetailsRD();
+      
+      // Prevent race conditions: if track changed while fetching, abort
+      if (expectedUri !== currentTrackUri) return;
+
+      // Clean up previous instance to prevent duplicates
+      document.getElementById('releaseDate')?.remove();
+
+      const targetSelector = localStorage.getItem('position');
+      const target = document.querySelector(targetSelector);
+      if (!target) {
+        log('Target container not found, will retry via observer.');
+        return;
+      }
+
       const fmt = localStorage.getItem('dateFormat');
       const sepChar = localStorage.getItem('separator');
       
-      const root = document.createElement('div');
+      // Use DocumentFragment for batched DOM insertion
+      const frag = document.createDocumentFragment();
+      const root = document.createElement('span');
       root.id = 'releaseDate';
 
-      if (localStorage.getItem('showCalendarIcon') === 'true') {
-        const icon = document.createElement('span'); icon.textContent = '📅 ';
-        root.appendChild(icon);
+      if (sepChar && sepChar !== '\u200E') {
+        const s = document.createElement('span'); 
+        s.textContent = ` ${sepChar} `;
+        root.appendChild(s);
       }
 
-      if (sepChar && sepChar !== '\u200E') {
-        const s = document.createElement('p'); s.textContent = sepChar;
-        root.appendChild(s);
+      if (localStorage.getItem('showCalendarIcon') === 'true') {
+        const icon = document.createElement('span'); 
+        icon.textContent = '📅 ';
+        root.appendChild(icon);
       }
 
       const dateA = document.createElement('a');
       dateA.textContent = formatDate(releaseDate, fmt);
       dateA.style.cursor = 'pointer';
+      dateA.onclick = toggleSettingsMenu;
+      
       if (localStorage.getItem('highlightAnniversary') === 'true' && isAnniversary(releaseDate)) {
         dateA.classList.add('nprd-anniv');
+        dateA.title = "Happy Release Anniversary!";
       }
       root.appendChild(dateA);
 
       if (localStorage.getItem('showAge') === 'true') {
-        const age = document.createElement('span'); age.className = 'nprd-age';
+        const age = document.createElement('span'); 
+        age.className = 'nprd-age';
         age.textContent = `(${computeAgeString(releaseDate)})`;
         root.appendChild(age);
       }
 
-      if (localStorage.getItem('showAlbumBadge') === 'true') {
-        const badge = document.createElement('span'); badge.className = 'nprd-badge';
+      if (localStorage.getItem('showAlbumBadge') === 'true' && album.album_type) {
+        const badge = document.createElement('span'); 
+        badge.className = 'nprd-badge';
         badge.textContent = album.album_type;
         root.appendChild(badge);
       }
 
-      const target = document.querySelector(localStorage.getItem('position'));
-      if (target) {
-        target.appendChild(root);
-        dateA.onclick = () => toggleSettingsMenu();
-      }
+      frag.appendChild(root);
+      target.appendChild(frag);
     } catch (e) { error(e); }
   }
 
   function createSettingsMenu() {
     if (document.getElementById('settingsMenu')) document.getElementById('settingsMenu').remove();
+    
     const menu = document.createElement('div');
     menu.id = 'settingsMenu';
 
@@ -240,19 +307,31 @@
     opts.appendChild(createNativeDropdown('dateFormat', 'Format', dateformat));
     opts.appendChild(createNativeDropdown('separator', 'Separator', separatorOpts));
     
-    // Aesthetic Toggles
     opts.appendChild(createToggle('showAge', 'Show Age String'));
+    opts.appendChild(createToggle('showAlbumBadge', 'Show Album Badge'));
+    opts.appendChild(createToggle('showCalendarIcon', 'Show Calendar Icon'));
+    opts.appendChild(createToggle('highlightAnniversary', 'Highlight Anniversaries'));
     opts.appendChild(createToggle('menuBlur', 'Enable Glass Blur Effect'));
     
     // Opacity Slider
     const opContainer = document.createElement('div');
     opContainer.className = 'Dropdown-container';
-    opContainer.innerHTML = `<label>Menu Opacity</label><input type="range" min="0.5" max="1.0" step="0.05" value="${localStorage.getItem('menuOpacity')}">`;
+    opContainer.innerHTML = `<label>Menu Opacity</label><input type="range" min="0.3" max="1.0" step="0.05" value="${localStorage.getItem('menuOpacity')}">`;
     opContainer.querySelector('input').oninput = (e) => {
       localStorage.setItem('menuOpacity', e.target.value);
       applyMenuStyles(menu);
     };
     opts.appendChild(opContainer);
+
+    // Color Picker
+    const colorContainer = document.createElement('div');
+    colorContainer.className = 'Dropdown-container';
+    colorContainer.innerHTML = `<label>Menu Color</label><input type="color" value="${localStorage.getItem('menuColor')}">`;
+    colorContainer.querySelector('input').oninput = (e) => {
+      localStorage.setItem('menuColor', e.target.value);
+      applyMenuStyles(menu);
+    };
+    opts.appendChild(colorContainer);
 
     menu.appendChild(opts);
     const info = document.createElement('a'); info.id = 'nprd-album-info';
@@ -269,7 +348,7 @@
     div.querySelector('input').onchange = (e) => {
       localStorage.setItem(key, e.target.checked ? 'true' : 'false');
       applyMenuStyles(document.getElementById('settingsMenu'));
-      displayReleaseDate();
+      triggerRender();
     };
     return div;
   }
@@ -284,7 +363,7 @@
     div.innerHTML = html;
     div.querySelector('select').onchange = (e) => {
       localStorage.setItem(id, e.target.value);
-      displayReleaseDate();
+      triggerRender();
     };
     return div;
   }
@@ -306,20 +385,25 @@
   async function updateSettingsMenuAlbumInfo() {
     const container = document.getElementById('nprd-album-info');
     if (!container) return;
-    const { album, releaseDate } = await getTrackDetailsRD();
-    container.innerHTML = `
-      <div style="display:flex; align-items:center; margin-top:15px; text-decoration:none; color:var(--spice-text);">
-        <img src="${album.images[0]?.url}" style="width:50px; height:50px; border-radius:4px; margin-right:10px;">
-        <div>
-          <p style="margin:0; font-weight:bold;">${album.name}</p>
-          <p style="margin:0; opacity:0.7; font-size:12px;">${album.artists[0].name} • ${formatDate(releaseDate, localStorage.getItem('dateFormat'))}</p>
+    try {
+      const { album, releaseDate } = await getTrackDetailsRD();
+      container.innerHTML = `
+        <div style="display:flex; align-items:center; margin-top:15px; text-decoration:none; color:var(--spice-text);">
+          <img src="${album.images[0]?.url || ''}" style="width:50px; height:50px; border-radius:4px; margin-right:10px; background:var(--spice-subtext);">
+          <div>
+            <p style="margin:0; font-weight:bold;">${album.name}</p>
+            <p style="margin:0; opacity:0.7; font-size:12px;">${album.artists[0]?.name} • ${formatDate(releaseDate, localStorage.getItem('dateFormat'))}</p>
+          </div>
         </div>
-      </div>
-    `;
-    container.href = album.external_urls.spotify;
+      `;
+      container.href = album.external_urls.spotify;
+    } catch (e) {
+      container.innerHTML = `<p style="color:var(--spice-error);">Could not load album info</p>`;
+    }
   }
 
   function formatDate(d, f) {
+    if (!(d instanceof Date) || isNaN(d)) return "Unknown Date";
     const dd = String(d.getDate()).padStart(2, '0'), mm = String(d.getMonth() + 1).padStart(2, '0'), yyyy = d.getFullYear();
     if (f === 'DD-MM-YYYY') return `${dd}-${mm}-${yyyy}`;
     if (f === 'MM-DD-YYYY') return `${mm}-${dd}-${yyyy}`;
@@ -327,14 +411,18 @@
   }
 
   function computeAgeString(d) {
+    if (!(d instanceof Date) || isNaN(d)) return "Unknown Age";
     const now = new Date();
     let y = now.getFullYear() - d.getFullYear(), m = now.getMonth() - d.getMonth();
     if (now.getDate() < d.getDate()) m--;
     if (m < 0) { y--; m += 12; }
+    if (y < 0) return 'Unreleased';
+    if (y === 0 && m === 0) return 'New';
     return y > 0 ? `${y}y ${m}m` : `${m}m`;
   }
 
   function isAnniversary(d) {
+    if (!(d instanceof Date) || isNaN(d)) return false;
     const now = new Date();
     return now.getMonth() === d.getMonth() && now.getDate() === d.getDate();
   }
