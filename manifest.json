@@ -5,15 +5,14 @@
         "preview": "now-playing-release-date/preview.jpg",
         "main": "now-playing-release-date/NowPlayingReleaseDate.js",
         "readme": "now-playing-release-date/README.md",
-        "authors":
-        [
+        "version": "1.0.1",
+        "authors": [
             {
                 "name": "GamerNation12",
                 "url": "https://github.com/GamerNation12/spicetify-extensions"
             }
         ],
-        "tags":
-        [
+        "tags": [
             "current song",
             "now playing",
             "release date",
