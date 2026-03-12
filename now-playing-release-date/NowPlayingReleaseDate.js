@@ -6,13 +6,11 @@
 */
 
 (() => {
-  const CURRENT_VERSION = "1.0.2"; // ⚠️ Update this number every time you push a new version to GitHub!
-
   const DEBUG = false;
   const log = (...args) => { if (DEBUG) console.log('[Release Date]', ...args); };
   const error = (...args) => console.error('[Release Date]', ...args);
 
-  console.log(`[Release Date For Currently Playing Song] loaded v${CURRENT_VERSION}`);
+  console.log('[Release Date For Currently Playing Song] loaded');
 
   async function waitUntil(predicate, opts = {}) {
     const { initial = 50, max = 500, timeout = 20000 } = opts;
@@ -32,19 +30,6 @@
 
   async function waitForTrackData() {
     await waitUntil(() => Spicetify?.Player?.data?.item);
-  }
-
-  async function checkAndNotifyUpdate() {
-    const savedVersion = localStorage.getItem('nprd_saved_version');
-    
-    if (savedVersion !== CURRENT_VERSION) {
-      if (savedVersion) {
-        Spicetify.showNotification(`🎉 Release Date updated to v${CURRENT_VERSION}!`);
-      } else {
-        Spicetify.showNotification(`📅 Release Date v${CURRENT_VERSION} installed successfully!`);
-      }
-      localStorage.setItem('nprd_saved_version', CURRENT_VERSION);
-    }
   }
 
   const positions = [
@@ -189,9 +174,7 @@
       await displayReleaseDate();
       updateSettingsMenuAlbumInfo();
     });
-    
     await displayReleaseDate();
-    checkAndNotifyUpdate(); // Triggers the popup if the version changed
   }
 
   async function displayReleaseDate() {
