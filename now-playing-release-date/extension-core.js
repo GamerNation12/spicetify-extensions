@@ -1,6 +1,5 @@
 /* Optimized + Resilient Now Playing Release Date (NPRD)
-    - Performance: caching, debouncing, rAF batching
-    - UI: Professional Glassmorphism Settings Menu
+    - Fix: Forced single-line layout & flex-spacing
 */
 
 (() => {
@@ -8,7 +7,7 @@
   const log = (...args) => { if (DEBUG) console.log('[NPRD]', ...args); };
   const error = (...args) => console.error('[NPRD]', ...args);
 
-  // --- Core Logic ---
+  // --- Core Logic (Unchanged) ---
   async function waitUntil(predicate, opts = {}) {
     const { initial = 50, max = 500, timeout = 20000 } = opts;
     let delay = initial;
@@ -51,9 +50,8 @@
     highlightAnniversary: 'true',
   };
 
-  // Initialize Settings
   if (!localStorage.getItem('position')) {
-    localStorage.setItem('position', positions[1].value);
+    localStorage.setItem('position', positions[0].value); // Set to Artist by default for better fit
     localStorage.setItem('dateFormat', dateformat[0].value);
     localStorage.setItem('separator', separatorOpts[0].value);
   }
@@ -116,7 +114,7 @@
     try { return await p; } finally { inflight.delete(albumId); }
   }
 
-  // --- Professional CSS ---
+  // --- Fixed Professional CSS ---
   function releaseDateCSS() {
     const styleId = 'nprd-style';
     if (document.getElementById(styleId)) return null;
@@ -125,77 +123,79 @@
     style.innerHTML = `
       #settingsMenu { 
         display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-        background: rgba(18, 18, 18, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-        padding: 24px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.1);
-        flex-direction: column; width: min(90vw, 440px); z-index: 10001; gap: 16px; border: none;
+        background: rgba(18, 18, 18, 0.9); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+        padding: 24px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1);
+        flex-direction: column; width: min(95vw, 440px); z-index: 10001; gap: 16px; border: none;
         box-sizing: border-box;
       }
       #settingsMenu * { box-sizing: border-box; }
       #nprd-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; backdrop-filter: blur(4px); }
       
-      #settingsMenu .nprd-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-      #settingsMenu h2 { color: var(--spice-text); font-size: 1.3rem; font-weight: 800; letter-spacing: -0.03em; margin: 0; }
-      #settingsMenu .nprd-close { background: rgba(255,255,255,0.05); border: none; color: var(--spice-text); border-radius: 50%; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-size: 14px; }
-      #settingsMenu .nprd-close:hover { background: rgba(255,255,255,0.15); }
-      
       .Dropdown-container { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; color: var(--spice-text); font-weight: 500; font-size: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
       .releaseDateDropdown-control { background: rgba(255,255,255,0.08); color: var(--spice-text); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 12px; font-family: inherit; cursor: pointer; transition: 0.2s; }
-      .releaseDateDropdown-control:hover { background: rgba(255,255,255,0.12); }
       
-      input[type="checkbox"] { width: 18px; height: 18px; accent-color: #1ed760; cursor: pointer; }
-
       #nprd-album-info { 
         margin-top: 12px; padding: 14px; background: rgba(255,255,255,0.05); border-radius: 14px; 
         text-decoration: none !important; border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; transition: transform 0.2s, background 0.2s;
       }
-      #nprd-album-info:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
-      #nprd-album-info img { width: 54px; height: 54px; border-radius: 6px; margin-right: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-      #nprd-album-info p { margin: 0; color: var(--spice-text); font-size: 0.85rem; line-height: 1.4; }
-      #nprd-album-info .album-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; }
-      #nprd-album-info .album-meta { opacity: 0.5; font-size: 0.75rem; }
+      #nprd-album-info img { width: 54px; height: 54px; border-radius: 6px; margin-right: 14px; }
 
-      #releaseDate { display: contents; font-size: 0.85rem; }
+      /* --- THE FIX --- */
+      #releaseDate { 
+        display: inline-flex !important; 
+        align-items: center; 
+        white-space: nowrap !important; /* Forces one line */
+        font-size: 0.85rem; 
+        margin-left: 8px;
+        flex-shrink: 0; /* Prevents container from squeezing the date */
+      }
       #releaseDate a { color: var(--spice-subtext); text-decoration: none; cursor: pointer; }
-      #releaseDate a:hover { color: var(--spice-text); }
-      .nprd-badge { padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: 800; background: var(--spice-button); color: black; text-transform: uppercase; margin-left: 6px; vertical-align: middle;}
-      .nprd-age { font-weight: 400; color: var(--spice-subtext); margin-left: 5px; font-size: 0.75rem; }
+      #releaseDate a:hover { color: var(--spice-text); text-decoration: underline; }
+      
+      .nprd-badge { 
+        padding: 1px 6px; 
+        border-radius: 4px; 
+        font-size: 10px; 
+        font-weight: 900; 
+        background: var(--spice-button); 
+        color: black !important; 
+        text-transform: uppercase; 
+        margin-left: 8px; 
+        line-height: 1.2;
+        display: inline-block;
+      }
+      .nprd-age { font-weight: 400; color: var(--spice-subtext); margin-left: 6px; font-size: 0.75rem; }
       .nprd-anniv { color: #1ed760 !important; font-weight: bold; }
     `;
     return style;
   }
 
+  // --- Menu and Toggle Logic (Preserved) ---
   function createSettingsMenu() {
     if (document.getElementById('settingsMenu')) document.getElementById('settingsMenu').remove();
-    
     const menu = document.createElement('div');
     menu.id = 'settingsMenu';
-
     const header = document.createElement('div');
     header.className = 'nprd-header';
-    header.innerHTML = `<h2>NPRD Settings</h2><button class="nprd-close" aria-label="Close">✕</button>`;
+    header.innerHTML = `<h2 style="color:white; margin:0">NPRD Settings</h2><button class="nprd-close" style="background:none; border:none; color:white; cursor:pointer; font-size:18px">✕</button>`;
     header.querySelector('.nprd-close').onclick = () => {
       menu.style.display = 'none';
       document.getElementById('nprd-backdrop').style.display = 'none';
     };
     menu.appendChild(header);
-
     const opts = document.createElement('div');
     opts.appendChild(createNativeDropdown('position', 'Display Position', positions));
     opts.appendChild(createNativeDropdown('dateFormat', 'Date Format', dateformat));
     opts.appendChild(createNativeDropdown('separator', 'Separator Style', separatorOpts));
-    
     opts.appendChild(createToggle('showAge', 'Show Time Since Release'));
     opts.appendChild(createToggle('showAlbumBadge', 'Show Album Type Badge'));
     opts.appendChild(createToggle('showCalendarIcon', 'Show Calendar Icon'));
     opts.appendChild(createToggle('highlightAnniversary', 'Anniversary Highlight'));
-
     menu.appendChild(opts);
-
     const info = document.createElement('a'); 
     info.id = 'nprd-album-info';
     info.target = "_blank";
     menu.appendChild(info);
-    
     document.body.appendChild(menu);
   }
 
@@ -206,21 +206,14 @@
       const { album, releaseDate } = await getTrackDetailsRD();
       const df = localStorage.getItem('dateFormat');
       container.href = album.external_urls.spotify;
-      container.innerHTML = `
-        <img src="${album.images[0]?.url || ''}">
-        <div>
-          <p class="album-name">${album.name}</p>
-          <p class="album-meta">${album.artists[0]?.name} • ${album.album_type.toUpperCase()}</p>
-          <p class="album-meta">${formatDate(releaseDate, df)}</p>
-        </div>
-      `;
-    } catch (e) { container.innerHTML = `<p style="opacity:0.5">Album info unavailable</p>`; }
+      container.innerHTML = `<img src="${album.images[0]?.url || ''}"><div><p style="font-weight:700; color:white; margin:0">${album.name}</p><p style="opacity:0.6; color:white; margin:0; font-size:0.8rem">${album.artists[0]?.name} • ${album.album_type.toUpperCase()}</p></div>`;
+    } catch (e) { container.innerHTML = `<p style="opacity:0.5; color:white">Album info unavailable</p>`; }
   }
 
   function createToggle(key, text) {
     const div = document.createElement('div');
     div.className = 'Dropdown-container';
-    div.innerHTML = `<label>${text}</label><input type="checkbox" ${localStorage.getItem(key) === 'true' ? 'checked' : ''}>`;
+    div.innerHTML = `<label style="color:white">${text}</label><input type="checkbox" ${localStorage.getItem(key) === 'true' ? 'checked' : ''}>`;
     div.querySelector('input').onchange = (e) => {
       localStorage.setItem(key, e.target.checked ? 'true' : 'false');
       displayReleaseDate();
@@ -232,7 +225,7 @@
     const div = document.createElement('div');
     div.className = 'Dropdown-container';
     const current = localStorage.getItem(id);
-    let html = `<label>${label}</label><select class="releaseDateDropdown-control">`;
+    let html = `<label style="color:white">${label}</label><select class="releaseDateDropdown-control">`;
     options.forEach(o => html += `<option value="${o.value}" ${current === o.value ? 'selected' : ''}>${o.text}</option>`);
     html += `</select>`;
     div.innerHTML = html;
@@ -260,6 +253,7 @@
     if (isHidden) updateSettingsMenuAlbumInfo();
   }
 
+  // --- Fixed Display Logic ---
   async function displayReleaseDate() {
     try {
       const { releaseDate, album } = await getTrackDetailsRD();
@@ -311,7 +305,13 @@
       }
 
       const target = document.querySelector(lsPosition);
-      if (target) target.appendChild(root);
+      if (target) {
+          // Force target to be flex so children stay on one line
+          target.style.display = 'flex';
+          target.style.alignItems = 'center';
+          target.style.flexWrap = 'nowrap';
+          target.appendChild(root);
+      }
     } catch (e) { error(e); }
   }
 
