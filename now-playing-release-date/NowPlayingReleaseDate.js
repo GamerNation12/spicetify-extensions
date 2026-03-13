@@ -1,14 +1,12 @@
-// MGN Auto-Updating Loader - V2 (Cache Killer)
+// MGN Auto-Updating Loader - V3 (CORS Fix)
 (async function loadExtension() {
-  // We use the 'refs/heads/main' path to be as direct as possible
+  // Direct path to your core extension file
   const GITHUB_RAW_URL = "https://raw.githubusercontent.com/GamerNation12/spicetify-extensions/refs/heads/main/now-playing-release-date/extension-core.js";
   
   try {
-    // We add a random number AND the 'no-cache' header to force a fresh download
-    const response = await fetch(`${GITHUB_RAW_URL}?v=${Math.random()}`, { 
-      cache: 'no-cache',
-      headers: { 'Cache-Control': 'no-cache' }
-    });
+    // We only use the random query parameter to force a fresh download.
+    // Removing the second argument (cache/headers) fixes the CORS preflight error.
+    const response = await fetch(`${GITHUB_RAW_URL}?v=${Math.random()}`);
     
     if (!response.ok) throw new Error(`GitHub error: ${response.status}`);
     const code = await response.text();
@@ -18,7 +16,7 @@
     await import(localUrl);
     
     URL.revokeObjectURL(localUrl);
-    console.log('[MGN Loader] Success: Forced fresh download of Core Extension.');
+    console.log('[MGN Loader] Success: Core Extension synced from GitHub.');
     
   } catch (error) {
     console.error('[MGN Loader] Failed to load:', error);
