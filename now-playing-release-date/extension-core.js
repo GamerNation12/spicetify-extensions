@@ -151,13 +151,23 @@
         font-size: 0.85rem; 
         margin-left: 8px;
         flex-shrink: 0;
-        opacity: 0; /* Hidden initially */
-        transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth Fade */
+        opacity: 0;
+        transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
       }
       #releaseDate.fade-in { opacity: 1; }
 
       #releaseDate a { color: var(--spice-subtext); text-decoration: none; cursor: pointer; }
       #releaseDate a:hover { color: var(--spice-text); }
+
+      .nprd-refresh {
+        background: none; border: none; color: var(--spice-subtext);
+        cursor: pointer; margin-left: 6px; padding: 2px;
+        display: flex; align-items: center; justify-content: center;
+        transition: color 0.2s, transform 0.4s ease;
+      }
+      .nprd-refresh:hover { color: #1ed760; transform: rotate(180deg); }
+      .nprd-refresh svg { width: 13px; height: 13px; fill: currentColor; }
+
       .nprd-badge { padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: 800; background: var(--spice-button); color: black; text-transform: uppercase; margin-left: 6px; vertical-align: middle;}
       .nprd-age { font-weight: 400; color: var(--spice-subtext); margin-left: 5px; font-size: 0.75rem; }
       .nprd-anniv { color: #1ed760 !important; font-weight: bold; }
@@ -173,7 +183,6 @@
 
     const header = document.createElement('div');
     header.className = 'nprd-header';
-    // --- Updated Title Name ---
     header.innerHTML = `<h2>Release Date Settings</h2><button class="nprd-close" aria-label="Close">✕</button>`;
     header.querySelector('.nprd-close').onclick = () => {
       menu.style.display = 'none';
@@ -271,6 +280,24 @@
         root.appendChild(badge);
       }
 
+      // --- NEW: Refresh Button Logic ---
+      const refreshBtn = document.createElement('button');
+      refreshBtn.className = 'nprd-refresh';
+      refreshBtn.title = 'Fix Date or Position';
+      refreshBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.3 0 6 2.7 6 6 0 1-.3 2-.7 2.8l1.5 1.5c.7-1.3 1.2-2.8 1.2-4.3 0-5-4-9-9-9zM6 12c0-1 .3-2 .7-2.8L5.2 7.7C4.5 9 4 10.5 4 12c0 5 4 9 9 9v-3l4 4-4 4v-3c-3.3 0-6-2.7-6-6z"/></svg>`;
+      
+      refreshBtn.onclick = (e) => {
+          e.stopPropagation();
+          const albumUri = Spicetify.Player.data.item.album?.uri;
+          if (albumUri) {
+              const albumId = albumUri.split(':')[2];
+              albumCache.delete(albumId); // Clear specific cache to force re-fetch
+          }
+          displayReleaseDate();
+          Spicetify.showNotification("Refreshing Release Date...");
+      };
+      root.appendChild(refreshBtn);
+
       const target = document.querySelector(lsPosition);
       if (target) {
           target.style.display = 'flex';
@@ -278,7 +305,6 @@
           target.style.flexWrap = 'nowrap';
           target.appendChild(root);
           
-          // --- Improved Fade Animation Trigger ---
           setTimeout(() => {
               root.classList.add('fade-in');
           }, 10);
