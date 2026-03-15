@@ -416,27 +416,33 @@
       const refreshBtn = document.createElement('button');
       refreshBtn.className = 'nprd-refresh';
       refreshBtn.type = 'button';
-      refreshBtn.title = 'Reload extension';
-      refreshBtn.setAttribute('aria-label', 'Reload extension');
+      refreshBtn.title = 'Refresh release date';
+      refreshBtn.setAttribute('aria-label', 'Refresh release date');
       refreshBtn.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4V1L8 5l4 4V6c3.3 0 6 2.7 6 6 0 1-.3 2-.7 2.8l1.5 1.5c.7-1.3 1.2-2.8 1.2-4.3 0-5-4-9-9-9zM6 12c0-1 .3-2 .7-2.8L5.2 7.7C4.5 9 4 10.5 4 12c0 5 4 9 9 9v-3l4 4-4 4v-3c-3.3 0-6-2.7-6-6z"/></svg>`;
       refreshBtn.onclick = (e) => {
         e.stopPropagation();
-        console.log(PREFIX, 'Reloading extension');
-        Spicetify.showNotification('Reloading…');
-        location.reload();
+        const albumUri = Spicetify.Player.data?.item?.album?.uri;
+        if (albumUri) {
+          const albumId = albumUri.split(':')[2];
+          albumCache.delete(albumId);
+        }
+        console.log(PREFIX, 'Refreshing release date');
+        Spicetify.showNotification('Refreshing release date…');
+        displayReleaseDate();
       };
       root.appendChild(refreshBtn);
 
-      const target = document.querySelector(lsPosition);
+      let target = document.querySelector(lsPosition);
+      if (!target) {
+        const fallback = POSITIONS.find(p => p.value !== lsPosition)?.value;
+        if (fallback) target = document.querySelector(fallback);
+      }
       if (target) {
-          target.style.display = 'flex';
-          target.style.alignItems = 'center';
-          target.style.flexWrap = 'nowrap';
-          target.appendChild(root);
-          
-          setTimeout(() => {
-              root.classList.add('fade-in');
-          }, 10);
+        target.style.display = 'flex';
+        target.style.alignItems = 'center';
+        target.style.flexWrap = 'nowrap';
+        target.appendChild(root);
+        setTimeout(() => root.classList.add('fade-in'), 10);
       }
     } catch (e) { error(e); }
   }
