@@ -288,13 +288,9 @@
       
       refreshBtn.onclick = (e) => {
           e.stopPropagation();
-          const albumUri = Spicetify.Player.data.item.album?.uri;
-          if (albumUri) {
-              const albumId = albumUri.split(':')[2];
-              albumCache.delete(albumId); // Clear specific cache to force re-fetch
-          }
-          displayReleaseDate();
-          Spicetify.showNotification("Refreshing Release Date...");
+          console.log('[Release Date] Refreshing whole extension');
+          Spicetify.showNotification("Refreshing extension...");
+          location.reload();
       };
       root.appendChild(refreshBtn);
 
