@@ -4,12 +4,11 @@
 
 (() => {
   const DEBUG = false;
-  const log = (...args) => { if (DEBUG) console.log('[Release Date]', ...args); };
-  const error = (...args) => console.error('[Release Date]', ...args);
+  const PREFIX = '[Release Date]';
+  const log = (...args) => { if (DEBUG) console.log(PREFIX, ...args); };
+  const error = (...args) => console.error(PREFIX, ...args);
 
-  console.log('[Release Date For Currently Playing Song] loaded');
-
-  // --- Core Logic ---
+  // --- Utilities ---
   async function waitUntil(predicate, opts = {}) {
     const { initial = 50, max = 500, timeout = 20000 } = opts;
     let delay = initial;
@@ -30,35 +29,35 @@
     await waitUntil(() => Spicetify?.Player?.data?.item);
   }
 
-  const positions = [
-    { value: ".main-nowPlayingWidget-nowPlaying:not(#upcomingSongDiv) .main-trackInfo-artists", text: "Artist" },
-    { value: ".main-nowPlayingWidget-nowPlaying:not(#upcomingSongDiv) .main-trackInfo-name", text: "Song name" }
+  const POSITIONS = [
+    { value: ".main-nowPlayingWidget-nowPlaying:not(#upcomingSongDiv) .main-trackInfo-artists", text: "Below artist" },
+    { value: ".main-nowPlayingWidget-nowPlaying:not(#upcomingSongDiv) .main-trackInfo-name", text: "Below track name" }
   ];
-  const dateformat = [
+  const DATE_FORMATS = [
     { value: "DD-MM-YYYY", text: "DD-MM-YYYY" },
     { value: "MM-DD-YYYY", text: "MM-DD-YYYY" },
     { value: "YYYY-MM-DD", text: "YYYY-MM-DD" }
   ];
-  const separatorOpts = [
+  const SEPARATORS = [
     { value: "•", text: "Dot" },
     { value: "-", text: "Dash" },
-    { value: "\u200E", text: "None" },
+    { value: "\u200E", text: "None" }
   ];
 
-  const featureDefaults = {
+  const FEATURE_DEFAULTS = {
     showAge: 'true',
     showAlbumBadge: 'true',
     showCalendarIcon: 'true',
     highlightAnniversary: 'true',
   };
 
-  // Initialize Settings
+  /** Initialize default settings if not set */
   if (!localStorage.getItem('position')) {
-    localStorage.setItem('position', positions[1].value);
-    localStorage.setItem('dateFormat', dateformat[0].value);
-    localStorage.setItem('separator', separatorOpts[0].value);
+    localStorage.setItem('position', POSITIONS[1].value);
+    localStorage.setItem('dateFormat', DATE_FORMATS[0].value);
+    localStorage.setItem('separator', SEPARATORS[0].value);
   }
-  for (const [k, v] of Object.entries(featureDefaults)) {
+  for (const [k, v] of Object.entries(FEATURE_DEFAULTS)) {
     if (localStorage.getItem(k) == null) localStorage.setItem(k, v);
   }
 
@@ -79,6 +78,7 @@
     const playerData = Spicetify.Player.data;
     if (!playerData?.item?.uri) throw new Error('No track data');
     const albumUri = playerData.item.album?.uri;
+    if (!albumUri) throw new Error('No album data');
     const albumId = albumUri.split(':')[2];
 
     if (albumCache.has(albumId)) return { trackDetails: playerData.item, ...albumCache.get(albumId) };
@@ -117,97 +117,221 @@
     try { return await p; } finally { inflight.delete(albumId); }
   }
 
-  // --- Professional CSS ---
+  // --- Styles ---
+  const CALENDAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>';
+
   function releaseDateCSS() {
     const styleId = 'nprd-style';
     if (document.getElementById(styleId)) return null;
     const style = document.createElement('style');
     style.id = styleId;
-    style.innerHTML = `
-      #settingsMenu { 
-        display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-        background: rgba(18, 18, 18, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-        padding: 24px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.1);
-        flex-direction: column; width: min(90vw, 440px); z-index: 10001; gap: 16px; border: none;
+    style.textContent = `
+      #nprd-settings {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(25, 25, 25, 0.95);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        padding: 28px 24px;
+        border-radius: 16px;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
+        flex-direction: column;
+        width: min(90vw, 400px);
+        z-index: 10001;
+        gap: 0;
+        border: none;
         box-sizing: border-box;
+        font-family: var(--font-family, inherit);
       }
-      #settingsMenu * { box-sizing: border-box; }
-      #nprd-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; backdrop-filter: blur(4px); }
-      
-      #settingsMenu .nprd-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-      #settingsMenu h2 { color: var(--spice-text); font-size: 1.1rem; font-weight: 800; letter-spacing: -0.01em; margin: 0; }
-      #settingsMenu .nprd-close { background: rgba(255,255,255,0.05); border: none; color: var(--spice-text); border-radius: 50%; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-size: 14px; }
-      #settingsMenu .nprd-close:hover { background: rgba(255,255,255,0.15); }
-      
-      .Dropdown-container { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; color: var(--spice-text); font-weight: 500; font-size: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
-      .releaseDateDropdown-control { background: rgba(255,255,255,0.08); color: var(--spice-text); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 12px; font-family: inherit; cursor: pointer; transition: 0.2s; }
-      
-      input[type="checkbox"] { width: 18px; height: 18px; accent-color: #1ed760; cursor: pointer; }
-
-      #releaseDate { 
-        display: inline-flex !important; 
-        align-items: center; 
+      #nprd-settings * { box-sizing: border-box; }
+      #nprd-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 10000;
+        backdrop-filter: blur(2px);
+      }
+      #nprd-settings .nprd-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+      }
+      #nprd-settings h2 {
+        color: var(--spice-text);
+        font-size: 1.125rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin: 0;
+      }
+      #nprd-settings .nprd-close {
+        background: transparent;
+        border: none;
+        color: var(--spice-subtext);
+        border-radius: 50%;
+        cursor: pointer;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.15s, background 0.15s;
+        font-size: 18px;
+      }
+      #nprd-settings .nprd-close:hover {
+        color: var(--spice-text);
+        background: rgba(255,255,255,0.08);
+      }
+      #nprd-settings .nprd-section {
+        margin-bottom: 4px;
+      }
+      #nprd-settings .nprd-section-title {
+        color: var(--spice-subtext);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 16px 0 8px;
+        padding: 0;
+      }
+      #nprd-settings .nprd-section-title:first-child { margin-top: 0; }
+      #nprd-settings .nprd-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        color: var(--spice-text);
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+      }
+      #nprd-settings .nprd-row:last-child { border-bottom: none; }
+      #nprd-settings .nprd-select {
+        background: rgba(255,255,255,0.06);
+        color: var(--spice-text);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.8125rem;
+        font-family: inherit;
+        cursor: pointer;
+        min-width: 140px;
+      }
+      #nprd-settings input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #1ed760;
+        cursor: pointer;
+      }
+      #releaseDate {
+        display: inline-flex !important;
+        align-items: center;
         white-space: nowrap !important;
-        font-size: 0.85rem; 
+        font-size: 0.8125rem;
         margin-left: 8px;
         flex-shrink: 0;
         opacity: 0;
-        transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: opacity 0.35s ease;
       }
       #releaseDate.fade-in { opacity: 1; }
-
-      #releaseDate a { color: var(--spice-subtext); text-decoration: none; cursor: pointer; }
+      #releaseDate a {
+        color: var(--spice-subtext);
+        text-decoration: none;
+        cursor: pointer;
+        transition: color 0.15s;
+      }
       #releaseDate a:hover { color: var(--spice-text); }
-
+      .nprd-calendar-icon {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 4px;
+      }
+      .nprd-calendar-icon svg { width: 14px; height: 14px; fill: currentColor; }
       .nprd-refresh {
-        background: none; border: none; color: var(--spice-subtext);
-        cursor: pointer; margin-left: 6px; padding: 2px;
-        display: flex; align-items: center; justify-content: center;
-        transition: color 0.2s, transform 0.4s ease;
+        background: none;
+        border: none;
+        color: var(--spice-subtext);
+        cursor: pointer;
+        margin-left: 4px;
+        padding: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s, transform 0.35s ease;
       }
       .nprd-refresh:hover { color: #1ed760; transform: rotate(180deg); }
-      .nprd-refresh svg { width: 13px; height: 13px; fill: currentColor; }
-
-      .nprd-badge { padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: 800; background: var(--spice-button); color: black; text-transform: uppercase; margin-left: 6px; vertical-align: middle;}
-      .nprd-age { font-weight: 400; color: var(--spice-subtext); margin-left: 5px; font-size: 0.75rem; }
-      .nprd-anniv { color: #1ed760 !important; font-weight: bold; }
+      .nprd-refresh svg { width: 14px; height: 14px; fill: currentColor; }
+      .nprd-badge {
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.625rem;
+        font-weight: 700;
+        background: rgba(30, 215, 96, 0.2);
+        color: var(--spice-text);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-left: 6px;
+      }
+      .nprd-age {
+        font-weight: 400;
+        color: var(--spice-subtext);
+        margin-left: 6px;
+        font-size: 0.75rem;
+      }
+      .nprd-anniv { color: #1ed760 !important; font-weight: 600; }
     `;
     return style;
   }
 
   function createSettingsMenu() {
-    if (document.getElementById('settingsMenu')) document.getElementById('settingsMenu').remove();
-    
+    const existing = document.getElementById('nprd-settings');
+    if (existing) existing.remove();
+
     const menu = document.createElement('div');
-    menu.id = 'settingsMenu';
+    menu.id = 'nprd-settings';
+    menu.setAttribute('role', 'dialog');
+    menu.setAttribute('aria-labelledby', 'nprd-settings-title');
 
     const header = document.createElement('div');
     header.className = 'nprd-header';
-    header.innerHTML = `<h2>Release Date Settings</h2><button class="nprd-close" aria-label="Close">✕</button>`;
+    header.innerHTML = `<h2 id="nprd-settings-title">Release date</h2><button class="nprd-close" type="button" aria-label="Close settings">×</button>`;
     header.querySelector('.nprd-close').onclick = () => {
       menu.style.display = 'none';
-      document.getElementById('nprd-backdrop').style.display = 'none';
+      const b = document.getElementById('nprd-backdrop');
+      if (b) b.style.display = 'none';
     };
     menu.appendChild(header);
 
-    const opts = document.createElement('div');
-    opts.appendChild(createNativeDropdown('position', 'Display Position', positions));
-    opts.appendChild(createNativeDropdown('dateFormat', 'Date Format', dateformat));
-    opts.appendChild(createNativeDropdown('separator', 'Separator Style', separatorOpts));
-    
-    opts.appendChild(createToggle('showAge', 'Show Time Since Release'));
-    opts.appendChild(createToggle('showAlbumBadge', 'Show Album Type Badge'));
-    opts.appendChild(createToggle('showCalendarIcon', 'Show Calendar Icon'));
-    opts.appendChild(createToggle('highlightAnniversary', 'Anniversary Highlight'));
+    const layoutSection = document.createElement('div');
+    layoutSection.className = 'nprd-section';
+    layoutSection.innerHTML = '<div class="nprd-section-title">Layout</div>';
+    layoutSection.appendChild(createRow('Position', 'position', POSITIONS));
+    layoutSection.appendChild(createRow('Date format', 'dateFormat', DATE_FORMATS));
+    layoutSection.appendChild(createRow('Separator', 'separator', SEPARATORS));
+    menu.appendChild(layoutSection);
 
-    menu.appendChild(opts);
+    const displaySection = document.createElement('div');
+    displaySection.className = 'nprd-section';
+    displaySection.innerHTML = '<div class="nprd-section-title">Display</div>';
+    displaySection.appendChild(createToggle('showCalendarIcon', 'Calendar icon'));
+    displaySection.appendChild(createToggle('showAge', 'Time since release'));
+    displaySection.appendChild(createToggle('showAlbumBadge', 'Album type badge'));
+    displaySection.appendChild(createToggle('highlightAnniversary', 'Highlight release anniversary'));
+    menu.appendChild(displaySection);
+
     document.body.appendChild(menu);
   }
 
   function createToggle(key, text) {
     const div = document.createElement('div');
-    div.className = 'Dropdown-container';
-    div.innerHTML = `<label>${text}</label><input type="checkbox" ${localStorage.getItem(key) === 'true' ? 'checked' : ''}>`;
+    div.className = 'nprd-row';
+    div.innerHTML = `<label for="nprd-${key}">${text}</label><input id="nprd-${key}" type="checkbox" ${localStorage.getItem(key) === 'true' ? 'checked' : ''}>`;
     div.querySelector('input').onchange = (e) => {
       localStorage.setItem(key, e.target.checked ? 'true' : 'false');
       displayReleaseDate();
@@ -215,12 +339,12 @@
     return div;
   }
 
-  function createNativeDropdown(id, label, options) {
+  function createRow(label, id, options) {
     const div = document.createElement('div');
-    div.className = 'Dropdown-container';
+    div.className = 'nprd-row';
     const current = localStorage.getItem(id);
-    let html = `<label>${label}</label><select class="releaseDateDropdown-control">`;
-    options.forEach(o => html += `<option value="${o.value}" ${current === o.value ? 'selected' : ''}>${o.text}</option>`);
+    let html = `<label for="nprd-${id}">${label}</label><select id="nprd-${id}" class="nprd-select">`;
+    options.forEach(o => html += `<option value="${escapeAttr(o.value)}" ${current === o.value ? 'selected' : ''}>${escapeText(o.text)}</option>`);
     html += `</select>`;
     div.innerHTML = html;
     div.querySelector('select').onchange = (e) => {
@@ -228,6 +352,13 @@
       displayReleaseDate();
     };
     return div;
+  }
+
+  function escapeAttr(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function escapeText(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   async function displayReleaseDate() {
@@ -243,8 +374,10 @@
       root.id = 'releaseDate';
 
       if (localStorage.getItem('showCalendarIcon') === 'true') {
-        const icon = document.createElement('span'); 
-        icon.textContent = '📅 ';
+        const icon = document.createElement('span');
+        icon.className = 'nprd-calendar-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.innerHTML = CALENDAR_SVG;
         root.appendChild(icon);
       }
 
@@ -257,8 +390,8 @@
       const dateA = document.createElement('a');
       dateA.textContent = formatDate(releaseDate, lsDateFormat);
       dateA.onclick = (e) => {
-          e.preventDefault();
-          toggleSettingsMenu(document.getElementById('settingsMenu'));
+        e.preventDefault();
+        toggleSettingsMenu(document.getElementById('nprd-settings'));
       };
       
       if (localStorage.getItem('highlightAnniversary') === 'true' && isAnniversary(releaseDate)) {
@@ -280,17 +413,17 @@
         root.appendChild(badge);
       }
 
-      // --- NEW: Refresh Button Logic ---
       const refreshBtn = document.createElement('button');
       refreshBtn.className = 'nprd-refresh';
-      refreshBtn.title = 'Fix Date or Position';
-      refreshBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.3 0 6 2.7 6 6 0 1-.3 2-.7 2.8l1.5 1.5c.7-1.3 1.2-2.8 1.2-4.3 0-5-4-9-9-9zM6 12c0-1 .3-2 .7-2.8L5.2 7.7C4.5 9 4 10.5 4 12c0 5 4 9 9 9v-3l4 4-4 4v-3c-3.3 0-6-2.7-6-6z"/></svg>`;
-      
+      refreshBtn.type = 'button';
+      refreshBtn.title = 'Reload extension';
+      refreshBtn.setAttribute('aria-label', 'Reload extension');
+      refreshBtn.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4V1L8 5l4 4V6c3.3 0 6 2.7 6 6 0 1-.3 2-.7 2.8l1.5 1.5c.7-1.3 1.2-2.8 1.2-4.3 0-5-4-9-9-9zM6 12c0-1 .3-2 .7-2.8L5.2 7.7C4.5 9 4 10.5 4 12c0 5 4 9 9 9v-3l4 4-4 4v-3c-3.3 0-6-2.7-6-6z"/></svg>`;
       refreshBtn.onclick = (e) => {
-          e.stopPropagation();
-          console.log('[Release Date] Refreshing whole extension');
-          Spicetify.showNotification("Refreshing extension...");
-          location.reload();
+        e.stopPropagation();
+        console.log(PREFIX, 'Reloading extension');
+        Spicetify.showNotification('Reloading…');
+        location.reload();
       };
       root.appendChild(refreshBtn);
 
@@ -328,19 +461,20 @@
     return now.getMonth() === d.getMonth() && now.getDate() === d.getDate();
   }
 
-  function toggleSettingsMenu(settingsMenu) {
+  function toggleSettingsMenu(settingsEl) {
+    if (!settingsEl) return;
     let backdrop = document.getElementById('nprd-backdrop');
     if (!backdrop) {
-      backdrop = document.createElement('div'); 
+      backdrop = document.createElement('div');
       backdrop.id = 'nprd-backdrop';
       document.body.appendChild(backdrop);
       backdrop.onclick = () => {
-        settingsMenu.style.display = 'none';
+        settingsEl.style.display = 'none';
         backdrop.style.display = 'none';
       };
     }
-    const isHidden = settingsMenu.style.display === 'none' || settingsMenu.style.display === '';
-    settingsMenu.style.display = isHidden ? 'flex' : 'none';
+    const isHidden = settingsEl.style.display === 'none' || settingsEl.style.display === '';
+    settingsEl.style.display = isHidden ? 'flex' : 'none';
     backdrop.style.display = isHidden ? 'block' : 'none';
   }
 
