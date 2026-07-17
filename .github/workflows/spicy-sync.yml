@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
@@ -22,17 +22,26 @@ jobs:
           rm -rf official-spicy-lyrics/.git
           cp -r official-spicy-lyrics/* spicy-lyrics/
           cp official-spicy-lyrics/.* spicy-lyrics/ 2>/dev/null || true
+          # Fix case sensitivity bug in official repository
+          mv spicy-lyrics/src/utils/Logger.ts spicy-lyrics/src/utils/logger.ts || true
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
 
       - name: Install & Build Official Spicy Lyrics
         shell: bash
         run: |
           cd spicy-lyrics
-          npm install
-          npm run build
+          bun pm trust --all
+          bun install
+          bun run build
 
       - name: Inject Beautiful Release Date (Auto-Patch)
         shell: bash
         run: |
+          echo -e "\n;" >> spicy-lyrics/build/spicy-lyrics.js
           cat .github/scripts/brd.js >> spicy-lyrics/build/spicy-lyrics.js
           echo "console.log('Beautiful Release Date successfully injected into Spicy Lyrics!');" >> spicy-lyrics/build/spicy-lyrics.js
           
