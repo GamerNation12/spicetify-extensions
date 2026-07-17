@@ -1,6 +1,9 @@
 {
-  "version": "1.11.24",
+  "version": "1.11.25",
   "changelogs": {
+    "1.11.24": [
+      "Completely removed legacy restoreInterval code that was causing unwanted track fetches and Unknown Date bugs."
+    ],
     "1.11.21": [
       "Reverted experimental Spicy Lyrics integration to restore rock-solid core stability."
     ],
@@ -88,6 +91,6 @@
     ]
   },
   "changelog": [
-    "Completely removed legacy restoreInterval code that was causing unwanted track fetches and Unknown Date bugs."
+    "Added an option in the Settings Menu to hide the refresh button in the Now Playing panel."
   ]
 }

@@ -74,6 +74,7 @@
     showAudioFeatures: 'true',
     showLabel: 'true',
     showExplicitBadge: 'true',
+    showRefreshBtn: 'true',
     hideVideoBtn: 'true',
     textColor: 'inherit',
     fontSize: '0.75rem',
@@ -501,6 +502,7 @@
     layoutTab.appendChild(createCustomDropdown('dateFormat', 'Date Format', dateformat));
     layoutTab.appendChild(createCustomDropdown('separator', 'Separator Style', separatorOpts));
     layoutTab.appendChild(createToggle('hideVideoBtn', 'Hide Music Video Button'));
+    layoutTab.appendChild(createToggle('showRefreshBtn', 'Show Refresh Button'));
 
     const analyticsTab = tabContents.querySelector('#tab-analytics-info');
     analyticsTab.appendChild(createToggle('showAudioFeatures', 'BPM & Musical Key'));
@@ -872,6 +874,10 @@
       refreshBtn.className = 'brd-refresh';
       refreshBtn.title = 'Fix Date or Position';
       refreshBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.3 0 6 2.7 6 6 0 1-.3 2-.7 2.8l1.5 1.5c.7-1.3 1.2-2.8 1.2-4.3 0-5-4-9-9-9zM6 12c0-1 .3-2 .7-2.8L5.2 7.7C4.5 9 4 10.5 4 12c0 5 4 9 9 9v-3l4 4-4 4v-3c-3.3 0-6-2.7-6-6z"/></svg>`;
+      
+      if (localStorage.getItem('showRefreshBtn') === 'false') {
+          refreshBtn.style.display = 'none';
+      }
       
       refreshBtn.onclick = (e) => {
           e.stopPropagation();
