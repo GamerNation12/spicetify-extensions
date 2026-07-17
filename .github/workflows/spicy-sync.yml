@@ -43,7 +43,7 @@ jobs:
         shell: bash
         run: |
           echo -e "\n;" >> spicy-lyrics/build/spicy-lyrics.js
-          cat .github/scripts/brd.js >> spicy-lyrics/build/spicy-lyrics.js
+          cat beautiful-release-date/extension-core.js >> spicy-lyrics/build/spicy-lyrics.js
           echo "console.log('Beautiful Release Date successfully injected into Spicy Lyrics!');" >> spicy-lyrics/build/spicy-lyrics.js
           
       - name: Commit and Push Custom Build
