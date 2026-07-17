@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spicetify Extensions Update Hub</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Load modern font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap">
+</head>
+<body>
+    <div class="glow-backdrop"></div>
+    
+    <header class="navbar">
+        <div class="navbar-content">
+            <div class="brand">
+                <span class="logo-dot"></span>
+                <h1>Extension Hub</h1>
+            </div>
+            <nav class="nav-links">
+                <a href="#" class="active">Updates</a>
+                <a href="https://github.com/GamerNation12/spicetify-extensions" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <h2>Track and Update Your Extensions</h2>
+            <p>A beautiful dashboard displaying the latest versions, features, and fixes for your Spotify experience enhancements.</p>
+        </section>
+
+
+
+        <!-- Loading State -->
+        <div id="loading" class="state-container">
+            <div class="spinner"></div>
+            <p>Loading extensions analytics...</p>
+        </div>
+
+        <!-- Error State (e.g., CORS warning for file://) -->
+        <div id="error-alert" class="state-container error-box" style="display: none;">
+            <div class="icon">⚠️</div>
+            <h3>Local Loading Restriction</h3>
+            <p>To view live data dynamically locally, please run a local HTTP server (e.g., via VS Code Live Server or `npx serve`) or view it once deployed to GitHub Pages.</p>
+            <p class="small">Falling back to static visuals.</p>
+        </div>
+
+        <!-- Dynamic Grid Content -->
+        <div id="extensions-grid" class="extensions-grid"></div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 GamerNation12. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

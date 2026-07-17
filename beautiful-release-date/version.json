@@ -1,0 +1,93 @@
+{
+  "version": "1.11.24",
+  "changelogs": {
+    "1.11.21": [
+      "Reverted experimental Spicy Lyrics integration to restore rock-solid core stability."
+    ],
+    "1.11.20": [
+      "Hotfix: Resolved a syntax error that prevented the extension from loading in version 1.11.19."
+    ],
+    "1.11.19": [
+      "Improved Spicy Lyrics integration: The date pill now retains its styling in fullscreen mode and correctly anchors under the artist name when Spicy Lyrics is opened in the right sidebar."
+    ],
+    "1.11.18": [
+      "Restored pill styling and positioning logic for Spicy Lyrics."
+    ],
+    "1.11.17": [
+      "Fixed a bug where the date pill was completely invisible in both Spicy Lyrics main view and full screen view due to overflow clipping."
+    ],
+    "1.11.16": [
+      "Fixed an issue where the date pill would appear in the wrong place in Spicy Lyrics CinemaMode. It now attaches directly to the artist metadata without pushing it up."
+    ],
+    "1.11.15": [
+      "Made Spicy Lyrics fullscreen detection completely foolproof by checking for fixed CSS positioning instead of classes, and added fallback metadata selectors."
+    ],
+    "1.11.14": [
+      "Fixed an issue where the extension failed to detect Spicy Lyrics fullscreen mode because Spicy Lyrics creates multiple duplicate IDs. Switched to a robust class selector."
+    ],
+    "1.11.13": [
+      "Reverted Spicy Lyrics fullscreen detection to strictly rely on its native class to fix edge cases where it wasn't detected."
+    ],
+    "1.11.12": [
+      "Fixed Spicy Lyrics overlay positioning getting stuck in the bottom-left corner due to conflicting CSS rules, and improved fullscreen detection by checking DOM parent."
+    ],
+    "1.11.11": [
+      "Completely rewrote Spicy Lyrics integration to use an overlay system. This permanently fixes layout squishing and perfectly detects fullscreen mode without relying on fragile classes."
+    ],
+    "1.11.10": [
+      "Fixed an issue where the date pill would squish the artist name in Spicy Lyrics fullscreen by moving it outside the metadata container."
+    ],
+    "1.11.9": [
+      "Fixed an issue where the date pill would move when Spicy Lyrics was running in the main view instead of full screen."
+    ],
+    "1.11.8": [
+      "Added seamless integration for Spicy Lyrics fullscreen mode."
+    ],
+    "1.11.7": [
+      "Added dynamic Spicetify theme color options for text color."
+    ],
+    "1.11.6": [
+      "Fixed an issue where the settings menu and changelog popup stayed on screen after an OTA update."
+    ],
+    "1.11.5": [
+      "Renamed all internal 'nprd' prefixes to 'brd' (Beautiful Release Date)."
+    ],
+    "1.11.4": [
+      "Fixed a bug where the update popup would show repeatedly for some users."
+    ],
+    "1.11.3": [
+      "Removed the experimental Discord Local Remote connection to resolve connection timeout issues."
+    ],
+    "1.11.2": [
+      "Forced WebSockets in Socket.IO to bypass XHR mixed-content blocking."
+    ],
+    "1.11.1": [
+      "Added debug toasts to figure out why the Discord button is hiding."
+    ],
+    "1.11.0": [
+      "Added seamless Socket.IO connection to The Goats DJ Remote for playback control.",
+      "Injected a dynamic Discord DJ button into the Release Date UI when connected.",
+      "Reduced OTA update check cooldown from 5 minutes to 30 seconds for easier testing.",
+      "Clarified GitHub cache delay warnings in the OTA update check toast messages."
+    ],
+    "1.10.0": [
+      "Merged 'Analytics' and 'Info' tabs into a single unified tab.",
+      "Fixed a bug where the update popup would show every time Spotify was restarted."
+    ],
+    "1.9.31": [
+      "Fixed race conditions in the UI update functions that caused duplicated/overlapping visual elements."
+    ],
+    "1.11.22": [
+      "Fixed a bug where offline cache loading would incorrectly parse null release dates as 1970-01-01 and crash the formatting."
+    ],
+    "1.11.23": [
+      "Fixed a bug where the date pill would revert to Unknown Date in the middle of a song when Spicy Lyrics re-renders, caused by missing track album data during Spotify background URI updates."
+    ],
+    "1.11.24": [
+      "Completely removed legacy restoreInterval code that was causing unwanted track fetches and Unknown Date bugs."
+    ]
+  },
+  "changelog": [
+    "Completely removed legacy restoreInterval code that was causing unwanted track fetches and Unknown Date bugs."
+  ]
+}

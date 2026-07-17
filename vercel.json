@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/extensions", "destination": "/api/extensions.js" },
+    { "source": "/api/version", "destination": "/api/version.js" },
+    { "source": "/api/update", "destination": "/api/update.js" },
+    { "source": "/api/test-webhook", "destination": "/api/test-webhook.js" },
+    { "source": "/api/track", "destination": "/api/track.js" },
+    { "source": "/manifest.json", "destination": "/manifest.json" },
+    { "source": "/beautiful-release-date/version.json", "destination": "/beautiful-release-date/version.json" },
+    { "source": "/beautiful-release-date/extension-core.js", "destination": "/beautiful-release-date/extension-core.js" },
+    { "source": "/admin", "destination": "/docs/admin.html" },
+    { "source": "/admin.html", "destination": "/docs/admin.html" },
+    { "source": "/(.*)\\.(js|css|png|jpg|json|html)", "destination": "/docs/$1.$2" },
+    { "source": "/(.*)", "destination": "/docs/$1" }
+  ]
+}

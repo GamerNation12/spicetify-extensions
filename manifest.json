@@ -1,0 +1,52 @@
+[
+    {
+        "name": "Beautiful Release Date",
+        "description": "Displays the currently playing track's original release date with beautiful dynamic themes.",
+        "preview": "beautiful-release-date/preview.jpg",
+        "main": "beautiful-release-date/BeautifulReleaseDate.js",
+        "readme": "beautiful-release-date/README.md",
+        "authors":
+        [
+            {
+                "name": "GamerNation12",
+                "url": "https://github.com/GamerNation12/spicetify-extensions"
+            }
+        ],
+        "tags":
+        [
+            "GamerNation12",
+            "GN",
+            "release date",
+            "now playing",
+            "current song",
+            "info",
+            "utility",
+            "ui"
+        ]
+    },
+    {
+        "name": "Diagnostics & Accent Customizer (Test Plugin)",
+        "description": "An interactive diagnostics API inspector and RGB neon accent border customizer with a native profile settings toggle.",
+        "preview": "spicetify.png",
+        "main": "test-plugin/TestPlugin.js",
+        "readme": "test-plugin/README.md",
+        "authors":
+        [
+            {
+                "name": "GamerNation12",
+                "url": "https://github.com/GamerNation12/spicetify-extensions"
+            }
+        ],
+        "tags":
+        [
+            "GamerNation12",
+            "GN",
+            "test",
+            "plugin",
+            "diagnostics",
+            "api",
+            "utility",
+            "ui"
+        ]
+    }
+]

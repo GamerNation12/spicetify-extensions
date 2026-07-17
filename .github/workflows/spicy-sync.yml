@@ -1,0 +1,44 @@
+name: Auto-Sync Spicy Lyrics
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every midnight
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Your Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Clone Official Spicy Lyrics
+        run: |
+          git clone https://github.com/Spikerko/spicy-lyrics.git official-spicy-lyrics
+          cp -r official-spicy-lyrics/src spicy-lyrics/
+          cp -r official-spicy-lyrics/package.json spicy-lyrics/
+          cp -r official-spicy-lyrics/spice.config.ts spicy-lyrics/
+          cp -r official-spicy-lyrics/tsconfig.json spicy-lyrics/
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Inject Beautiful Release Date (Auto-Patch)
+        run: node .github/scripts/patcher.js
+
+      - name: Install & Build Custom Spicy Lyrics
+        run: |
+          cd spicy-lyrics
+          bun install
+          bun run build
+          
+      - name: Commit and Push Custom Build
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add spicy-lyrics/
+          git commit -m "chore: auto-sync and build latest spicy lyrics with release date" || exit 0
+          git push
