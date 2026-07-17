@@ -16,10 +16,9 @@ jobs:
       - name: Clone Official Spicy Lyrics
         run: |
           git clone https://github.com/Spikerko/spicy-lyrics.git official-spicy-lyrics
-          cp -r official-spicy-lyrics/src spicy-lyrics/
-          cp -r official-spicy-lyrics/package.json spicy-lyrics/
-          cp -r official-spicy-lyrics/spice.config.ts spicy-lyrics/
-          cp -r official-spicy-lyrics/tsconfig.json spicy-lyrics/
+          rm -rf official-spicy-lyrics/.git
+          cp -r official-spicy-lyrics/* spicy-lyrics/
+          cp official-spicy-lyrics/.* spicy-lyrics/ 2>/dev/null || true
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
