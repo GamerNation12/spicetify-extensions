@@ -20,16 +20,13 @@ jobs:
           cp -r official-spicy-lyrics/* spicy-lyrics/
           cp official-spicy-lyrics/.* spicy-lyrics/ 2>/dev/null || true
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+
 
       - name: Install & Build Official Spicy Lyrics
         run: |
           cd spicy-lyrics
-          bun install
-          bun run build
+          npm install
+          npm run build
 
       - name: Inject Beautiful Release Date (Auto-Patch)
         run: |
