@@ -48,5 +48,23 @@
             "utility",
             "ui"
         ]
+    },
+    {
+        "name": "Spicy Lyrics (GN Custom)",
+        "description": "Auto-synced and patched official Spicy Lyrics with Beautiful Release Date natively injected.",
+        "preview": "spicetify.png",
+        "main": "spicy-lyrics/build/spicy-lyrics.js",
+        "readme": "README.md",
+        "authors": [
+            {
+                "name": "GamerNation12",
+                "url": "https://github.com/GamerNation12/spicetify-extensions"
+            }
+        ],
+        "tags": [
+            "GamerNation12",
+            "spicy lyrics",
+            "release date"
+        ]
     }
 ]
