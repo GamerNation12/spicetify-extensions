@@ -1,4 +1,4 @@
-﻿// NAME: Beautiful Release Date
+// NAME: Beautiful Release Date
 // AUTHOR: GamerNation12
 // DESCRIPTION: Displays the currently playing track's original release date with beautiful dynamic themes.
 
