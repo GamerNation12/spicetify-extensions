@@ -25,14 +25,16 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Inject Beautiful Release Date (Auto-Patch)
-        run: node .github/scripts/patcher.cjs
-
-      - name: Install & Build Custom Spicy Lyrics
+      - name: Install & Build Official Spicy Lyrics
         run: |
           cd spicy-lyrics
           bun install
           bun run build
+
+      - name: Inject Beautiful Release Date (Auto-Patch)
+        run: |
+          cat .github/scripts/brd.js >> spicy-lyrics/build/spicy-lyrics.js
+          echo "console.log('Beautiful Release Date successfully injected into Spicy Lyrics!');" >> spicy-lyrics/build/spicy-lyrics.js
           
       - name: Commit and Push Custom Build
         run: |
