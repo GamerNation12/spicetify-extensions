@@ -42,9 +42,9 @@ jobs:
       - name: Inject Beautiful Release Date (Auto-Patch)
         shell: bash
         run: |
-          echo -e "\n;" >> spicy-lyrics/build/spicy-lyrics.js
-          cat beautiful-release-date/extension-core.js >> spicy-lyrics/build/spicy-lyrics.js
-          echo "console.log('Beautiful Release Date successfully injected into Spicy Lyrics!');" >> spicy-lyrics/build/spicy-lyrics.js
+          echo -e "\n;" >> spicy-lyrics/dist/spicy-lyrics.js
+          cat beautiful-release-date/extension-core.js >> spicy-lyrics/dist/spicy-lyrics.js
+          echo "console.log('Beautiful Release Date successfully injected into Spicy Lyrics!');" >> spicy-lyrics/dist/spicy-lyrics.js
           
       - name: Commit and Push Custom Build
         shell: bash
