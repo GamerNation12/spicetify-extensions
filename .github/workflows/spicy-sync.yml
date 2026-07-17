@@ -6,7 +6,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Your Repository
         uses: actions/checkout@v4
@@ -14,26 +16,28 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Clone Official Spicy Lyrics
+        shell: bash
         run: |
           git clone https://github.com/Spikerko/spicy-lyrics.git official-spicy-lyrics
           rm -rf official-spicy-lyrics/.git
           cp -r official-spicy-lyrics/* spicy-lyrics/
           cp official-spicy-lyrics/.* spicy-lyrics/ 2>/dev/null || true
 
-
-
       - name: Install & Build Official Spicy Lyrics
+        shell: bash
         run: |
           cd spicy-lyrics
           npm install
           npm run build
 
       - name: Inject Beautiful Release Date (Auto-Patch)
+        shell: bash
         run: |
           cat .github/scripts/brd.js >> spicy-lyrics/build/spicy-lyrics.js
           echo "console.log('Beautiful Release Date successfully injected into Spicy Lyrics!');" >> spicy-lyrics/build/spicy-lyrics.js
           
       - name: Commit and Push Custom Build
+        shell: bash
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
