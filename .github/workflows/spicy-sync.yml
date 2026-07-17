@@ -27,7 +27,7 @@ jobs:
           bun-version: latest
 
       - name: Inject Beautiful Release Date (Auto-Patch)
-        run: node .github/scripts/patcher.js
+        run: node .github/scripts/patcher.cjs
 
       - name: Install & Build Custom Spicy Lyrics
         run: |
