@@ -1,4 +1,4 @@
-// NAME: Beautiful Release Date
+﻿// NAME: Beautiful Release Date
 // AUTHOR: GamerNation12
 // DESCRIPTION: Displays the currently playing track's original release date with beautiful dynamic themes.
 
@@ -61,7 +61,7 @@
   ];
 
   const separatorOpts = [
-    { value: "•", text: "Dot" },
+    { value: "â€¢", text: "Dot" },
     { value: "-", text: "Dash" },
     { value: "\u200E", text: "None" },
   ];
@@ -444,7 +444,7 @@
 
     const header = document.createElement('div');
     header.className = 'brd-header';
-    header.innerHTML = `<div style="display:flex;align-items:baseline;gap:8px;"><h2>Settings</h2><span style="opacity:0.5;font-size:0.75rem;font-weight:600;">v${BRD_VERSION}</span></div><button class="brd-close" aria-label="Close">✕</button>`;
+    header.innerHTML = `<div style="display:flex;align-items:baseline;gap:8px;"><h2>Settings</h2><span style="opacity:0.5;font-size:0.75rem;font-weight:600;">v${BRD_VERSION}</span></div><button class="brd-close" aria-label="Close">âœ•</button>`;
     header.querySelector('.brd-close').onclick = () => {
       toggleSettingsMenu(menu);
     };
@@ -638,7 +638,7 @@
           <span style="font-weight:800;letter-spacing:-0.01em;">Release Date updated</span>
           <span style="opacity:0.7;font-size:0.8rem;">Now Playing Release Date v${BRD_VERSION}</span>
         </div>
-        <button id="brd-changelog-close" style="background:rgba(255,255,255,0.05);border:none;color:var(--spice-text);border-radius:999px;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;">✕</button>
+        <button id="brd-changelog-close" style="background:rgba(255,255,255,0.05);border:none;color:var(--spice-text);border-radius:999px;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;">âœ•</button>
       </div>
       <ul id="brd-changelog-list" style="margin:4px 0 0 16px;padding:0;list-style:disc;"></ul>
       <button id="brd-changelog-ok" style="margin-top:10px;align-self:flex-end;background:#1ed760;border:none;border-radius:999px;padding:6px 14px;font-size:0.8rem;font-weight:600;cursor:pointer;color:#000;">
@@ -800,7 +800,7 @@
       if (lsSeparator && lsSeparator !== '\u200E') {
         const sep = document.createElement('span');
         sep.className = 'brd-sep';
-        sep.textContent = lsSeparator === '•' ? '•' : lsSeparator;
+        sep.textContent = lsSeparator === 'â€¢' ? 'â€¢' : lsSeparator;
         root.appendChild(sep);
       }
 
@@ -853,10 +853,10 @@
       if (localStorage.getItem('showAudioFeatures') === 'true' && audioFeatures) {
         const af = document.createElement('span');
         af.className = 'brd-audio-features';
-        const keys = ['C', 'C♯/D♭', 'D', 'D♯/E♭', 'E', 'F', 'F♯/G♭', 'G', 'G♯/A♭', 'A', 'A♯/B♭', 'B'];
+        const keys = ['C', 'Câ™¯/Dâ™­', 'D', 'Dâ™¯/Eâ™­', 'E', 'F', 'Fâ™¯/Gâ™­', 'G', 'Gâ™¯/Aâ™­', 'A', 'Aâ™¯/Bâ™­', 'B'];
         const keyStr = keys[audioFeatures.key] || '?';
         const modeStr = audioFeatures.mode === 1 ? 'Maj' : 'Min';
-        af.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg><span>${audioFeatures.tempo} BPM • ${keyStr} ${modeStr}</span>`;
+        af.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg><span>${audioFeatures.tempo} BPM â€¢ ${keyStr} ${modeStr}</span>`;
         root.appendChild(af);
       }
 
