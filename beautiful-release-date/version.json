@@ -97,6 +97,6 @@
     ]
   },
   "changelog": [
-    "Added an option in the Settings Menu to hide the refresh button in the Now Playing panel."
+    "Fixed Spicetify Marketplace API rate limit issue by replacing relative image paths in the README with raw GitHub URLs."
   ]
 }
