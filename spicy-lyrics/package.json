@@ -41,8 +41,10 @@
   "peerDependencies": {
     "typescript": "^5.9.3"
   },
+  "overrides": {
+    "@spicemod/creator": "0.0.35"
+  },
   "trustedDependencies": [
-    "@parcel/watcher",
-    "esbuild"
+    "@parcel/watcher"
   ]
 }
