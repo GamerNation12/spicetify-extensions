@@ -1,6 +1,6 @@
 # Beautiful Release Date
 
-![Preview image](./preview.png)
+![Preview image](https://raw.githubusercontent.com/GamerNation12/spicetify-extensions/main/beautiful-release-date/preview.png)
 
 A high-performance, fully modernized Spicetify extension that displays exactly when your music was released, how old it is, and how popular it currently is on Spotify. 
 
@@ -16,7 +16,7 @@ This is a heavily upgraded fork that fixes UI bugs, adds robust performance opti
 
 It creates a clickable element near your track info. Once clicked, it brings up a robust settings menu where you can configure everything:
 
-![Settings menu image](./settings.png)
+![Settings menu image](https://raw.githubusercontent.com/GamerNation12/spicetify-extensions/main/beautiful-release-date/settings.png)
 
 ### ⚙️ Configuration Options
 

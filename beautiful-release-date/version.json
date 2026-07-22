@@ -1,6 +1,12 @@
 {
-  "version": "1.11.25",
+  "version": "1.11.26",
   "changelogs": {
+    "1.11.26": [
+      "Fixed Spicetify Marketplace API rate limit issue by replacing relative image paths in the README with raw GitHub URLs."
+    ],
+    "1.11.25": [
+      "No changes."
+    ],
     "1.11.24": [
       "Completely removed legacy restoreInterval code that was causing unwanted track fetches and Unknown Date bugs."
     ],

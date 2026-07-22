@@ -39,6 +39,7 @@
     },
   },
   "trustedDependencies": [
+    "esbuild",
     "@parcel/watcher",
   ],
   "packages": {
