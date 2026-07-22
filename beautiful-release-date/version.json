@@ -1,6 +1,9 @@
 {
-  "version": "1.11.26",
+  "version": "1.11.27",
   "changelogs": {
+    "1.11.27": [
+      "Fixed broken character encoding for the close button in the settings and changelog menus."
+    ],
     "1.11.26": [
       "Fixed Spicetify Marketplace API rate limit issue by replacing relative image paths in the README with raw GitHub URLs."
     ],
@@ -97,6 +100,6 @@
     ]
   },
   "changelog": [
-    "Fixed Spicetify Marketplace API rate limit issue by replacing relative image paths in the README with raw GitHub URLs."
+    "Fixed broken character encoding for the close button in the settings and changelog menus."
   ]
 }

@@ -444,7 +444,7 @@
 
     const header = document.createElement('div');
     header.className = 'brd-header';
-    header.innerHTML = `<div style="display:flex;align-items:baseline;gap:8px;"><h2>Settings</h2><span style="opacity:0.5;font-size:0.75rem;font-weight:600;">v${BRD_VERSION}</span></div><button class="brd-close" aria-label="Close">âœ•</button>`;
+    header.innerHTML = `<div style="display:flex;align-items:baseline;gap:8px;"><h2>Settings</h2><span style="opacity:0.5;font-size:0.75rem;font-weight:600;">v${BRD_VERSION}</span></div><button class="brd-close" aria-label="Close">&#10005;</button>`;
     header.querySelector('.brd-close').onclick = () => {
       toggleSettingsMenu(menu);
     };
@@ -638,7 +638,7 @@
           <span style="font-weight:800;letter-spacing:-0.01em;">Release Date updated</span>
           <span style="opacity:0.7;font-size:0.8rem;">Now Playing Release Date v${BRD_VERSION}</span>
         </div>
-        <button id="brd-changelog-close" style="background:rgba(255,255,255,0.05);border:none;color:var(--spice-text);border-radius:999px;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;">âœ•</button>
+        <button id="brd-changelog-close" style="background:rgba(255,255,255,0.05);border:none;color:var(--spice-text);border-radius:999px;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;">&#10005;</button>
       </div>
       <ul id="brd-changelog-list" style="margin:4px 0 0 16px;padding:0;list-style:disc;"></ul>
       <button id="brd-changelog-ok" style="margin-top:10px;align-self:flex-end;background:#1ed760;border:none;border-radius:999px;padding:6px 14px;font-size:0.8rem;font-weight:600;cursor:pointer;color:#000;">
