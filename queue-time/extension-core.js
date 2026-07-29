@@ -7,7 +7,7 @@
     let qt_style = document.createElement("style");
     qt_style.innerHTML = `
     .mgn-queue-time-header::after {
-        content: " • " var(--queue-remaining);
+        content: var(--queue-remaining);
         color: var(--spice-subtext, #a7a7a7);
         font-size: 0.875rem;
         font-weight: 400;
@@ -39,22 +39,30 @@
         
         let timeStr = hours > 0 ? `${hours}hr ${minutes}m` : `${minutes}m`;
         const songString = numSongs === 1 ? '1 song' : `${numSongs} songs`;
-        const displayString = `${songString} • ${timeStr}`;
+        
+        // Put the bullet inside the JS variable to avoid CSS concatenation quirks
+        const displayString = ` • ${songString} • ${timeStr}`;
 
         const targetTexts = ["Next from", "Next in queue", "Next In Queue"];
-        const potentialHeaders = document.querySelectorAll('h2, h3, span, p');
         
-        potentialHeaders.forEach(el => {
-            const text = el.textContent?.trim();
-            if (targetTexts.some(t => text?.startsWith(t))) {
-                const hasMatchingChild = Array.from(el.children).some(child => {
-                    const childText = child.textContent?.trim();
-                    return targetTexts.some(t => childText?.startsWith(t));
-                });
-                
-                if (!hasMatchingChild) {
-                    el.classList.add('mgn-queue-time-header');
-                    el.style.setProperty('--queue-remaining', `'${displayString}'`);
+        // Scope the search to prevent performance hits and find text nodes reliably
+        const containers = document.querySelectorAll('.Root__right-sidebar, .Root__main-view, [data-testid="right-sidebar"], [data-testid="main-view"], .queue-panel');
+        
+        containers.forEach(container => {
+            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+            let node;
+            while ((node = walker.nextNode())) {
+                const text = node.nodeValue?.trim() || "";
+                if (targetTexts.some(t => text.startsWith(t))) {
+                    let targetEl = node.parentElement;
+                    
+                    // Add class to the direct parent of the text node
+                    if (targetEl && !targetEl.classList.contains('mgn-queue-time-header')) {
+                        targetEl.classList.add('mgn-queue-time-header');
+                    }
+                    if (targetEl) {
+                        targetEl.style.setProperty('--queue-remaining', `'${displayString}'`);
+                    }
                 }
             }
         });

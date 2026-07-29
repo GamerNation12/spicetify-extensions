@@ -1,6 +1,6 @@
 {
-  "version": "1.2.1",
+  "version": "1.2.2",
   "changelog": [
-    "Converted to MGN Auto-Updating Loader for instant OTA updates from GitHub."
+    "Hotfix: Fixed DOM finding logic using TreeWalker to ensure text injected correctly in modern UI."
   ]
 }
