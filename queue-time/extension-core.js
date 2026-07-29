@@ -4,25 +4,13 @@
         return;
     }
 
-    let qt_style = document.createElement("style");
-    qt_style.innerHTML = `
-    .mgn-queue-time-header::after {
-        content: var(--queue-remaining);
-        color: var(--spice-subtext, #a7a7a7);
-        font-size: 0.875rem;
-        font-weight: 400;
-        white-space: nowrap;
-    }
-    `;
-    document.head.appendChild(qt_style);
-
     setInterval(() => {
         const nextTracks = Spicetify.Queue?.nextTracks || Spicetify.Queue?.next_tracks || [];
         const numSongs = nextTracks.length;
         
         if (numSongs === 0) {
-            document.querySelectorAll('.mgn-queue-time-header').forEach(el => {
-                el.style.setProperty('--queue-remaining', "''");
+            document.querySelectorAll('.mgn-queue-time-node').forEach(el => {
+                el.remove();
             });
             return;
         }
@@ -40,10 +28,9 @@
         let timeStr = hours > 0 ? `${hours}hr ${minutes}m` : `${minutes}m`;
         const songString = numSongs === 1 ? '1 song' : `${numSongs} songs`;
         
-        // Put the bullet inside the JS variable to avoid CSS concatenation quirks
         const displayString = ` • ${songString} • ${timeStr}`;
 
-        const targetTexts = ["Next from", "Next in queue", "Next In Queue"];
+        const targetTexts = ["Next from", "Next in queue", "Next In Queue", "Next up"];
         
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
         let node;
@@ -56,11 +43,21 @@
                     targetEl = targetEl.parentElement;
                 }
                 
-                if (targetEl && !targetEl.classList.contains('mgn-queue-time-header')) {
-                    targetEl.classList.add('mgn-queue-time-header');
-                }
                 if (targetEl) {
-                    targetEl.style.setProperty('--queue-remaining', `'${displayString}'`);
+                    let timeNode = targetEl.querySelector('.mgn-queue-time-node');
+                    if (!timeNode) {
+                        timeNode = document.createElement('span');
+                        timeNode.className = 'mgn-queue-time-node';
+                        timeNode.style.color = 'var(--spice-subtext, #a7a7a7)';
+                        timeNode.style.fontSize = '0.875rem';
+                        timeNode.style.fontWeight = '400';
+                        timeNode.style.whiteSpace = 'nowrap';
+                        timeNode.style.marginLeft = '4px';
+                        targetEl.appendChild(timeNode);
+                    }
+                    if (timeNode.textContent !== displayString) {
+                        timeNode.textContent = displayString;
+                    }
                 }
             }
         }
