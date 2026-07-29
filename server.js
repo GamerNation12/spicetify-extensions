@@ -82,8 +82,7 @@ app.post('/api/update', async (req, res) => {
             console.log(`Skipping extension-core.js update for ${folder}:`, e.message);
         }
         
-        // 3. Notify Discord
-        await sendDiscordWebhook(folder, version, changelog);
+        // 3. Notify Discord (now handled by GitHub Actions auto-discord-update.yml)
 
         res.json({ success: true, message: `Successfully pushed updates to v${version}` });
 
@@ -160,10 +159,12 @@ async function pushToGitHub(path, content, message) {
     }
 }
 
+
 async function sendDiscordWebhook(folder, version, changelog) {
     const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
-    if (!WEBHOOK_URL) return;
-
+    const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+    const CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
+    
     // Clean up changelog for Discord
     const changelogList = changelog.split('\n')
         .map(l => l.trim())
@@ -182,17 +183,28 @@ async function sendDiscordWebhook(folder, version, changelog) {
                 value: changelogList || "No changes specified." 
             }
         ],
-        footer: { text: "Spicetify Extension Updates" },
+        footer: { text: "Spicetify Extension Updates (Test)" },
         timestamp: new Date().toISOString()
     };
 
     try {
-        await fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ embeds: [embed] })
-        });
-        console.log(`[Webhook] Sent notification for ${folder} v${version}`);
+        if (BOT_TOKEN && CHANNEL_ID) {
+            await fetch(`https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bot ${BOT_TOKEN}`
+                },
+                body: JSON.stringify({ embeds: [embed] })
+            });
+        } else if (WEBHOOK_URL) {
+            await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ embeds: [embed] })
+            });
+        }
+        console.log(`[Webhook] Sent test notification for ${folder} v${version}`);
     } catch (e) {
         console.error('Discord Webhook failed:', e);
     }
@@ -203,3 +215,4 @@ app.listen(PORT, () => {
 });
 
 export default app;
+
