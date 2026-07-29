@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 
 async function main() {
     const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
