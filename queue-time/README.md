@@ -1,7 +1,7 @@
 # Queue Time
 Simply displays the time remaining in the current queue.
 
-![!Queue Time Screenshot](/queue-time/QueueTime.png)
+![!Queue Time Screenshot](https://raw.githubusercontent.com/GamerNation12/spicetify-extensions/main/queue-time/QueueTime.png)
 
 <br><br>
 
