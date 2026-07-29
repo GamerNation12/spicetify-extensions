@@ -8,22 +8,22 @@
     qt_style.innerHTML = `
     #mgn-queue-time-pill {
         position: fixed;
-        bottom: 105px;
-        right: 24px;
+        bottom: 145px; /* Placed right above the beautiful release date pill */
+        left: 16px;
         z-index: 9999;
         background: rgba(30, 30, 30, 0.7);
         border: 1px solid rgba(255,255,255,0.1);
         border-radius: 999px;
-        padding: 6px 16px;
+        padding: 4px 14px;
         color: var(--spice-text, #fff);
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         font-weight: 600;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-        backdrop-filter: blur(12px) saturate(150%);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        backdrop-filter: blur(8px);
         pointer-events: auto;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         transition: opacity 0.3s ease, transform 0.2s ease;
         opacity: 0;
         pointer-events: none;
@@ -33,13 +33,13 @@
         pointer-events: auto;
     }
     #mgn-queue-time-pill:hover {
-        transform: translateY(-2px) scale(1.02);
+        transform: translateY(-2px);
         background: rgba(40, 40, 40, 0.8);
         border-color: rgba(255,255,255,0.2);
     }
     #mgn-queue-time-pill svg {
-        width: 14px;
-        height: 14px;
+        width: 12px;
+        height: 12px;
         fill: currentColor;
         opacity: 0.8;
     }
@@ -53,21 +53,40 @@
     const textNode = pill.querySelector('#mgn-qt-text');
 
     setInterval(() => {
-        const nextTracks = Spicetify.Queue?.nextTracks || Spicetify.Queue?.next_tracks || [];
-        const numSongs = nextTracks.length;
-        
+        let nextTracks = Spicetify.Queue?.nextTracks || Spicetify.Queue?.next_tracks || [];
+        let numSongs = nextTracks.length;
+        let totalTimeMs = 0;
+
+        if (numSongs > 0) {
+            totalTimeMs = nextTracks.reduce((acc, cur) => {
+                const duration = Number(cur.duration || cur.contextTrack?.metadata?.duration || cur.item?.duration?.milliseconds || cur.track?.metadata?.duration || cur.metadata?.duration) || 0;
+                return acc + duration;
+            }, 0);
+            totalTimeMs = Math.max(0, totalTimeMs + Spicetify.Player.getDuration() - Spicetify.Player.getProgress());
+        } else {
+            // DOM Fallback for Context Queues that Spotify hides from the API
+            const domRows = document.querySelectorAll('.main-trackList-rowDuration');
+            if (domRows.length > 0) {
+                domRows.forEach(el => {
+                    const txt = el.textContent.trim();
+                    const parts = txt.split(':');
+                    if (parts.length === 2) {
+                        totalTimeMs += (parseInt(parts[0]) * 60 + parseInt(parts[1])) * 1000;
+                        numSongs++;
+                    } else if (parts.length === 3) {
+                        totalTimeMs += (parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2])) * 1000;
+                        numSongs++;
+                    }
+                });
+            }
+        }
+
         if (numSongs === 0) {
             pill.classList.remove('visible');
             return;
         }
 
-        const totalTimeMs = nextTracks.reduce((acc, cur) => {
-            const duration = Number(cur.duration || cur.contextTrack?.metadata?.duration || cur.item?.duration?.milliseconds || cur.track?.metadata?.duration) || 0;
-            return acc + duration;
-        }, 0);
-
-        const ms = Math.max(0, totalTimeMs + Spicetify.Player.getDuration() - Spicetify.Player.getProgress());
-        const totalMinutes = Math.floor(ms / 60000);
+        const totalMinutes = Math.floor(totalTimeMs / 60000);
         const hours = Math.floor(totalMinutes / 60);
         const minutes = totalMinutes % 60;
         
