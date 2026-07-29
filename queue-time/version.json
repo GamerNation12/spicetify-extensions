@@ -1,7 +1,8 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "changelog": [
-    "Rebranded and ported to GamerNation12.",
-    "Brought under active maintenance to fix queue panel bugs."
+    "Fixed queue time not showing up in modern Spotify UI.",
+    "Refactored code to be resilient against Spotify class name changes.",
+    "Updated display format to include the number of songs."
   ]
 }

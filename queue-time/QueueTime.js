@@ -1,48 +1,62 @@
-let qt_style = document.createElement( "style" );
-qt_style.innerHTML = `
-.queue-queuePage-header,
-#queue-panel .NWVZ_rxlezZ8xTHlMg4Y:first-child .LFdMliaHVgrpBcqNKHU3,
-.vLZJk3f3zoMmc3u9QMrc .LIaQPESoX4ijscRRn3lz:first-of-type,
-#queue-panel .KHNumev0cQFGYG2rSV1p:first-child .fYX4XCQz81A_L1WZ88uc {
-    position: relative;
-}
-.queue-queuePage-header::after,
-#queue-panel .NWVZ_rxlezZ8xTHlMg4Y:first-child .LFdMliaHVgrpBcqNKHU3::after,
-.vLZJk3f3zoMmc3u9QMrc .LIaQPESoX4ijscRRn3lz:first-of-type::after,
-#queue-panel .KHNumev0cQFGYG2rSV1p:first-child .fYX4XCQz81A_L1WZ88uc::after {
-    content: var(--queue-remaining);
-    color: var(--spice-subtext);
-    font-size: 1rem;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    font-weight: initial;
-}
-/* for queue panel only: */
-.queue-panel .queue-queuePage-header::after,
-#queue-panel .NWVZ_rxlezZ8xTHlMg4Y:first-child .LFdMliaHVgrpBcqNKHU3::after,
-#queue-panel .KHNumev0cQFGYG2rSV1p:first-child .fYX4XCQz81A_L1WZ88uc::after {
-    top: 4.5px;
-}
-`;
-document.head.appendChild( qt_style );
+(function QueueTime() {
+    if (!Spicetify || !Spicetify.Platform || !Spicetify.Queue || !Spicetify.Player) {
+        setTimeout(QueueTime, 300);
+        return;
+    }
 
-let momentScript = document.createElement( "script" );
-momentScript.setAttribute( 'src', 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js' );
-momentScript.setAttribute( 'integrity', 'sha512-+H4iLjY3JsKiF2V6N366in5IQHj2uEsGV7Pp/GRcm0fn76aPAk5V8xB6n8fQhhSonTqTXs/klFz4D0GIn6Br9g==' );
-momentScript.setAttribute( 'crossorigin', 'anonymous' );
-momentScript.setAttribute( 'referrerpolicy', 'no-referrer' );
-document.head.appendChild( momentScript );
+    let qt_style = document.createElement("style");
+    qt_style.innerHTML = `
+    .mgn-queue-time-header::after {
+        content: " • " var(--queue-remaining);
+        color: var(--spice-subtext, #a7a7a7);
+        font-size: 0.875rem;
+        font-weight: 400;
+        white-space: nowrap;
+    }
+    `;
+    document.head.appendChild(qt_style);
 
-setInterval( () => {
-	const totalTime = Spicetify.Queue?.nextTracks.slice( 0 ).reduce( ( acc, cur, _, arr ) => {
-		if ( isNaN( Number( cur.contextTrack.metadata.duration ) ) ) arr.splice(1);
-		return acc + ( Number( cur.contextTrack.metadata.duration ) || 0 )
-	}, 0 ) || 0;
-	document.querySelectorAll(
-        `.queue-queuePage-header,
-        #queue-panel .NWVZ_rxlezZ8xTHlMg4Y:first-child .LFdMliaHVgrpBcqNKHU3,
-        .vLZJk3f3zoMmc3u9QMrc .LIaQPESoX4ijscRRn3lz:first-of-type,
-        #queue-panel .KHNumev0cQFGYG2rSV1p:first-child .fYX4XCQz81A_L1WZ88uc`
-    )?.forEach(e => e.style.setProperty( '--queue-remaining', `'${moment.utc( totalTime + Spicetify.Player.getDuration() - Spicetify.Player.getProgress() ).format( 'HH:mm:ss' )} Remaining'` ) );
-}, 1000 );
+    setInterval(() => {
+        const nextTracks = Spicetify.Queue.nextTracks || [];
+        const numSongs = nextTracks.length;
+        
+        if (numSongs === 0) {
+            document.querySelectorAll('.mgn-queue-time-header').forEach(el => {
+                el.style.setProperty('--queue-remaining', "''");
+            });
+            return;
+        }
+
+        const totalTimeMs = nextTracks.reduce((acc, cur) => {
+            const duration = Number(cur.contextTrack?.metadata?.duration) || 0;
+            return acc + duration;
+        }, 0);
+
+        const ms = Math.max(0, totalTimeMs + Spicetify.Player.getDuration() - Spicetify.Player.getProgress());
+        const totalMinutes = Math.floor(ms / 60000);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        
+        let timeStr = hours > 0 ? `${hours}hr ${minutes}m` : `${minutes}m`;
+        const songString = numSongs === 1 ? '1 song' : `${numSongs} songs`;
+        const displayString = `${songString} • ${timeStr}`;
+
+        const targetTexts = ["Next from", "Next in queue", "Next In Queue"];
+        const potentialHeaders = document.querySelectorAll('h2, h3, span, p');
+        
+        potentialHeaders.forEach(el => {
+            const text = el.textContent?.trim();
+            if (targetTexts.some(t => text?.startsWith(t))) {
+                const hasMatchingChild = Array.from(el.children).some(child => {
+                    const childText = child.textContent?.trim();
+                    return targetTexts.some(t => childText?.startsWith(t));
+                });
+                
+                if (!hasMatchingChild) {
+                    el.classList.add('mgn-queue-time-header');
+                    el.style.setProperty('--queue-remaining', `'${displayString}'`);
+                }
+            }
+        });
+    }, 1000);
+})();
