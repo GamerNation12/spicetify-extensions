@@ -10,11 +10,83 @@
     }
     console.log("[Queue Time] Spicetify loaded, building UI!");
 
-    if (document.getElementById('mgn-queue-time-pill')) {
+    if (document.getElementById('mgn-queue-time-pill') || window.__mgnQueueTimeRunning) {
         console.log("[Queue Time] UI already exists. Aborting duplicate init.");
         return;
     }
+    window.__mgnQueueTimeRunning = true;
 
+    // Default Settings
+    const defaultSettings = {
+        mode: 'text', // 'pill' or 'text'
+        format: 'both', // 'both' (80 songs, 5hr 4m), 'time' (5hr 4m)
+        color: '#ffffff'
+    };
+
+    let settings = { ...defaultSettings };
+    try {
+        const stored = localStorage.getItem("queue-time:settings");
+        if (stored) settings = { ...settings, ...JSON.parse(stored) };
+    } catch (e) {}
+
+    function saveSettings() {
+        localStorage.setItem("queue-time:settings", JSON.stringify(settings));
+        applySettings();
+    }
+
+    // Settings Modal
+    function openSettings() {
+        const container = document.createElement("div");
+        container.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 16px; padding: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="color: var(--spice-text); font-size: 14px;">Display Mode</label>
+                    <select id="qt-mode" style="background: var(--spice-button-disabled); color: var(--spice-text); border: none; padding: 8px; border-radius: 4px;">
+                        <option value="pill" ${settings.mode === 'pill' ? 'selected' : ''}>Floating Pill</option>
+                        <option value="text" ${settings.mode === 'text' ? 'selected' : ''}>In-Queue Text</option>
+                    </select>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="color: var(--spice-text); font-size: 14px;">Text Format</label>
+                    <select id="qt-format" style="background: var(--spice-button-disabled); color: var(--spice-text); border: none; padding: 8px; border-radius: 4px;">
+                        <option value="both" ${settings.format === 'both' ? 'selected' : ''}>Songs & Time (e.g. 80 songs • 5hr 4m)</option>
+                        <option value="time" ${settings.format === 'time' ? 'selected' : ''}>Time Only (e.g. 5hr 4m)</option>
+                    </select>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="color: var(--spice-text); font-size: 14px;">Custom Color</label>
+                    <input type="color" id="qt-color" value="${settings.color}" style="background: none; border: none; cursor: pointer;">
+                </div>
+                <button id="qt-save" style="margin-top: 10px; background: var(--spice-button-active); color: var(--spice-text); border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">Save & Apply</button>
+            </div>
+        `;
+
+        Spicetify.PopupModal.display({
+            title: "Queue Time Settings",
+            content: container,
+            isLarge: false
+        });
+
+        container.querySelector("#qt-save").onclick = () => {
+            settings.mode = container.querySelector("#qt-mode").value;
+            settings.format = container.querySelector("#qt-format").value;
+            settings.color = container.querySelector("#qt-color").value;
+            saveSettings();
+            Spicetify.PopupModal.hide();
+        };
+    }
+
+    // Register Menu Item
+    if (Spicetify.Menu && Spicetify.Menu.Item) {
+        new Spicetify.Menu.Item(
+            "Queue Time Settings",
+            false,
+            openSettings,
+            '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>'
+        ).register();
+    }
+
+    // DOM Elements setup
     let qt_style = document.createElement("style");
     qt_style.innerHTML = `
     #mgn-queue-time-pill {
@@ -54,6 +126,14 @@
         fill: currentColor;
         opacity: 0.8;
     }
+    .mgn-qt-inline {
+        margin-left: auto;
+        font-size: 0.875rem;
+        font-weight: 400;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        padding-right: 16px;
+    }
     `;
     document.head.appendChild(qt_style);
 
@@ -61,11 +141,23 @@
     pill.id = 'mgn-queue-time-pill';
     pill.innerHTML = `<svg viewBox="0 0 16 16"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg><span id="mgn-qt-text"></span>`;
     document.body.appendChild(pill);
-    const textNode = pill.querySelector('#mgn-qt-text');
+    const pillTextNode = pill.querySelector('#mgn-qt-text');
+
+    let currentFormattedText = "";
+
+    function applySettings() {
+        if (settings.mode === 'text') {
+            pill.classList.remove('visible');
+        } else {
+            pill.style.color = settings.color;
+        }
+    }
+
+    applySettings(); // initial
 
     setInterval(() => {
         try {
-            // Try to find the queue from multiple possible Spicetify structures
+            // Update Logic
             let nextTracks = [];
             if (Spicetify.Queue?.nextTracks?.length > 0) nextTracks = Spicetify.Queue.nextTracks;
             else if (Spicetify.Queue?.next_tracks?.length > 0) nextTracks = Spicetify.Queue.next_tracks;
@@ -80,42 +172,79 @@
                     return acc + duration;
                 }, 0);
             } else {
-                // DOM Fallback: The right sidebar Queue panel does NOT show durations, so we estimate based on track count
                 const domRows = document.querySelectorAll('.Root__right-sidebar .main-trackList-row, .queue-panel .main-trackList-row, [data-testid="right-sidebar"] .main-trackList-row');
                 if (domRows.length > 0) {
-                    // Usually there's the "Now Playing" track at the top, so we subtract 1.
                     numSongs = Math.max(1, domRows.length - 1);
-                    totalTimeMs = numSongs * 210000; // ~3.5 mins average per song
+                    totalTimeMs = numSongs * 210000;
                 }
             }
 
             if (numSongs === 0) {
-                textNode.textContent = "Queue Empty (or API blocked)";
-                pill.classList.add('visible');
-                return;
+                currentFormattedText = "Empty";
+                if (settings.mode === 'pill') pill.classList.add('visible');
+            } else {
+                const currentDur = Spicetify.Player.getDuration ? Spicetify.Player.getDuration() : 0;
+                const currentProg = Spicetify.Player.getProgress ? Spicetify.Player.getProgress() : 0;
+                totalTimeMs = Math.max(0, totalTimeMs + currentDur - currentProg);
+
+                const totalMinutes = Math.floor(totalTimeMs / 60000);
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                
+                let timeStr = hours > 0 ? `${hours}hr ${minutes}m` : `${minutes}m`;
+                let songString = numSongs === 1 ? '1 song' : `${numSongs} songs`;
+                
+                if (nextTracks.length === 0) {
+                    timeStr = "~" + timeStr;
+                }
+                
+                if (settings.format === 'time') {
+                    currentFormattedText = timeStr;
+                } else {
+                    currentFormattedText = `${songString} • ${timeStr}`;
+                }
+
+                if (settings.mode === 'pill') {
+                    pillTextNode.textContent = currentFormattedText;
+                    pill.classList.add('visible');
+                }
             }
 
-            const currentDur = Spicetify.Player.getDuration ? Spicetify.Player.getDuration() : 0;
-            const currentProg = Spicetify.Player.getProgress ? Spicetify.Player.getProgress() : 0;
-            totalTimeMs = Math.max(0, totalTimeMs + currentDur - currentProg);
-
-            const totalMinutes = Math.floor(totalTimeMs / 60000);
-            const hours = Math.floor(totalMinutes / 60);
-            const minutes = totalMinutes % 60;
-            
-            let timeStr = hours > 0 ? `${hours}hr ${minutes}m` : `${minutes}m`;
-            let songString = numSongs === 1 ? '1 song' : `${numSongs} songs`;
-            
-            // Add a ~ symbol if we used the DOM fallback estimate
-            if (nextTracks.length === 0) {
-                timeStr = "~" + timeStr;
+            // In-Queue Text Injection
+            if (settings.mode === 'text') {
+                let headers = Array.from(document.querySelectorAll('.Root__right-sidebar h2, .queue-panel h2, [data-testid="right-sidebar"] h2'));
+                
+                headers.forEach(h2 => {
+                    let text = h2.textContent.toLowerCase();
+                    if (text.includes("now playing") || text.includes("next in queue") || text.includes("next from")) {
+                        let container = h2.parentElement;
+                        
+                        if (container && !container.querySelector('.mgn-qt-inline')) {
+                            if (window.getComputedStyle(container).display !== 'flex') {
+                                container.style.display = 'flex';
+                                container.style.alignItems = 'center';
+                                container.style.justifyContent = 'space-between';
+                                container.style.width = '100%';
+                            }
+                            let span = document.createElement('span');
+                            span.className = 'mgn-qt-inline';
+                            span.style.color = settings.color;
+                            container.appendChild(span);
+                        }
+                        
+                        let inlineSpan = container.querySelector('.mgn-qt-inline');
+                        if (inlineSpan) {
+                            inlineSpan.textContent = currentFormattedText;
+                            inlineSpan.style.color = settings.color;
+                        }
+                    }
+                });
+            } else {
+                document.querySelectorAll('.mgn-qt-inline').forEach(el => el.remove());
             }
-            
-            textNode.textContent = `${songString} • ${timeStr}`;
-            pill.classList.add('visible');
+
         } catch (e) {
-            textNode.textContent = "Error: " + e.message;
-            pill.classList.add('visible');
+            console.error("[Queue Time] Error:", e);
         }
     }, 1000);
 })();
