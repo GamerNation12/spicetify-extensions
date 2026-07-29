@@ -17,7 +17,7 @@
     document.head.appendChild(qt_style);
 
     setInterval(() => {
-        const nextTracks = Spicetify.Queue.nextTracks || [];
+        const nextTracks = Spicetify.Queue?.nextTracks || Spicetify.Queue?.next_tracks || [];
         const numSongs = nextTracks.length;
         
         if (numSongs === 0) {
@@ -28,7 +28,7 @@
         }
 
         const totalTimeMs = nextTracks.reduce((acc, cur) => {
-            const duration = Number(cur.contextTrack?.metadata?.duration) || 0;
+            const duration = Number(cur.duration || cur.contextTrack?.metadata?.duration || cur.item?.duration?.milliseconds || cur.track?.metadata?.duration) || 0;
             return acc + duration;
         }, 0);
 
@@ -45,26 +45,24 @@
 
         const targetTexts = ["Next from", "Next in queue", "Next In Queue"];
         
-        // Scope the search to prevent performance hits and find text nodes reliably
-        const containers = document.querySelectorAll('.Root__right-sidebar, .Root__main-view, [data-testid="right-sidebar"], [data-testid="main-view"], .queue-panel');
-        
-        containers.forEach(container => {
-            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
-            let node;
-            while ((node = walker.nextNode())) {
-                const text = node.nodeValue?.trim() || "";
-                if (targetTexts.some(t => text.startsWith(t))) {
-                    let targetEl = node.parentElement;
-                    
-                    // Add class to the direct parent of the text node
-                    if (targetEl && !targetEl.classList.contains('mgn-queue-time-header')) {
-                        targetEl.classList.add('mgn-queue-time-header');
-                    }
-                    if (targetEl) {
-                        targetEl.style.setProperty('--queue-remaining', `'${displayString}'`);
-                    }
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while ((node = walker.nextNode())) {
+            const text = node.nodeValue?.trim() || "";
+            if (targetTexts.some(t => text.startsWith(t))) {
+                let targetEl = node.parentElement;
+                
+                if (targetEl && targetEl.tagName === 'SPAN') {
+                    targetEl = targetEl.parentElement;
+                }
+                
+                if (targetEl && !targetEl.classList.contains('mgn-queue-time-header')) {
+                    targetEl.classList.add('mgn-queue-time-header');
+                }
+                if (targetEl) {
+                    targetEl.style.setProperty('--queue-remaining', `'${displayString}'`);
                 }
             }
-        });
+        }
     }, 1000);
 })();
