@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.30';
+  let BRD_VERSION = '1.11.31';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -211,7 +211,7 @@
               let cleanName = trackName.replace(/[-(\[].*?(remaster|live|mono|stereo|version|edit|mix).*?[)\]]/i, '').trim();
               if (cleanName.includes(' - ')) cleanName = cleanName.split(' - ')[0].trim();
               
-              const query = `track:"${cleanName}" artist:"${artistName}"`;
+              const query = `${cleanName} ${artistName}`;
               const searchRes = await Spicetify.CosmosAsync.get(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=15`);
               
               if (searchRes?.tracks?.items && searchRes.tracks.items.length > 0) {

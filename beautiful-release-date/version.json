@@ -1,11 +1,11 @@
 {
-  "version": "1.11.30",
+  "version": "1.11.31",
   "changelogs": {
-    "1.11.30": [
-      "Added debug payload printing to diagnose Spotify Search API empty response."
+    "1.11.31": [
+      "Simplified Cosmos API search query syntax to prevent Spotify from returning empty results."
     ]
   },
   "changelog": [
-    "Added debug payload printing to diagnose Spotify Search API empty response."
+    "Simplified Cosmos API search query syntax to prevent Spotify from returning empty results."
   ]
 }
