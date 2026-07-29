@@ -1,11 +1,11 @@
 {
-  "version": "1.11.29",
+  "version": "1.11.30",
   "changelogs": {
-    "1.11.29": [
-      "Added debug notifications for original date search heuristic."
+    "1.11.30": [
+      "Added debug payload printing to diagnose Spotify Search API empty response."
     ]
   },
   "changelog": [
-    "Added debug notifications for original date search heuristic."
+    "Added debug payload printing to diagnose Spotify Search API empty response."
   ]
 }
