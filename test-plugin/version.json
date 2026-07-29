@@ -1,6 +1,6 @@
 {
-  "version": "1.1.3",
+  "version": "1.1.4",
   "changelog": [
-    "Re-testing the GitHub Action now that secrets are added!"
+    "Final test to confirm the ES modules fix works!"
   ]
 }
