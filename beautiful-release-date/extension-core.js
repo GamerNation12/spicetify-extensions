@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.31';
+  let BRD_VERSION = '1.11.32';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -208,32 +208,46 @@
           const trackName = playerData.item.name || '';
           const artistName = playerData.item.artists?.[0]?.name || '';
           if (trackName && artistName) {
-              let cleanName = trackName.replace(/[-(\[].*?(remaster|live|mono|stereo|version|edit|mix).*?[)\]]/i, '').trim();
+              let cleanName = trackName.replace(/[-(\[].*?(remaster|live|mono|stereo|version|edit|mix|deluxe).*?[)\]]/i, '').trim();
               if (cleanName.includes(' - ')) cleanName = cleanName.split(' - ')[0].trim();
               
-              const query = `${cleanName} ${artistName}`;
-              const searchRes = await Spicetify.CosmosAsync.get(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=15`);
-              
-              if (searchRes?.tracks?.items && searchRes.tracks.items.length > 0) {
-                  let oldestTime = Infinity;
-                  searchRes.tracks.items.forEach(item => {
-                      if (item.album?.release_date) {
-                          const d = new Date(item.album.release_date);
-                          if (!isNaN(d.getTime()) && d.getTime() < oldestTime) {
-                              oldestTime = d.getTime();
-                              searchOldestDate = d;
+              const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(cleanName + " " + artistName)}&entity=song&limit=15`;
+              try {
+                  const itunesRes = await fetch(itunesUrl).then(r => r.json());
+                  if (itunesRes && itunesRes.results && itunesRes.results.length > 0) {
+                      let oldestTime = Infinity;
+                      itunesRes.results.forEach(item => {
+                          if (item.releaseDate) {
+                              const d = new Date(item.releaseDate);
+                              if (!isNaN(d.getTime()) && d.getTime() < oldestTime) {
+                                  oldestTime = d.getTime();
+                                  searchOldestDate = d;
+                              }
                           }
+                      });
+                  }
+              } catch (err) { log('iTunes search failed', err); }
+              
+              if (!searchOldestDate) {
+                  try {
+                      const query = `${cleanName} ${artistName}`;
+                      const searchRes = await Spicetify.CosmosAsync.get(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=15`);
+                      if (searchRes?.tracks?.items && searchRes.tracks.items.length > 0) {
+                          let oldestTime = Infinity;
+                          searchRes.tracks.items.forEach(item => {
+                              if (item.album?.release_date) {
+                                  const d = new Date(item.album.release_date);
+                                  if (!isNaN(d.getTime()) && d.getTime() < oldestTime) {
+                                      oldestTime = d.getTime();
+                                      searchOldestDate = d;
+                                  }
+                              }
+                          });
                       }
-                  });
-                  if (searchOldestDate) Spicetify.showNotification("DEBUG: Found oldest date " + searchOldestDate.getFullYear());
-                  else Spicetify.showNotification("DEBUG: no date found in items");
-              } else {
-                  let resStr = searchRes ? JSON.stringify(searchRes) : "null";
-                  if (resStr.length > 80) resStr = resStr.substring(0, 80) + "...";
-                  Spicetify.showNotification("DEBUG RES: " + resStr);
+                  } catch (err) { log('Spotify search fallback failed', err); }
               }
           }
-      } catch (e) { log('Original date search failed', e); Spicetify.showNotification("DEBUG: Search failed " + e.message); }
+      } catch (e) { log('Original date search failed', e); }
 
       let album, releaseDate;
       if (albumDetails?.date && albumDetails.date.year) {

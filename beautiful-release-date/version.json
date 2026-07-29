@@ -1,11 +1,11 @@
 {
-  "version": "1.11.31",
+  "version": "1.11.32",
   "changelogs": {
-    "1.11.31": [
-      "Simplified Cosmos API search query syntax to prevent Spotify from returning empty results."
+    "1.11.32": [
+      "Replaced fragile Spotify search logic with iTunes API fallback for completely bulletproof original release date fetching."
     ]
   },
   "changelog": [
-    "Simplified Cosmos API search query syntax to prevent Spotify from returning empty results."
+    "Replaced fragile Spotify search logic with iTunes API fallback for completely bulletproof original release date fetching."
   ]
 }
