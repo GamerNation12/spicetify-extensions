@@ -3,8 +3,8 @@
 // DESCRIPTION: Displays Queue Time
 (function QueueTime() {
     console.log("[Queue Time] Script evaluating...");
-    if (!Spicetify || !Spicetify.Platform || !Spicetify.Player || !document.body) {
-        console.log("[Queue Time] Waiting for Spicetify Player API and document.body to load...");
+    if (!Spicetify || !Spicetify.Platform || !Spicetify.Player || !document.body || !Spicetify.Menu || !Spicetify.Menu.Item) {
+        console.log("[Queue Time] Waiting for Spicetify Player API, Menu, and document.body to load...");
         setTimeout(QueueTime, 300);
         return;
     }
