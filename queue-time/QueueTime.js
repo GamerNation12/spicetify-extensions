@@ -2,8 +2,16 @@
 // AUTHOR: GN
 // DESCRIPTION: Displays Queue Time
 (function QueueTime() {
-    if (!Spicetify || !Spicetify.Platform || !Spicetify.Player) {
+    console.log("[Queue Time] Script evaluating...");
+    if (!Spicetify || !Spicetify.Platform || !Spicetify.Player || !document.body) {
+        console.log("[Queue Time] Waiting for Spicetify Player API and document.body to load...");
         setTimeout(QueueTime, 300);
+        return;
+    }
+    console.log("[Queue Time] Spicetify loaded, building UI!");
+
+    if (document.getElementById('mgn-queue-time-pill')) {
+        console.log("[Queue Time] UI already exists. Aborting duplicate init.");
         return;
     }
 
