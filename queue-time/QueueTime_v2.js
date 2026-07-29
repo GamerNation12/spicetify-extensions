@@ -3,8 +3,8 @@
 // DESCRIPTION: Displays Queue Time
 (function QueueTime() {
     console.log("[Queue Time] Script evaluating...");
-    if (!Spicetify || !Spicetify.Platform || !Spicetify.Player || !document.body || !Spicetify.Menu || !Spicetify.Menu.Item) {
-        console.log("[Queue Time] Waiting for Spicetify Player API, Menu, and document.body to load...");
+    if (!Spicetify || !Spicetify.Platform || !Spicetify.Player || !document.body || !Spicetify.Topbar) {
+        console.log("[Queue Time] Waiting for Spicetify Player API and document.body to load...");
         setTimeout(QueueTime, 300);
         return;
     }
@@ -84,6 +84,12 @@
             openSettings,
             '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>'
         ).register();
+    } else if (Spicetify.Topbar && Spicetify.Topbar.Button) {
+        new Spicetify.Topbar.Button(
+            "Queue Time Settings",
+            '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>',
+            openSettings
+        );
     }
 
     // DOM Elements setup
@@ -157,11 +163,14 @@
 
     setInterval(() => {
         try {
-            // Update Logic
+            // Priority: The native PlayerAPI internal queue state is 100% reliable for all users.
             let nextTracks = [];
-            if (Spicetify.Queue?.nextTracks?.length > 0) nextTracks = Spicetify.Queue.nextTracks;
-            else if (Spicetify.Queue?.next_tracks?.length > 0) nextTracks = Spicetify.Queue.next_tracks;
-            else if (Spicetify.Platform?.PlayerAPI?.getState()?.queue?.nextTracks?.length > 0) nextTracks = Spicetify.Platform.PlayerAPI.getState().queue.nextTracks;
+            let stateQueue = Spicetify.Platform?.PlayerAPI?.getState()?.queue?.nextTracks;
+            if (stateQueue && stateQueue.length > 0) {
+                nextTracks = stateQueue;
+            } else if (Spicetify.Queue?.nextTracks?.length > 0) {
+                nextTracks = Spicetify.Queue.nextTracks;
+            }
             
             let numSongs = nextTracks.length;
             let totalTimeMs = 0;
