@@ -1,37 +1,24 @@
-(function HidePodcasts() {
-    if (!Spicetify || !Spicetify.Platform) {
-        setTimeout(HidePodcasts, 300);
-        return;
-    }
-
-    const observer = new MutationObserver(() => {
-        // Find chips and navigation items containing "Podcasts" or "Audiobooks"
-        const spans = document.querySelectorAll('span');
-        for (const span of spans) {
-            const text = span.textContent?.trim();
-            if (text === 'Podcasts & Shows' || text === 'Audiobooks' || text === 'Podcasts') {
-                
-                // Hide containing button (like library/home filters)
-                const btn = span.closest('button');
-                if (btn && btn.style.display !== 'none') {
-                    btn.style.display = 'none';
-                }
-                
-                // Hide containing link (like sidebar navigation)
-                const link = span.closest('a');
-                if (link && link.href && (link.href.includes('/podcasts') || link.href.includes('/audiobooks'))) {
-                    const li = link.closest('li');
-                    if (li && li.style.display !== 'none') {
-                        li.style.display = 'none';
-                    } else if (link.style.display !== 'none') {
-                        link.style.display = 'none';
-                    }
-                }
-            }
-        }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
+// MGN Auto-Updating Loader - V3 (CORS & Throttle Fix)
+// NAME: Hide Podcasts & Audiobooks
+// AUTHOR: GamerNation12
+// DESCRIPTION: Hides the 'Podcasts & Shows' and 'Audiobooks' buttons from Spicetify UI.
+(async function loadExtension() {
+  const GITHUB_RAW_URL = "https://raw.githubusercontent.com/GamerNation12/spicetify-extensions/refs/heads/main/hide-podcasts/extension-core.js";
+  
+  try {
+    const response = await fetch(`${GITHUB_RAW_URL}?v=${Math.random()}`);
     
-    console.log("Hide Podcasts & Audiobooks loaded.");
+    if (!response.ok) throw new Error(`GitHub error: ${response.status}`);
+    const code = await response.text();
+
+    const blob = new Blob([code], { type: 'application/javascript' });
+    const localUrl = URL.createObjectURL(blob);
+    await import(localUrl);
+    
+    URL.revokeObjectURL(localUrl);
+    console.log('[MGN Loader] Success: Hide Podcasts & Audiobooks Core synced from GitHub.');
+    
+  } catch (error) {
+    console.error('[MGN Loader] Failed to load Hide Podcasts & Audiobooks:', error);
+  }
 })();

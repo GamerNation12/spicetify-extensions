@@ -1,8 +1,6 @@
 {
-  "version": "1.2.0",
+  "version": "1.2.1",
   "changelog": [
-    "Fixed queue time not showing up in modern Spotify UI.",
-    "Refactored code to be resilient against Spotify class name changes.",
-    "Updated display format to include the number of songs."
+    "Converted to MGN Auto-Updating Loader for instant OTA updates from GitHub."
   ]
 }

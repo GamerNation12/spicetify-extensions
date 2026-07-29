@@ -1,6 +1,6 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "changelog": [
-    "Initial release. Hides Podcasts & Shows and Audiobooks buttons."
+    "Converted to MGN Auto-Updating Loader for instant OTA updates from GitHub."
   ]
 }
