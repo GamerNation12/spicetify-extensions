@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.28';
+  let BRD_VERSION = '1.11.29';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -225,9 +225,13 @@
                           }
                       }
                   });
+                  if (searchOldestDate) Spicetify.showNotification("DEBUG: Found oldest date " + searchOldestDate.getFullYear());
+                  else Spicetify.showNotification("DEBUG: searchRes items exist but no date found");
+              } else {
+                  Spicetify.showNotification("DEBUG: searchRes tracks items empty");
               }
           }
-      } catch (e) { log('Original date search failed', e); }
+      } catch (e) { log('Original date search failed', e); Spicetify.showNotification("DEBUG: Search failed " + e.message); }
 
       let album, releaseDate;
       if (albumDetails?.date && albumDetails.date.year) {
