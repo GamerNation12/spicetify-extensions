@@ -8,7 +8,7 @@
     qt_style.innerHTML = `
     #mgn-queue-time-pill {
         position: fixed;
-        bottom: 145px; /* Placed right above the beautiful release date pill */
+        bottom: 145px;
         left: 16px;
         z-index: 9999;
         background: rgba(30, 30, 30, 0.7);
@@ -53,47 +53,58 @@
     const textNode = pill.querySelector('#mgn-qt-text');
 
     setInterval(() => {
-        let nextTracks = Spicetify.Queue?.nextTracks || Spicetify.Queue?.next_tracks || [];
-        let numSongs = nextTracks.length;
-        let totalTimeMs = 0;
+        try {
+            // Try to find the queue from multiple possible Spicetify structures
+            let nextTracks = [];
+            if (Spicetify.Queue?.nextTracks?.length > 0) nextTracks = Spicetify.Queue.nextTracks;
+            else if (Spicetify.Queue?.next_tracks?.length > 0) nextTracks = Spicetify.Queue.next_tracks;
+            else if (Spicetify.Platform?.PlayerAPI?.getState()?.queue?.nextTracks?.length > 0) nextTracks = Spicetify.Platform.PlayerAPI.getState().queue.nextTracks;
+            
+            let numSongs = nextTracks.length;
+            let totalTimeMs = 0;
 
-        if (numSongs > 0) {
-            totalTimeMs = nextTracks.reduce((acc, cur) => {
-                const duration = Number(cur.duration || cur.contextTrack?.metadata?.duration || cur.item?.duration?.milliseconds || cur.track?.metadata?.duration || cur.metadata?.duration) || 0;
-                return acc + duration;
-            }, 0);
-            totalTimeMs = Math.max(0, totalTimeMs + Spicetify.Player.getDuration() - Spicetify.Player.getProgress());
-        } else {
-            // DOM Fallback for Context Queues that Spotify hides from the API
-            const domRows = document.querySelectorAll('.main-trackList-rowDuration');
-            if (domRows.length > 0) {
-                domRows.forEach(el => {
-                    const txt = el.textContent.trim();
-                    const parts = txt.split(':');
-                    if (parts.length === 2) {
-                        totalTimeMs += (parseInt(parts[0]) * 60 + parseInt(parts[1])) * 1000;
-                        numSongs++;
-                    } else if (parts.length === 3) {
-                        totalTimeMs += (parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2])) * 1000;
-                        numSongs++;
-                    }
-                });
+            if (numSongs > 0) {
+                totalTimeMs = nextTracks.reduce((acc, cur) => {
+                    const duration = Number(cur.duration || cur.contextTrack?.metadata?.duration || cur.item?.duration?.milliseconds || cur.track?.metadata?.duration || cur.metadata?.duration) || 0;
+                    return acc + duration;
+                }, 0);
+            } else {
+                // DOM Fallback: The right sidebar Queue panel does NOT show durations, so we estimate based on track count
+                const domRows = document.querySelectorAll('.Root__right-sidebar .main-trackList-row, .queue-panel .main-trackList-row, [data-testid="right-sidebar"] .main-trackList-row');
+                if (domRows.length > 0) {
+                    // Usually there's the "Now Playing" track at the top, so we subtract 1.
+                    numSongs = Math.max(1, domRows.length - 1);
+                    totalTimeMs = numSongs * 210000; // ~3.5 mins average per song
+                }
             }
-        }
 
-        if (numSongs === 0) {
-            pill.classList.remove('visible');
-            return;
-        }
+            if (numSongs === 0) {
+                textNode.textContent = "Queue Empty (or API blocked)";
+                pill.classList.add('visible');
+                return;
+            }
 
-        const totalMinutes = Math.floor(totalTimeMs / 60000);
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-        
-        let timeStr = hours > 0 ? `${hours}hr ${minutes}m` : `${minutes}m`;
-        const songString = numSongs === 1 ? '1 song' : `${numSongs} songs`;
-        
-        textNode.textContent = `${songString} • ${timeStr}`;
-        pill.classList.add('visible');
+            const currentDur = Spicetify.Player.getDuration ? Spicetify.Player.getDuration() : 0;
+            const currentProg = Spicetify.Player.getProgress ? Spicetify.Player.getProgress() : 0;
+            totalTimeMs = Math.max(0, totalTimeMs + currentDur - currentProg);
+
+            const totalMinutes = Math.floor(totalTimeMs / 60000);
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            
+            let timeStr = hours > 0 ? `${hours}hr ${minutes}m` : `${minutes}m`;
+            let songString = numSongs === 1 ? '1 song' : `${numSongs} songs`;
+            
+            // Add a ~ symbol if we used the DOM fallback estimate
+            if (nextTracks.length === 0) {
+                timeStr = "~" + timeStr;
+            }
+            
+            textNode.textContent = `${songString} • ${timeStr}`;
+            pill.classList.add('visible');
+        } catch (e) {
+            textNode.textContent = "Error: " + e.message;
+            pill.classList.add('visible');
+        }
     }, 1000);
 })();
