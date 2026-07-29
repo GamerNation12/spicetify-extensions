@@ -1,6 +1,6 @@
 {
-  "version": "1.1.1",
+  "version": "1.1.2",
   "changelog": [
-    "Fixed a bug where the update popup would repeatedly display on Spotify startup."
+    "Testing the new GitHub Action auto-discord-update webhook!"
   ]
 }
