@@ -70,14 +70,10 @@
     {
         "name": "Queue Time",
         "description": "See how much time is left in your Spicetify queue.",
-        "preview": "QueueTime/QueueTime.png",
-        "main": "QueueTime/QueueTime.js",
-        "readme": "QueueTime/README.md",
+        "preview": "queue-time/QueueTime.png",
+        "main": "queue-time/QueueTime.js",
+        "readme": "queue-time/README.md",
         "authors": [
-            {
-                "name": "Theblockbuster1",
-                "url": "https://github.com/Theblockbuster1"
-            },
             {
                 "name": "GamerNation12",
                 "url": "https://github.com/GamerNation12/spicetify-extensions"
