@@ -11,8 +11,10 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = 'Loading...';
-  let BRD_CHANGELOG_LINES = [];
+  let BRD_VERSION = '1.11.28';
+  let BRD_CHANGELOG_LINES = [
+    "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
+  ];
   let currentPreviewRequestId = 0;
   let currentDisplayRequestId = 0;
   // --- Core Logic ---
@@ -201,6 +203,32 @@
         fetchFailed = true;
       }
 
+      let searchOldestDate = null;
+      try {
+          const trackName = playerData.item.name || '';
+          const artistName = playerData.item.artists?.[0]?.name || '';
+          if (trackName && artistName) {
+              let cleanName = trackName.replace(/[-(\[].*?(remaster|live|mono|stereo|version|edit|mix).*?[)\]]/i, '').trim();
+              if (cleanName.includes(' - ')) cleanName = cleanName.split(' - ')[0].trim();
+              
+              const query = `track:"${cleanName}" artist:"${artistName}"`;
+              const searchRes = await Spicetify.CosmosAsync.get(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=15`);
+              
+              if (searchRes?.tracks?.items) {
+                  let oldestTime = Infinity;
+                  searchRes.tracks.items.forEach(item => {
+                      if (item.album?.release_date) {
+                          const d = new Date(item.album.release_date);
+                          if (!isNaN(d.getTime()) && d.getTime() < oldestTime) {
+                              oldestTime = d.getTime();
+                              searchOldestDate = d;
+                          }
+                      }
+                  });
+              }
+          }
+      } catch (e) { log('Original date search failed', e); }
+
       let album, releaseDate;
       if (albumDetails?.date && albumDetails.date.year) {
         album = {
@@ -223,6 +251,14 @@
             releaseDate = null;
         }
       }
+
+      if (searchOldestDate) {
+          if (!releaseDate || searchOldestDate.getTime() < releaseDate.getTime()) {
+              log('Found older original release date via search!', searchOldestDate);
+              releaseDate = searchOldestDate;
+          }
+      }
+
       cacheSet(trackId, { album, releaseDate, popularity, audioFeatures, explicit, label }, !fetchFailed);
       return { trackDetails: playerData.item, album, releaseDate, popularity, audioFeatures, explicit, label };
     })();
