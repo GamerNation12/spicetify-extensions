@@ -72,7 +72,7 @@
         "name": "Queue Time",
         "description": "See how much time is left in your Spicetify queue.",
         "preview": "queue-time/QueueTime.png",
-        "main": "queue-time/QueueTime.js",
+        "main": "queue-time/QueueTime_v2.js",
         "readme": "queue-time/README.md",
         "authors": [
             {
