@@ -65,7 +65,8 @@
                             const localUrl = URL.createObjectURL(blob);
                             await import(localUrl);
                             URL.revokeObjectURL(localUrl);
-                            Spicetify.showNotification(`Successfully updated to v${latestVersion}!`);
+                            Spicetify.showNotification(`Successfully updated to v${latestVersion}! Reloading...`);
+                            setTimeout(() => window.location.reload(), 1500);
                         } catch (e) {
                             Spicetify.showNotification("Update failed. See console.", true);
                         }
