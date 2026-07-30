@@ -1,6 +1,9 @@
 {
-  "version": "2.0.21",
+  "version": "2.0.22",
   "changelogs": {
+    "2.0.22": [
+      "Fixed an issue where the extension would crash if the Spotify queue was populated by a third-party app like Shuffle+."
+    ],
     "2.0.21": [
       "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
       "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -69,7 +72,6 @@
     ]
   },
   "changelog": [
-    "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
-    "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
+    "Fixed an issue where the extension would crash if the Spotify queue was populated by a third-party app like Shuffle+."
   ]
 }
