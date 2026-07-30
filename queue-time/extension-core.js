@@ -24,7 +24,17 @@
         document.querySelectorAll('.mgn-qt-inline').forEach(el => el.remove());
     }
     
-    window.__mgnQueueTimeState = {};
+    let savedState = {};
+    try {
+        savedState = JSON.parse(localStorage.getItem('mgnQueueTimeState')) || {};
+    } catch (e) {}
+
+    window.__mgnQueueTimeState = {
+        manualIndex: savedState.manualIndex || 0,
+        lastTrackUri: savedState.lastTrackUri || null,
+        lastContextUri: savedState.lastContextUri || null,
+        lastUriTime: savedState.lastUriTime || 0
+    };
 
     const QT_VERSION = "2.0.20";
     let QT_CHANGELOG_LINES = [
@@ -438,6 +448,7 @@
                     window.__mgnQueueTimeState.lastTrackUri = state?.item?.uri;
                     window.__mgnQueueTimeState.manualIndex = 0;
                     window.__mgnQueueTimeState.lastUriTime = Date.now();
+                    localStorage.setItem('mgnQueueTimeState', JSON.stringify(window.__mgnQueueTimeState));
                 } else if (window.__mgnQueueTimeState.lastTrackUri !== state?.item?.uri) {
                     // Song changed!
                     const now = Date.now();
@@ -450,6 +461,7 @@
                     
                     window.__mgnQueueTimeState.lastTrackUri = state?.item?.uri;
                     window.__mgnQueueTimeState.lastUriTime = now;
+                    localStorage.setItem('mgnQueueTimeState', JSON.stringify(window.__mgnQueueTimeState));
                 }
                 
                 // Fallback to our manual counter if native is broken
@@ -461,8 +473,8 @@
                 }
             }
 
-            if (numSongs >= 80) {
-                const uri = state?.context?.uri;
+            const uri = state?.context?.uri;
+            if (uri && uri.includes('spotify:playlist:')) {
                 let contextCount = Number(state?.context?.metadata?.track_count);
                 
                 if (isNaN(contextCount) && uri && uri.includes('spotify:playlist:')) {
