@@ -26,9 +26,9 @@
     
     window.__mgnQueueTimeState = {};
 
-    const QT_VERSION = "2.0.15";
+    const QT_VERSION = "2.0.16";
     let QT_CHANGELOG_LINES = [
-        "Added manual track index tracking for users whose Spotify client does not report the current track index natively.",
+        "Fixed a crash (ReferenceError) caused by a variable scoping issue in the new manual index tracker.",
         "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
     ];
 
@@ -421,8 +421,10 @@
                 }, 0);
             }
             
+            let state = Spicetify.Platform?.PlayerAPI?.getState();
+            
             // Try to find the exact current index using the context URI if native index is missing
-            let currentIndex = Number(state?.index?.track) ?? Number(state?.index?.itemIndex);
+            let currentIndex = Number(state?.index?.track) || Number(state?.index?.itemIndex);
             
             // If the native index is missing or 0 (and we know it shouldn't always be 0), we can try to locate it in the nextTracks context
             if (isNaN(currentIndex) || currentIndex === 0) {
@@ -447,7 +449,6 @@
             }
 
             if (numSongs >= 80) {
-                const state = Spicetify.Platform?.PlayerAPI?.getState();
                 const uri = state?.context?.uri;
                 let contextCount = Number(state?.context?.metadata?.track_count);
                 

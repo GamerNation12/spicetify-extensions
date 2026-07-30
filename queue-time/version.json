@@ -1,6 +1,9 @@
 {
-  "version": "2.0.15",
+  "version": "2.0.16",
   "changelogs": {
+    "2.0.16": [
+      "Fixed a crash (ReferenceError) caused by a variable scoping issue in the new manual index tracker."
+    ],
     "2.0.15": [
       "Added manual track index tracking for users whose Spotify client does not report the current track index natively."
     ],
@@ -49,6 +52,6 @@
     ]
   },
   "changelog": [
-    "Added manual track index tracking for users whose Spotify client does not report the current track index natively."
+    "Fixed a crash (ReferenceError) caused by a variable scoping issue in the new manual index tracker."
   ]
 }
