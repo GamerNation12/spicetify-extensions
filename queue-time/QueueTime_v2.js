@@ -225,12 +225,32 @@
             
             let numSongs = nextTracks.length;
             let totalTimeMs = 0;
+            let isEstimated = false;
 
             if (numSongs > 0) {
                 totalTimeMs = nextTracks.reduce((acc, cur) => {
                     const duration = Number(cur.duration || cur.contextTrack?.metadata?.duration || cur.item?.duration?.milliseconds || cur.track?.metadata?.duration || cur.metadata?.duration) || 0;
                     return acc + duration;
                 }, 0);
+            }
+            
+            if (numSongs >= 80) {
+                const state = Spicetify.Platform?.PlayerAPI?.getState();
+                const contextCount = Number(state?.context?.metadata?.track_count);
+                const currentIndex = Number(state?.index?.track);
+                
+                if (!isNaN(contextCount) && !isNaN(currentIndex)) {
+                    const contextRemaining = Math.max(0, contextCount - currentIndex - 1);
+                    const queuedLength = state?.queue?.queued?.length || 0;
+                    const calculatedRemaining = contextRemaining + queuedLength;
+                    
+                    if (calculatedRemaining > numSongs) {
+                        isEstimated = true;
+                        const avgTime = totalTimeMs / numSongs;
+                        numSongs = calculatedRemaining;
+                        totalTimeMs = avgTime * numSongs;
+                    }
+                }
             }
 
             if (numSongs === 0) {
@@ -241,12 +261,23 @@
                 const currentProg = Spicetify.Player.getProgress ? Spicetify.Player.getProgress() : 0;
                 totalTimeMs = Math.max(0, totalTimeMs + currentDur - currentProg);
 
-                const totalMinutes = Math.floor(totalTimeMs / 60000);
-                const hours = Math.floor(totalMinutes / 60);
-                const minutes = totalMinutes % 60;
+                const totalSeconds = Math.floor(totalTimeMs / 1000);
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
                 
-                let timeStr = hours > 0 ? `${hours}hr ${minutes}m` : `${minutes}m`;
+                let timeStr = "";
+                if (hours > 0) {
+                    timeStr = `${hours}hr ${minutes}m ${seconds}s`;
+                } else {
+                    timeStr = `${minutes}m ${seconds}s`;
+                }
+                
                 let songString = numSongs === 1 ? '1 song' : `${numSongs} songs`;
+                
+                if (isEstimated) {
+                    timeStr = "~" + timeStr;
+                }
                 
                 if (nextTracks.length === 0) {
                     timeStr = "~" + timeStr;
@@ -270,7 +301,7 @@
                 
                 headers.forEach(h2 => {
                     let text = h2.textContent.toLowerCase();
-                    if (text.includes("now playing") || text.includes("next in queue") || text.includes("next from")) {
+                    if (text.includes("next in queue") || text.includes("next from")) {
                         let container = h2.parentElement;
                         
                         if (container && !container.querySelector('.mgn-qt-inline')) {

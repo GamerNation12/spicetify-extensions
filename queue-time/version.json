@@ -1,6 +1,13 @@
 {
-  "version": "2.0.0",
+  "version": "2.0.2",
   "changelogs": {
+    "2.0.2": [
+      "Vastly improved queue tracking: Queue Time now bypasses Spotify's 80-song display limit by intelligently calculating your true playlist context size and manually queued items to show the real total queue count and time!"
+    ],
+    "2.0.1": [
+      "Fixed duplicate header injection (no longer shows on 'Now playing').",
+      "Added seconds to time format (e.g. 5hr 6m 30s)."
+    ],
     "2.0.0": [
       "Officially renamed to Queue Time 2.0!",
       "Added Save to Playlist feature! You can now click the save icon directly in the Queue page to save your entire upcoming queue to a new playlist.",
@@ -8,8 +15,6 @@
     ]
   },
   "changelog": [
-    "Officially renamed to Queue Time 2.0!",
-    "Added Save to Playlist feature! You can now click the save icon directly in the Queue page to save your entire upcoming queue to a new playlist.",
-    "Added a Settings gear icon directly to the queue page so you can easily change between pill/text modes."
+    "Vastly improved queue tracking: Queue Time now bypasses Spotify's 80-song display limit by intelligently calculating your true playlist context size and manually queued items to show the real total queue count and time!"
   ]
 }
