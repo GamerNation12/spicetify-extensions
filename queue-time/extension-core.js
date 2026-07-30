@@ -36,7 +36,7 @@
         lastUriTime: savedState.lastUriTime || 0
     };
 
-    const QT_VERSION = "2.0.26";
+    const QT_VERSION = "2.0.27";
     let QT_CHANGELOG_LINES = [
         "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
         "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -417,6 +417,11 @@
                 nextTracks = stateQueue;
             } else if (Spicetify.Queue?.nextTracks?.length > 0) {
                 nextTracks = Spicetify.Queue.nextTracks;
+            }
+            
+            // Filter out Autoplay and Shuffle+ delimiters to perfectly count actual remaining songs!
+            if (nextTracks.length > 0) {
+                nextTracks = nextTracks.filter(t => t.provider !== 'autoplay' && t.uri !== 'spotify:delimiter' && t.contextTrack?.uri !== 'spotify:delimiter');
             }
             
             let numSongs = nextTracks.length;

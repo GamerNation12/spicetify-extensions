@@ -1,6 +1,9 @@
 {
-  "version": "2.0.26",
+  "version": "2.0.27",
   "changelogs": {
+    "2.0.27": [
+      "Flawless fix for Autoplay and Shuffle+: perfectly ignores Spotify's added Autoplay songs and Shuffle+ delimiters so the count accurately reflects your playlist and goes down correctly when skipping!"
+    ],
     "2.0.26": [
       "Actually applied the fix for small playlists not updating their song count when skipping songs."
     ],
@@ -84,6 +87,6 @@
     ]
   },
   "changelog": [
-    "Actually applied the fix for small playlists not updating their song count when skipping songs."
+    "Flawless fix for Autoplay and Shuffle+: perfectly ignores Spotify's added Autoplay songs and Shuffle+ delimiters so the count accurately reflects your playlist and goes down correctly when skipping!"
   ]
 }
