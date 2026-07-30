@@ -1,23 +1,18 @@
 {
-  "version": "2.0.3",
+  "version": "2.0.4",
   "changelogs": {
+    "2.0.4": [
+      "Massive Queue Time Settings Redesign!",
+      "Added a sleek, native-feeling premium settings menu with rounded edges and micro-animations.",
+      "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
+    ],
     "2.0.3": [
-      "Added OTA Update support! You can now check for updates directly from the Queue Time Settings menu."
-    ],
-    "2.0.2": [
-      "Vastly improved queue tracking: Queue Time now bypasses Spotify's 80-song display limit by intelligently calculating your true playlist context size and manually queued items to show the real total queue count and time!"
-    ],
-    "2.0.1": [
-      "Fixed duplicate header injection (no longer shows on 'Now playing').",
-      "Added seconds to time format (e.g. 5hr 6m 30s)."
-    ],
-    "2.0.0": [
-      "Officially renamed to Queue Time 2.0!",
-      "Added Save to Playlist feature! You can now click the save icon directly in the Queue page to save your entire upcoming queue to a new playlist.",
-      "Added a Settings gear icon directly to the queue page so you can easily change between pill/text modes."
+      "Added save queue to playlist button"
     ]
   },
   "changelog": [
-    "Added OTA Update support! You can now check for updates directly from the Queue Time Settings menu."
+      "Massive Queue Time Settings Redesign!",
+      "Added a sleek, native-feeling premium settings menu with rounded edges and micro-animations.",
+      "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
   ]
 }

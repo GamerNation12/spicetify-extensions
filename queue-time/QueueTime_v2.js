@@ -16,7 +16,12 @@
     }
     window.__mgnQueueTimeRunning = true;
 
-    const QT_VERSION = "2.0.2";
+    const QT_VERSION = "2.0.4";
+    let QT_CHANGELOG_LINES = [
+        "Massive Queue Time Settings Redesign!",
+        "Added a sleek, native-feeling premium settings menu with rounded edges and micro-animations.",
+        "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
+    ];
 
     // Default Settings
     const defaultSettings = {
@@ -42,6 +47,12 @@
             if (res.ok) {
                 const json = await res.json();
                 const latestVersion = json.version;
+                
+                if (json.changelogs && json.changelogs[QT_VERSION]) {
+                    QT_CHANGELOG_LINES = json.changelogs[QT_VERSION];
+                } else if (json.changelog && latestVersion === QT_VERSION) {
+                    QT_CHANGELOG_LINES = json.changelog;
+                }
                 
                 if (latestVersion !== QT_VERSION) {
                     if (manual) {
@@ -70,35 +81,142 @@
             if (manual) Spicetify.showNotification("Failed to check for updates.", true);
         }
     }
+    
+    function showChangelogPopup() {
+        if (document.getElementById('qt-changelog')) return;
+
+        const backdrop = document.createElement('div');
+        backdrop.id = 'qt-changelog-backdrop';
+        backdrop.style.position = 'fixed';
+        backdrop.style.inset = '0';
+        backdrop.style.background = 'rgba(0,0,0,0.6)';
+        backdrop.style.zIndex = '10000';
+        backdrop.style.backdropFilter = 'blur(4px)';
+
+        const modal = document.createElement('div');
+        modal.id = 'qt-changelog';
+        modal.style.position = 'fixed';
+        modal.style.top = '50%';
+        modal.style.left = '50%';
+        modal.style.transform = 'translate(-50%, -50%)';
+        modal.style.background = 'rgba(18,18,18,0.9)';
+        modal.style.backdropFilter = 'blur(25px)';
+        modal.style.padding = '20px 22px';
+        modal.style.borderRadius = '18px';
+        modal.style.boxShadow = '0 20px 50px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08)';
+        modal.style.color = 'var(--spice-text)';
+        modal.style.width = 'min(90vw, 420px)';
+        modal.style.fontSize = '0.9rem';
+        modal.style.display = 'flex';
+        modal.style.flexDirection = 'column';
+        modal.style.gap = '10px';
+        modal.style.zIndex = '10001';
+
+        modal.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <div style="display:flex;flex-direction:column;gap:2px;">
+              <span style="font-weight:800;letter-spacing:-0.01em;">Queue Time Updated</span>
+              <span style="opacity:0.7;font-size:0.8rem;">Queue Time v${QT_VERSION}</span>
+            </div>
+            <button id="qt-changelog-close" style="background:rgba(255,255,255,0.05);border:none;color:var(--spice-text);border-radius:999px;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;">&#10005;</button>
+          </div>
+          <ul id="qt-changelog-list" style="margin:4px 0 0 16px;padding:0;list-style:disc;"></ul>
+          <button id="qt-changelog-ok" style="margin-top:10px;align-self:flex-end;background:#1ed760;border:none;border-radius:999px;padding:6px 14px;font-size:0.8rem;font-weight:600;cursor:pointer;color:#000;transition:transform 0.1s;">
+            Awesome
+          </button>
+        `;
+
+        const listEl = modal.querySelector('#qt-changelog-list');
+        const firstLines = QT_CHANGELOG_LINES.slice(0, 3);
+        firstLines.forEach(line => {
+          const li = document.createElement('li');
+          li.textContent = line;
+          listEl.appendChild(li);
+        });
+        if (QT_CHANGELOG_LINES.length > 3) {
+          const li = document.createElement('li');
+          li.textContent = `...and ${QT_CHANGELOG_LINES.length - 3} more changes.`;
+          li.style.opacity = '0.6';
+          li.style.listStyle = 'none';
+          li.style.marginLeft = '-16px';
+          li.style.marginTop = '4px';
+          listEl.appendChild(li);
+        }
+
+        const close = () => {
+          backdrop.remove();
+          modal.remove();
+        };
+
+        modal.querySelector('#qt-changelog-close').onclick = close;
+        modal.querySelector('#qt-changelog-ok').onclick = close;
+        backdrop.onclick = close;
+
+        document.body.appendChild(backdrop);
+        document.body.appendChild(modal);
+    }
+    
+    // Check for updates on load
+    const updateCheckPromise = checkForUpdates();
+    setInterval(checkForUpdates, 1000 * 60 * 60);
+
+    const seenVersion = localStorage.getItem('qt_version');
+    const currentVerStr = String(QT_VERSION);
+    const sessionShown = sessionStorage.getItem('qt_popup_shown_' + currentVerStr);
+    
+    if (!sessionShown && seenVersion !== currentVerStr) {
+        try { localStorage.setItem('qt_version', currentVerStr); } catch(e){}
+        sessionStorage.setItem('qt_popup_shown_' + currentVerStr, 'true');
+        Promise.all([
+            updateCheckPromise.catch(() => {}),
+            new Promise(r => setTimeout(r, 2000))
+        ]).finally(() => {
+            showChangelogPopup();
+        });
+    }
 
     // Settings Modal
     function openSettings() {
         const container = document.createElement("div");
         container.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 16px; padding: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <label style="color: var(--spice-text); font-size: 14px;">Display Mode</label>
-                    <select id="qt-mode" style="background: var(--spice-button-disabled); color: var(--spice-text); border: none; padding: 8px; border-radius: 4px;">
+            <style>
+                .qt-setting-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px 16px; border-radius: 8px; transition: background 0.2s; }
+                .qt-setting-row:hover { background: rgba(255,255,255,0.08); }
+                .qt-select { background: rgba(0,0,0,0.2); color: var(--spice-text); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 6px; outline: none; cursor: pointer; font-family: inherit; font-size: 13px; }
+                .qt-select:hover { background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.2); }
+                .qt-color-picker { width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; background: none; overflow: hidden; padding: 0; }
+                .qt-color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+                .qt-color-picker::-webkit-color-swatch { border: none; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,0.2); }
+                .qt-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: 700; font-size: 13px; cursor: pointer; transition: transform 0.1s, filter 0.2s; color: #000; }
+                .qt-btn:hover { transform: scale(1.02); filter: brightness(1.1); }
+                .qt-btn:active { transform: scale(0.98); }
+                .qt-save-btn { background: #1ed760; }
+                .qt-update-btn { background: rgba(255,255,255,0.1); color: var(--spice-text); border: 1px solid rgba(255,255,255,0.1); }
+            </style>
+            <div style="display: flex; flex-direction: column; gap: 12px; padding: 8px 4px;">
+                <div class="qt-setting-row">
+                    <label style="color: var(--spice-text); font-weight: 600; font-size: 14px;">Display Mode</label>
+                    <select id="qt-mode" class="qt-select">
                         <option value="pill" ${settings.mode === 'pill' ? 'selected' : ''}>Floating Pill</option>
                         <option value="text" ${settings.mode === 'text' ? 'selected' : ''}>In-Queue Text</option>
                     </select>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <label style="color: var(--spice-text); font-size: 14px;">Text Format</label>
-                    <select id="qt-format" style="background: var(--spice-button-disabled); color: var(--spice-text); border: none; padding: 8px; border-radius: 4px;">
+                <div class="qt-setting-row">
+                    <label style="color: var(--spice-text); font-weight: 600; font-size: 14px;">Text Format</label>
+                    <select id="qt-format" class="qt-select">
                         <option value="both" ${settings.format === 'both' ? 'selected' : ''}>Songs & Time (e.g. 80 songs • 5hr 4m)</option>
                         <option value="time" ${settings.format === 'time' ? 'selected' : ''}>Time Only (e.g. 5hr 4m)</option>
                     </select>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <label style="color: var(--spice-text); font-size: 14px;">Custom Color</label>
-                    <input type="color" id="qt-color" value="${settings.color}" style="background: none; border: none; cursor: pointer;">
+                <div class="qt-setting-row">
+                    <label style="color: var(--spice-text); font-weight: 600; font-size: 14px;">Custom Color</label>
+                    <input type="color" id="qt-color" class="qt-color-picker" value="${settings.color}">
                 </div>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button id="qt-save" style="flex: 1; background: var(--spice-button-active); color: var(--spice-text); border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">Save & Apply</button>
-                    <button id="qt-update-btn" style="flex: 1; background: var(--spice-button-disabled); color: var(--spice-text); border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">Check for Updates</button>
+                <div style="display: flex; gap: 12px; margin-top: 8px;">
+                    <button id="qt-save" class="qt-btn qt-save-btn">Save & Apply</button>
+                    <button id="qt-update-btn" class="qt-btn qt-update-btn">Check for Updates</button>
                 </div>
-                <div style="text-align: center; font-size: 12px; color: var(--spice-subtext); margin-top: -5px;">v${QT_VERSION}</div>
+                <div style="text-align: center; font-size: 11px; color: var(--spice-subtext); margin-top: 4px; opacity: 0.6; font-weight: 600;">Queue Time v${QT_VERSION}</div>
             </div>
         `;
 
