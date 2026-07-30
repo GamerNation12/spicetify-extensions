@@ -36,9 +36,10 @@
         lastUriTime: savedState.lastUriTime || 0
     };
 
-    const QT_VERSION = "2.0.20";
+    const QT_VERSION = "2.0.21";
     let QT_CHANGELOG_LINES = [
-        "The queue song count now correctly includes the currently playing track again so that the math perfectly matches your expectations."
+        "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
+        "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
     ];
 
     // Default Settings
