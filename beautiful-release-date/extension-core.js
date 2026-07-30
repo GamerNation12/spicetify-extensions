@@ -216,12 +216,16 @@
                   const itunesRes = await fetch(itunesUrl).then(r => r.json());
                   if (itunesRes && itunesRes.results && itunesRes.results.length > 0) {
                       let oldestTime = Infinity;
+                      const queryArtist = artistName.toLowerCase();
                       itunesRes.results.forEach(item => {
                           if (item.releaseDate) {
-                              const d = new Date(item.releaseDate);
-                              if (!isNaN(d.getTime()) && d.getTime() < oldestTime) {
-                                  oldestTime = d.getTime();
-                                  searchOldestDate = d;
+                              const itemArtist = (item.artistName || '').toLowerCase();
+                              if (itemArtist.includes(queryArtist) || queryArtist.includes(itemArtist)) {
+                                  const d = new Date(item.releaseDate);
+                                  if (!isNaN(d.getTime()) && d.getTime() < oldestTime) {
+                                      oldestTime = d.getTime();
+                                      searchOldestDate = d;
+                                  }
                               }
                           }
                       });
@@ -234,12 +238,16 @@
                       const searchRes = await Spicetify.CosmosAsync.get(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=15`);
                       if (searchRes?.tracks?.items && searchRes.tracks.items.length > 0) {
                           let oldestTime = Infinity;
+                          const queryArtist = artistName.toLowerCase();
                           searchRes.tracks.items.forEach(item => {
                               if (item.album?.release_date) {
-                                  const d = new Date(item.album.release_date);
-                                  if (!isNaN(d.getTime()) && d.getTime() < oldestTime) {
-                                      oldestTime = d.getTime();
-                                      searchOldestDate = d;
+                                  const itemArtist = (item.artists?.[0]?.name || '').toLowerCase();
+                                  if (itemArtist.includes(queryArtist) || queryArtist.includes(itemArtist)) {
+                                      const d = new Date(item.album.release_date);
+                                      if (!isNaN(d.getTime()) && d.getTime() < oldestTime) {
+                                          oldestTime = d.getTime();
+                                          searchOldestDate = d;
+                                      }
                                   }
                               }
                           });

@@ -1,11 +1,11 @@
 {
-  "version": "1.11.32",
+  "version": "1.11.33",
   "changelogs": {
-    "1.11.32": [
-      "Replaced fragile Spotify search logic with iTunes API fallback for completely bulletproof original release date fetching."
+    "1.11.33": [
+      "Fixed iTunes/Spotify fallback logic mistakenly prioritizing Kidz Bop or other cover songs that have older release dates by enforcing strict artist name matching."
     ]
   },
   "changelog": [
-    "Replaced fragile Spotify search logic with iTunes API fallback for completely bulletproof original release date fetching."
+    "Fixed iTunes/Spotify fallback logic mistakenly prioritizing Kidz Bop or other cover songs that have older release dates by enforcing strict artist name matching."
   ]
 }
