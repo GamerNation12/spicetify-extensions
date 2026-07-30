@@ -1,6 +1,11 @@
 {
-  "version": "2.0.4",
+  "version": "2.0.5",
   "changelogs": {
+    "2.0.5": [
+      "Added Full Playlist Time Estimation (bypasses 80 song limit)!",
+      "Updated settings UI text to be more accurate (showing seconds).",
+      "Minor calculation fixes."
+    ],
     "2.0.4": [
       "Massive Queue Time Settings Redesign!",
       "Added a sleek, native-feeling premium settings menu with rounded edges and micro-animations.",
@@ -11,8 +16,8 @@
     ]
   },
   "changelog": [
-      "Massive Queue Time Settings Redesign!",
-      "Added a sleek, native-feeling premium settings menu with rounded edges and micro-animations.",
-      "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
+    "Added Full Playlist Time Estimation (bypasses 80 song limit)!",
+    "Updated settings UI text to be more accurate (showing seconds).",
+    "Minor calculation fixes."
   ]
 }
