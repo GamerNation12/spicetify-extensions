@@ -16,6 +16,8 @@
     }
     window.__mgnQueueTimeRunning = true;
 
+    const QT_VERSION = "2.0.2";
+
     // Default Settings
     const defaultSettings = {
         mode: 'text', // 'pill' or 'text'
@@ -32,6 +34,41 @@
     function saveSettings() {
         localStorage.setItem("queue-time:settings", JSON.stringify(settings));
         applySettings();
+    }
+    
+    async function checkForUpdates(manual = false) {
+        try {
+            const res = await fetch(`https://raw.githubusercontent.com/GamerNation12/spicetify-extensions/main/queue-time/version.json?t=${Math.random()}`);
+            if (res.ok) {
+                const json = await res.json();
+                const latestVersion = json.version;
+                
+                if (latestVersion !== QT_VERSION) {
+                    if (manual) {
+                        const btn = document.getElementById('qt-update-btn');
+                        if (btn) btn.textContent = 'Updating...';
+                        try {
+                            const codeRes = await fetch(`https://raw.githubusercontent.com/GamerNation12/spicetify-extensions/main/queue-time/QueueTime_v2.js?t=${Date.now()}`);
+                            if (!codeRes.ok) throw new Error();
+                            const code = await codeRes.text();
+                            const blob = new Blob([code], { type: 'application/javascript' });
+                            const localUrl = URL.createObjectURL(blob);
+                            await import(localUrl);
+                            URL.revokeObjectURL(localUrl);
+                            Spicetify.showNotification(`Successfully updated to v${latestVersion}!`);
+                        } catch (e) {
+                            Spicetify.showNotification("Update failed. See console.", true);
+                        }
+                    } else {
+                        Spicetify.showNotification(`Queue Time: New version ${latestVersion} available!`);
+                    }
+                } else {
+                    if (manual) Spicetify.showNotification(`Already on latest version (v${latestVersion}).`);
+                }
+            }
+        } catch (e) {
+            if (manual) Spicetify.showNotification("Failed to check for updates.", true);
+        }
     }
 
     // Settings Modal
@@ -57,7 +94,11 @@
                     <label style="color: var(--spice-text); font-size: 14px;">Custom Color</label>
                     <input type="color" id="qt-color" value="${settings.color}" style="background: none; border: none; cursor: pointer;">
                 </div>
-                <button id="qt-save" style="margin-top: 10px; background: var(--spice-button-active); color: var(--spice-text); border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">Save & Apply</button>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button id="qt-save" style="flex: 1; background: var(--spice-button-active); color: var(--spice-text); border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">Save & Apply</button>
+                    <button id="qt-update-btn" style="flex: 1; background: var(--spice-button-disabled); color: var(--spice-text); border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">Check for Updates</button>
+                </div>
+                <div style="text-align: center; font-size: 12px; color: var(--spice-subtext); margin-top: -5px;">v${QT_VERSION}</div>
             </div>
         `;
 
@@ -73,6 +114,22 @@
             settings.color = container.querySelector("#qt-color").value;
             saveSettings();
             Spicetify.PopupModal.hide();
+        };
+        
+        const updateBtn = container.querySelector("#qt-update-btn");
+        updateBtn.onclick = () => {
+            updateBtn.textContent = 'Checking...';
+            updateBtn.disabled = true;
+            updateBtn.style.opacity = '0.5';
+            updateBtn.style.cursor = 'not-allowed';
+            checkForUpdates(true).finally(() => {
+                setTimeout(() => {
+                    updateBtn.textContent = 'Check for Updates';
+                    updateBtn.disabled = false;
+                    updateBtn.style.opacity = '1';
+                    updateBtn.style.cursor = 'pointer';
+                }, 1500);
+            });
         };
     }
 

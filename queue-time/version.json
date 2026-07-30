@@ -1,6 +1,9 @@
 {
-  "version": "2.0.2",
+  "version": "2.0.3",
   "changelogs": {
+    "2.0.3": [
+      "Added OTA Update support! You can now check for updates directly from the Queue Time Settings menu."
+    ],
     "2.0.2": [
       "Vastly improved queue tracking: Queue Time now bypasses Spotify's 80-song display limit by intelligently calculating your true playlist context size and manually queued items to show the real total queue count and time!"
     ],
@@ -15,6 +18,6 @@
     ]
   },
   "changelog": [
-    "Vastly improved queue tracking: Queue Time now bypasses Spotify's 80-song display limit by intelligently calculating your true playlist context size and manually queued items to show the real total queue count and time!"
+    "Added OTA Update support! You can now check for updates directly from the Queue Time Settings menu."
   ]
 }
