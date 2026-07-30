@@ -414,11 +414,16 @@
             let totalTimeMs = 0;
             let isEstimated = false;
 
-            if (numSongs > 0) {
+            if (numSongs > 0 || state?.item) {
+                // Add current track to the count
+                numSongs += 1;
+                
+                if (nextTracks.length > 0) {
                 totalTimeMs = nextTracks.reduce((acc, cur) => {
                     const duration = Number(cur.duration || cur.contextTrack?.metadata?.duration || cur.item?.duration?.milliseconds || cur.track?.metadata?.duration || cur.metadata?.duration) || 0;
                     return acc + duration;
                 }, 0);
+                }
             }
             
             let state = Spicetify.Platform?.PlayerAPI?.getState();
