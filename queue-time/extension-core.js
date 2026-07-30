@@ -423,6 +423,7 @@
             let numSongs = nextTracks.length;
             let totalTimeMs = 0;
             let isEstimated = false;
+            let state = Spicetify.Platform?.PlayerAPI?.getState();
 
             if (numSongs > 0 || state?.item) {
                 // Add current track to the count
@@ -435,8 +436,6 @@
                 }, 0);
                 }
             }
-            
-            let state = Spicetify.Platform?.PlayerAPI?.getState();
             
             // Try to find the exact current index using the context URI if native index is missing
             let currentIndex = Number(state?.index?.track) || Number(state?.index?.itemIndex);
@@ -552,13 +551,13 @@
                     if (totalRemaining > numSongs) {
                         const estimatedDurationAvg = totalTimeMs / numSongs;
                         totalTimeMs = estimatedDurationAvg * totalRemaining;
-                        numSongs = totalRemaining;
+                        numSongs = totalRemaining + 1;
                         isEstimated = true;
                     } else if (totalRemaining < numSongs) {
                         // The queue has MORE songs than the playlist has left!
                         // This happens when Repeat or Autoplay is ON for small playlists and inflates nextTracks to 80.
                         // We truncate the queue to only sum the true remaining songs of the current playlist context.
-                        numSongs = totalRemaining;
+                        numSongs = totalRemaining + 1;
                         totalTimeMs = nextTracks.slice(0, numSongs).reduce((acc, cur) => {
                             const duration = Number(cur.duration || cur.contextTrack?.metadata?.duration || cur.item?.duration?.milliseconds || cur.track?.metadata?.duration || cur.metadata?.duration) || 0;
                             return acc + duration;
