@@ -4,11 +4,16 @@
 // VERSION: 2.0.19
 // MGN Auto-Updating Loader - Instant API OTA Version
 (async function loadExtension() {
-  // Use raw.githubusercontent to bypass the 60 req/hr API rate limit!
-  const API_URL = "https://raw.githubusercontent.com/GamerNation12/spicetify-extensions/main/queue-time/extension-core.js";
+  // Using the API bypasses the 5-minute CDN cache, ensuring instant updates.
+  // Note: Unauthenticated API requests are limited to 60 per hour per IP.
+  const API_URL = "https://api.github.com/repos/GamerNation12/spicetify-extensions/contents/queue-time/extension-core.js";
   
   try {
-    const response = await fetch(`${API_URL}?t=${Date.now()}`);
+    const response = await fetch(`${API_URL}?t=${Date.now()}`, {
+      headers: {
+        "Accept": "application/vnd.github.v3.raw"
+      }
+    });
     
     if (!response.ok) throw new Error(`GitHub fetch error: ${response.status}`);
     const code = await response.text();
