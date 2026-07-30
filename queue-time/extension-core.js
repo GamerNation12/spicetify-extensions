@@ -26,9 +26,9 @@
     
     window.__mgnQueueTimeState = {};
 
-    const QT_VERSION = "2.0.16";
+    const QT_VERSION = "2.0.17";
     let QT_CHANGELOG_LINES = [
-        "Fixed a crash (ReferenceError) caused by a variable scoping issue in the new manual index tracker.",
+        "Fixed an issue where small playlists with Repeat enabled would artificially inflate the queue to 80 songs.",
         "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
     ];
 
@@ -527,6 +527,16 @@
                         const estimatedDurationAvg = totalTimeMs / numSongs;
                         totalTimeMs = estimatedDurationAvg * totalRemaining;
                         numSongs = totalRemaining;
+                        isEstimated = true;
+                    } else if (totalRemaining < numSongs) {
+                        // The queue has MORE songs than the playlist has left!
+                        // This happens when Repeat or Autoplay is ON for small playlists and inflates nextTracks to 80.
+                        // We truncate the queue to only sum the true remaining songs of the current playlist context.
+                        numSongs = totalRemaining;
+                        totalTimeMs = nextTracks.slice(0, numSongs).reduce((acc, cur) => {
+                            const duration = Number(cur.duration || cur.contextTrack?.metadata?.duration || cur.item?.duration?.milliseconds || cur.track?.metadata?.duration || cur.metadata?.duration) || 0;
+                            return acc + duration;
+                        }, 0);
                         isEstimated = true;
                     }
                 } else {
