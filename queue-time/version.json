@@ -1,6 +1,9 @@
 {
-  "version": "2.0.8",
+  "version": "2.0.9",
   "changelogs": {
+    "2.0.9": [
+      "Added Hot Reloading for Seamless Updates! Queue Time will now update itself perfectly without needing a Spotify restart!"
+    ],
     "2.0.8": [
       "Made Full Playlist Estimation completely bulletproof by using three different internal APIs to fetch playlist lengths."
     ],
@@ -27,6 +30,6 @@
     ]
   },
   "changelog": [
-    "Made Full Playlist Estimation completely bulletproof by using three different internal APIs to fetch playlist lengths."
+    "Added Hot Reloading for Seamless Updates! Queue Time will now update itself perfectly without needing a Spotify restart!"
   ]
 }

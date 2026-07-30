@@ -8,15 +8,27 @@
     }
     console.info("✨ [GN | Queue Time] Successfully initialized.");
 
-    if (document.getElementById('mgn-queue-time-pill') || window.__mgnQueueTimeRunning) {
-        console.warn("⚠️ [GN | Queue Time] UI already exists. Aborting duplicate init.");
-        return;
+    if (window.__mgnQueueTimeState) {
+        if (window.__mgnQueueTimeState.interval) clearInterval(window.__mgnQueueTimeState.interval);
+        if (window.__mgnQueueTimeState.updateInterval) clearInterval(window.__mgnQueueTimeState.updateInterval);
+        
+        const removeIds = [
+            'mgn-queue-time-pill', 'mgn-qt-settings-backdrop', 'mgn-qt-settings-menu',
+            'mgn-qt-style', 'mgn-qt-changelog-backdrop', 'mgn-qt-changelog-modal'
+        ];
+        removeIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        });
+        
+        document.querySelectorAll('.mgn-qt-inline').forEach(el => el.remove());
     }
-    window.__mgnQueueTimeRunning = true;
+    
+    window.__mgnQueueTimeState = {};
 
-    const QT_VERSION = "2.0.8";
+    const QT_VERSION = "2.0.9";
     let QT_CHANGELOG_LINES = [
-        "Made Full Playlist Estimation completely bulletproof by using three different internal APIs to fetch playlist lengths."
+        "Added Hot Reloading for Seamless Updates! Queue Time will now update itself perfectly without needing a Spotify restart!",
         "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
     ];
 
@@ -64,8 +76,7 @@
                             const localUrl = URL.createObjectURL(blob);
                             await import(localUrl);
                             URL.revokeObjectURL(localUrl);
-                            Spicetify.showNotification(`Successfully updated to v${latestVersion}! Reloading...`);
-                            setTimeout(() => window.location.reload(), 1500);
+                            Spicetify.showNotification(`Successfully updated to v${latestVersion}!`);
                         } catch (e) {
                             Spicetify.showNotification("Update failed. See console.", true);
                         }
@@ -157,7 +168,7 @@
     
     // Check for updates on load
     const updateCheckPromise = checkForUpdates();
-    setInterval(checkForUpdates, 1000 * 60 * 60);
+    window.__mgnQueueTimeState.updateInterval = setInterval(checkForUpdates, 1000 * 60 * 60);
 
     const seenVersion = localStorage.getItem('qt_version');
     const currentVerStr = String(QT_VERSION);
@@ -395,7 +406,7 @@
     applySettings(); // initial
     let cachedPlaylistLengths = {};
 
-    setInterval(() => {
+    window.__mgnQueueTimeState.interval = setInterval(() => {
         try {
             // Priority: The native PlayerAPI internal queue state is 100% reliable for all users.
             let nextTracks = [];
