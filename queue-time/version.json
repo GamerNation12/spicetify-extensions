@@ -1,15 +1,15 @@
 {
-  "version": "1.3.4",
+  "version": "2.0.0",
   "changelogs": {
-    "1.3.4": [
-      "Fixed injection into the full-page queue by making the header search global.",
-      "Removed DOM fallback for free users because virtualized lists broke the math. Now strictly relies on PlayerAPI state.",
-      "Fixed settings menu loop by polling for Menu or Topbar API safely."
+    "2.0.0": [
+      "Officially renamed to Queue Time 2.0!",
+      "Added Save to Playlist feature! You can now click the save icon directly in the Queue page to save your entire upcoming queue to a new playlist.",
+      "Added a Settings gear icon directly to the queue page so you can easily change between pill/text modes."
     ]
   },
   "changelog": [
-    "Fixed injection into the full-page queue by making the header search global.",
-    "Removed DOM fallback for free users because virtualized lists broke the math. Now strictly relies on PlayerAPI state.",
-    "Fixed settings menu loop by polling for Menu or Topbar API safely."
+    "Officially renamed to Queue Time 2.0!",
+    "Added Save to Playlist feature! You can now click the save icon directly in the Queue page to save your entire upcoming queue to a new playlist.",
+    "Added a Settings gear icon directly to the queue page so you can easily change between pill/text modes."
   ]
 }

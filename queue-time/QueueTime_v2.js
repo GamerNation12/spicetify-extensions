@@ -96,6 +96,36 @@
         }
     }, 1000);
 
+    // Save Queue to Playlist Logic
+    async function saveQueueToPlaylist(nextTracks) {
+        if (!nextTracks || nextTracks.length === 0) {
+            Spicetify.showNotification("Queue is empty!");
+            return;
+        }
+        try {
+            Spicetify.showNotification("Saving Queue to Playlist...");
+            const me = await Spicetify.CosmosAsync.get('https://api.spotify.com/v1/me');
+            const userId = me.id;
+            const dateStr = new Date().toLocaleString();
+            const playlist = await Spicetify.CosmosAsync.post(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+                name: `Saved Queue (${dateStr})`,
+                public: false,
+                description: "Saved from Queue Time Extension"
+            });
+            
+            const uris = nextTracks.map(cur => cur.uri || cur.contextTrack?.uri || cur.item?.uri || cur.track?.uri || cur.metadata?.uri).filter(Boolean);
+            
+            for (let i = 0; i < uris.length; i += 100) {
+                const chunk = uris.slice(i, i + 100);
+                await Spicetify.CosmosAsync.post(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, { uris: chunk });
+            }
+            Spicetify.showNotification("Successfully Saved Queue!");
+        } catch (e) {
+            console.error("[Queue Time] Save failed:", e);
+            Spicetify.showNotification("Failed to save Queue (check console)", true);
+        }
+    }
+
     // DOM Elements setup
     let qt_style = document.createElement("style");
     qt_style.innerHTML = `
@@ -113,13 +143,13 @@
         font-weight: 600;
         box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         backdrop-filter: blur(8px);
-        pointer-events: auto;
         display: flex;
         align-items: center;
         gap: 6px;
         transition: opacity 0.3s ease, transform 0.2s ease;
         opacity: 0;
         pointer-events: none;
+        cursor: pointer;
     }
     #mgn-queue-time-pill.visible {
         opacity: 1;
@@ -144,11 +174,28 @@
         transition: opacity 0.2s;
         padding-right: 16px;
     }
+    .mgn-qt-icon-btn {
+        background: transparent;
+        border: none;
+        color: var(--spice-subtext);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px;
+        border-radius: 4px;
+    }
+    .mgn-qt-icon-btn:hover {
+        color: var(--spice-text);
+        background: rgba(255,255,255,0.1);
+    }
     `;
     document.head.appendChild(qt_style);
 
     let pill = document.createElement('div');
     pill.id = 'mgn-queue-time-pill';
+    pill.onclick = openSettings;
+    pill.title = "Queue Time Settings";
     pill.innerHTML = `<svg viewBox="0 0 16 16"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg><span id="mgn-qt-text"></span>`;
     document.body.appendChild(pill);
     const pillTextNode = pill.querySelector('#mgn-qt-text');
@@ -233,13 +280,41 @@
                                 container.style.justifyContent = 'space-between';
                                 container.style.width = '100%';
                             }
-                            let span = document.createElement('span');
-                            span.className = 'mgn-qt-inline';
-                            span.style.color = settings.color;
-                            container.appendChild(span);
+                            
+                            let injectDiv = document.createElement('div');
+                            injectDiv.className = 'mgn-qt-inline';
+                            injectDiv.style.display = 'flex';
+                            injectDiv.style.alignItems = 'center';
+                            injectDiv.style.gap = '8px';
+                            injectDiv.style.marginLeft = 'auto';
+                            injectDiv.style.paddingRight = '16px';
+                            
+                            // 1. Text
+                            let textSpan = document.createElement('span');
+                            textSpan.className = 'mgn-qt-time-text';
+                            textSpan.style.color = settings.color;
+                            injectDiv.appendChild(textSpan);
+                            
+                            // 2. Settings Gear
+                            let gearBtn = document.createElement('button');
+                            gearBtn.className = 'mgn-qt-icon-btn';
+                            gearBtn.title = 'Settings';
+                            gearBtn.innerHTML = '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>';
+                            gearBtn.onclick = openSettings;
+                            injectDiv.appendChild(gearBtn);
+                            
+                            // 3. Save Playlist
+                            let saveBtn = document.createElement('button');
+                            saveBtn.className = 'mgn-qt-icon-btn';
+                            saveBtn.title = 'Save Queue to Playlist';
+                            saveBtn.innerHTML = '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M14 2H2v12h12V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2z"></path><path d="M8 4.5a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 .5-.5z"></path></svg>';
+                            saveBtn.onclick = () => saveQueueToPlaylist(nextTracks);
+                            injectDiv.appendChild(saveBtn);
+
+                            container.appendChild(injectDiv);
                         }
                         
-                        let inlineSpan = container.querySelector('.mgn-qt-inline');
+                        let inlineSpan = container.querySelector('.mgn-qt-time-text');
                         if (inlineSpan) {
                             inlineSpan.textContent = currentFormattedText;
                             inlineSpan.style.color = settings.color;

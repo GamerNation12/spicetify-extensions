@@ -1,7 +1,12 @@
-# Queue Time
-Simply displays the time remaining in the current queue.
+# Queue Time 2.0
+Displays the time remaining in the current queue, and gives you the ability to save your queue to a playlist!
 
 ![!Queue Time Screenshot](https://raw.githubusercontent.com/GamerNation12/spicetify-extensions/main/queue-time/QueueTime.png)
+
+## Features
+- **Time Remaining**: Accurately calculates the exact time remaining based on Spotify's internal Player API.
+- **Save Queue to Playlist**: Click the Save icon next to the queue time in the queue page to backup your entire upcoming queue to a new playlist!
+- **Display Modes**: Choose between a discreet floating pill or natively injecting the text straight into the Queue Page headers.
 
 <br><br>
 
