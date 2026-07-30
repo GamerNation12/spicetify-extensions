@@ -1,6 +1,9 @@
 {
-  "version": "2.0.17",
+  "version": "2.0.18",
   "changelogs": {
+    "2.0.18": [
+      "The displayed song count now correctly includes the currently playing track so it mathematically matches the remaining time!"
+    ],
     "2.0.17": [
       "Fixed an issue where small playlists with Repeat enabled would artificially inflate the queue to 80 songs."
     ],
@@ -55,6 +58,6 @@
     ]
   },
   "changelog": [
-    "Fixed an issue where small playlists with Repeat enabled would artificially inflate the queue to 80 songs."
+    "The displayed song count now correctly includes the currently playing track so it mathematically matches the remaining time!"
   ]
 }

@@ -26,9 +26,9 @@
     
     window.__mgnQueueTimeState = {};
 
-    const QT_VERSION = "2.0.17";
+    const QT_VERSION = "2.0.18";
     let QT_CHANGELOG_LINES = [
-        "Fixed an issue where small playlists with Repeat enabled would artificially inflate the queue to 80 songs.",
+        "The displayed song count now correctly includes the currently playing track so it mathematically matches the remaining time!",
         "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
     ];
 
@@ -564,9 +564,8 @@
                     timeStr = `${minutes}m ${seconds}s`;
                 }
                 
-                let songString = numSongs === 1 ? '1 song' : `${numSongs} songs`;
-                
-                // Removed the ~ prefix for a cleaner UI
+                let displayedSongs = numSongs + 1;
+                let songString = displayedSongs === 1 ? '1 song' : `${displayedSongs} songs`;
                 
                 if (settings.format === 'time') {
                     currentFormattedText = timeStr;
