@@ -1,6 +1,10 @@
 {
-  "version": "2.0.13",
+  "version": "2.0.14",
   "changelogs": {
+    "2.0.14": [
+      "Removed the '~' symbol from the time display for a cleaner UI.",
+      "Removed Calc Mode from settings; Full Playlist Estimation is now the default and only mode."
+    ],
     "2.0.13": [
       "Fixed a bug where manually queued tracks were excluded from the total song count when Full Playlist Estimation was active."
     ],
@@ -42,6 +46,7 @@
     ]
   },
   "changelog": [
-    "Fixed a bug where manually queued tracks were excluded from the total song count when Full Playlist Estimation was active."
+    "Removed the '~' symbol from the time display for a cleaner UI.",
+    "Removed Calc Mode from settings; Full Playlist Estimation is now the default and only mode."
   ]
 }

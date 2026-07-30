@@ -26,9 +26,10 @@
     
     window.__mgnQueueTimeState = {};
 
-    const QT_VERSION = "2.0.13";
+    const QT_VERSION = "2.0.14";
     let QT_CHANGELOG_LINES = [
-        "Fixed a bug where manually queued tracks were excluded from the total song count when Full Playlist Estimation was active.",
+        "Removed the '~' symbol from the time display for a cleaner UI.",
+        "Removed Calc Mode from settings; Full Playlist Estimation is now the default and only mode.",
         "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
     ];
 
@@ -211,13 +212,7 @@
                         <option value="text" ${settings.mode === 'text' ? 'selected' : ''}>In-Queue Text</option>
                     </select>
                 </div>
-                <div class="qt-setting-row">
-                    <label style="color: var(--spice-text); font-weight: 600; font-size: 14px;">Calc Mode</label>
-                    <select id="qt-calc" class="qt-select">
-                        <option value="playlist" ${settings.calc === 'playlist' ? 'selected' : ''}>Estimate Full Playlist</option>
-                        <option value="queue" ${settings.calc === 'queue' ? 'selected' : ''}>Queue Only (Max 80)</option>
-                    </select>
-                </div>
+
                 <div class="qt-setting-row">
                     <label style="color: var(--spice-text); font-weight: 600; font-size: 14px;">Text Format</label>
                     <select id="qt-format" class="qt-select">
@@ -246,7 +241,6 @@
         container.querySelector("#qt-save").onclick = () => {
             settings.mode = container.querySelector("#qt-mode").value;
             settings.format = container.querySelector("#qt-format").value;
-            settings.calc = container.querySelector("#qt-calc")?.value || 'playlist';
             settings.color = container.querySelector("#qt-color").value;
             saveSettings();
             Spicetify.PopupModal.hide();
@@ -428,7 +422,7 @@
                 }, 0);
             }
             
-            if (numSongs >= 80 && settings.calc !== 'queue') {
+            if (numSongs >= 80) {
                 const state = Spicetify.Platform?.PlayerAPI?.getState();
                 const uri = state?.context?.uri;
                 let contextCount = Number(state?.context?.metadata?.track_count);
@@ -539,13 +533,7 @@
                 
                 let songString = numSongs === 1 ? '1 song' : `${numSongs} songs`;
                 
-                if (isEstimated) {
-                    timeStr = "~" + timeStr;
-                }
-                
-                if (nextTracks.length === 0) {
-                    timeStr = "~" + timeStr;
-                }
+                // Removed the ~ prefix for a cleaner UI
                 
                 if (settings.format === 'time') {
                     currentFormattedText = timeStr;
