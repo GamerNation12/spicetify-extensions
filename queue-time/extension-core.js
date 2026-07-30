@@ -2,16 +2,14 @@
 // AUTHOR: GamerNation12
 // DESCRIPTION: Displays Queue Time
 (function QueueTime() {
-    console.log("[Queue Time] Script evaluating...");
     if (!Spicetify || !Spicetify.Platform || !Spicetify.Player || !document.body) {
-        console.log("[Queue Time] Waiting for Spicetify Player API and document.body to load...");
         setTimeout(QueueTime, 300);
         return;
     }
-    console.log("[Queue Time] Spicetify loaded, building UI!");
+    console.info("✨ [GN | Queue Time] Successfully initialized.");
 
     if (document.getElementById('mgn-queue-time-pill') || window.__mgnQueueTimeRunning) {
-        console.log("[Queue Time] UI already exists. Aborting duplicate init.");
+        console.warn("⚠️ [GN | Queue Time] UI already exists. Aborting duplicate init.");
         return;
     }
     window.__mgnQueueTimeRunning = true;

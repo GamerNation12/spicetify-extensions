@@ -16,7 +16,7 @@
     await import(localUrl);
     
     URL.revokeObjectURL(localUrl);
-    console.log('[MGN Loader] Success: Spicy Lyrics Core synced from GitHub.');
+    console.info('🟢 [GN Loader] Successfully synced: Spicy Lyrics');
     
   } catch (error) {
     console.error('[MGN Loader] Failed to load Spicy Lyrics:', error);

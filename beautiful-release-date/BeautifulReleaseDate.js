@@ -14,7 +14,7 @@
     await import(localUrl);
     
     URL.revokeObjectURL(localUrl);
-    console.log('[MGN Loader] Success: Core Extension synced instantly from GitHub API.');
+    console.info('🟢 [GN Loader] Successfully synced: Beautiful Release Date');
     
   } catch (error) {
     console.error('[MGN Loader] Failed to load:', error);

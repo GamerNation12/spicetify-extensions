@@ -16,7 +16,7 @@
     await import(localUrl);
     
     URL.revokeObjectURL(localUrl);
-    console.log('[MGN Loader] Success: Diagnostics & Accent Customizer Core synced from GitHub.');
+    console.info('🟢 [GN Loader] Successfully synced: Diagnostics & Accent Customizer');
     
   } catch (error) {
     console.error('[MGN Loader] Failed to load:', error);

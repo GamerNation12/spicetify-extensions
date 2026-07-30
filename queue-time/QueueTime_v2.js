@@ -17,7 +17,7 @@
     await import(localUrl);
     
     URL.revokeObjectURL(localUrl);
-    console.log('[MGN Loader] Success: Queue Time Extension synced instantly from GitHub API.');
+    console.info('🟢 [GN Loader] Successfully synced: Queue Time');
     
   } catch (error) {
     console.error('[MGN Loader] Failed to load Queue Time:', error);

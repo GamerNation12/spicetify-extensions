@@ -7,7 +7,7 @@
   const log = (...args) => { if (DEBUG) console.log('[Release Date]', ...args); };
   const error = (...args) => console.error('[Release Date]', ...args);
 
-  console.log('[Release Date For Currently Playing Song] loaded');
+  console.info('✨ [GN | Beautiful Release Date] Successfully initialized.');
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.

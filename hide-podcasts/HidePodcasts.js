@@ -16,7 +16,7 @@
     await import(localUrl);
     
     URL.revokeObjectURL(localUrl);
-    console.log('[MGN Loader] Success: Hide Podcasts & Audiobooks Core synced from GitHub.');
+    console.info('🟢 [GN Loader] Successfully synced: Hide Podcasts & Audiobooks');
     
   } catch (error) {
     console.error('[MGN Loader] Failed to load Hide Podcasts & Audiobooks:', error);
