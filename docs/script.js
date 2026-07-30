@@ -13,14 +13,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const API_BASE = IS_LOCAL
         ? '..'
-        : 'https://api.github.com/repos/GamerNation12/spicetify-extensions/contents';
+        : 'https://raw.githubusercontent.com/GamerNation12/spicetify-extensions/main';
 
     const MANIFEST_PATH = `${API_BASE}/manifest.json`;
 
     try {
-        const res = await fetch(`${MANIFEST_PATH}?t=${Date.now()}`, {
-            headers: { 'Accept': 'application/vnd.github.v3.raw' }
-        });
+        const res = await fetch(`${MANIFEST_PATH}?t=${Date.now()}`);
         if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
         const manifest = await res.json();
 
@@ -44,9 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let versionData = { version: '0.0.0', changelog: ['Updates pending...'] };
 
         try {
-            const vRes = await fetch(`${API_BASE}/${folder}/version.json?t=${Date.now()}`, {
-                headers: { 'Accept': 'application/vnd.github.v3.raw' }
-            });
+            const vRes = await fetch(`${API_BASE}/${folder}/version.json?t=${Date.now()}`);
             if (vRes.ok) versionData = await vRes.json();
         } catch (e) {
             console.log(`Failed to fetch version for ${folder}`);
