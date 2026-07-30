@@ -1,6 +1,9 @@
 {
-  "version": "2.0.24",
+  "version": "2.0.25",
   "changelogs": {
+    "2.0.25": [
+      "Intelligently disable playlist estimation for playlists under 80 songs so they are completely immune to Shuffle+ bugs and track index glitches!"
+    ],
     "2.0.24": [
       "Fixed a bug where restarting a playlist would show the wrong song count because it remembered your previous spot in the queue."
     ],
@@ -78,6 +81,6 @@
     ]
   },
   "changelog": [
-    "Fixed a bug where restarting a playlist would show the wrong song count because it remembered your previous spot in the queue."
+    "Intelligently disable playlist estimation for playlists under 80 songs so they are completely immune to Shuffle+ bugs and track index glitches!"
   ]
 }
