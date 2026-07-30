@@ -26,9 +26,9 @@
     
     window.__mgnQueueTimeState = {};
 
-    const QT_VERSION = "2.0.9";
+    const QT_VERSION = "2.0.10";
     let QT_CHANGELOG_LINES = [
-        "Added Hot Reloading for Seamless Updates! Queue Time will now update itself perfectly without needing a Spotify restart!",
+        "Added aggressive diagnostic logging to debug playlist estimation.",
         "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
     ];
 
@@ -443,41 +443,53 @@
                         // 1. Try Spicetify Platform API (Safest & Official Internal API)
                         let found = false;
                         if (Spicetify.Platform?.PlaylistAPI?.getMetadata) {
+                            console.log("[Queue Time Debug] Trying PlaylistAPI.getMetadata for", uri);
                             Spicetify.Platform.PlaylistAPI.getMetadata(uri).then(md => {
+                                console.log("[Queue Time Debug] getMetadata response:", md);
                                 let len = md?.length ?? md?.totalLength ?? md?.trackCount ?? md?.tracks?.length ?? md?.duration;
                                 if (typeof len === 'number') {
+                                    console.log("[Queue Time Debug] Success getMetadata length:", len);
                                     cachedPlaylistLengths[uri] = len;
                                     found = true;
                                 }
-                            }).catch(() => {});
+                            }).catch(e => {
+                                console.error("[Queue Time Debug] getMetadata failed:", e);
+                            });
                         }
 
                         setTimeout(() => {
                             if (found) return;
                             
                             // 2. Try internal local Cosmos API
+                            console.log("[Queue Time Debug] Trying Cosmos sp://core-playlist for", uri);
                             Spicetify.CosmosAsync.get('sp://core-playlist/v1/playlist/' + uri).then(pl => {
+                                console.log("[Queue Time Debug] Cosmos core-playlist response:", pl);
                                 let len = pl?.playlist?.length ?? pl?.length ?? pl?.tracks?.length ?? pl?.tracks?.total;
                                 if (typeof len === 'number') {
+                                    console.log("[Queue Time Debug] Success core-playlist length:", len);
                                     cachedPlaylistLengths[uri] = len;
                                 } else {
                                     throw new Error("Local cache failed");
                                 }
-                            }).catch(() => {
+                            }).catch(e => {
+                                console.warn("[Queue Time Debug] Cosmos core-playlist failed:", e);
                                 // 3. Fallback to Web API
+                                console.log("[Queue Time Debug] Trying Web API for", playlistId);
                                 Spicetify.CosmosAsync.get('https://api.spotify.com/v1/playlists/' + playlistId).then(pl => {
+                                    console.log("[Queue Time Debug] Web API response:", pl);
                                     let len = pl?.tracks?.total ?? pl?.tracks?.length ?? pl?.length;
                                     if (typeof len === 'number') {
+                                        console.log("[Queue Time Debug] Success Web API length:", len);
                                         cachedPlaylistLengths[uri] = len;
                                     } else {
                                         throw new Error("Invalid playlist response");
                                     }
                                 }).catch(e => {
-                                    console.error("[GN | Queue Time] Failed to fetch playlist length", e);
+                                    console.error("[Queue Time Debug] All APIs Failed to fetch playlist length", e);
                                     setTimeout(() => { cachedPlaylistLengths[uri + "_fetching"] = false; }, 60000);
                                 });
                             });
-                        }, 100);
+                        }, 500);
                     }
                 }
                 
