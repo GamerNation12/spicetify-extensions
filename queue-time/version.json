@@ -1,6 +1,10 @@
 {
-  "version": "2.0.28",
+  "version": "3.0.0",
   "changelogs": {
+    "3.0.0": [
+      "Complete rebuild from scratch! Removed all complex math and cache logic.",
+      "Perfectly counts the actual queue. Native support for Shuffle+ and Autoplay."
+    ],
     "2.0.28": [
       "Bulletproofed the Autoplay filtering by physically truncating the queue at the Shuffle+ delimiter to guarantee 100% accuracy."
     ],
@@ -90,6 +94,7 @@
     ]
   },
   "changelog": [
-    "Bulletproofed the Autoplay filtering by physically truncating the queue at the Shuffle+ delimiter to guarantee 100% accuracy."
+    "Complete rebuild from scratch! Removed all complex math and cache logic.",
+    "Perfectly counts the actual queue. Native support for Shuffle+ and Autoplay."
   ]
 }

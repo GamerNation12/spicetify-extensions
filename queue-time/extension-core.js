@@ -30,13 +30,10 @@
     } catch (e) {}
 
     window.__mgnQueueTimeState = {
-        manualIndex: savedState.manualIndex || 0,
-        lastTrackUri: savedState.lastTrackUri || null,
-        lastContextUri: savedState.lastContextUri || null,
-        lastUriTime: savedState.lastUriTime || 0
+        interval: null
     };
 
-    const QT_VERSION = "2.0.28";
+    const QT_VERSION = "3.0.0";
     let QT_CHANGELOG_LINES = [
         "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
         "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -449,134 +446,6 @@
                 }
             }
             
-            // Try to find the exact current index using the context URI if native index is missing
-            let currentIndex = Number(state?.index?.track) || Number(state?.index?.itemIndex);
-            
-            // If the native index is missing or 0 (and we know it shouldn't always be 0), we can try to locate it in the nextTracks context
-            if (isNaN(currentIndex) || currentIndex === 0) {
-                // For now, if we can't find it natively, we just rely on our best guess.
-                // Actually, if we track the last known track URI, we can manually increment it!
-                if (!window.__mgnQueueTimeState.lastTrackUri) {
-                    window.__mgnQueueTimeState.lastTrackUri = state?.item?.uri;
-                    window.__mgnQueueTimeState.manualIndex = 0;
-                    window.__mgnQueueTimeState.lastUriTime = Date.now();
-                    localStorage.setItem('mgnQueueTimeState', JSON.stringify(window.__mgnQueueTimeState));
-                } else if (window.__mgnQueueTimeState.lastTrackUri !== state?.item?.uri) {
-                    // Song changed!
-                    const now = Date.now();
-                    const timeSinceLastChange = now - (window.__mgnQueueTimeState.lastUriTime || 0);
-                    
-                    // If track changed in under 2.5s, it's a Spotify fast-switch (e.g. initial shuffle load), not a true skip
-                    if (timeSinceLastChange > 2500) {
-                        window.__mgnQueueTimeState.manualIndex = (window.__mgnQueueTimeState.manualIndex || 0) + 1;
-                    }
-                    
-                    window.__mgnQueueTimeState.lastTrackUri = state?.item?.uri;
-                    window.__mgnQueueTimeState.lastUriTime = now;
-                    localStorage.setItem('mgnQueueTimeState', JSON.stringify(window.__mgnQueueTimeState));
-                }
-                
-                // Fallback to our manual counter if native is broken
-                if (isNaN(currentIndex)) {
-                    currentIndex = window.__mgnQueueTimeState.manualIndex || 0;
-                }
-            }
-
-            const uri = state?.context?.uri;
-            if (uri && uri.includes('spotify:playlist:')) {
-                let contextCount = Number(state?.context?.metadata?.track_count);
-                
-                if (isNaN(contextCount) && uri && uri.includes('spotify:playlist:')) {
-                    if (cachedPlaylistLengths[uri] !== undefined) {
-                        contextCount = cachedPlaylistLengths[uri];
-                    } else if (!cachedPlaylistLengths[uri + "_fetching"]) {
-                        cachedPlaylistLengths[uri + "_fetching"] = true;
-                        const playlistId = uri.split(':').pop();
-                        
-                        // 1. Try Spicetify Platform API (Safest & Official Internal API)
-                        let found = false;
-                        if (Spicetify.Platform?.PlaylistAPI?.getMetadata) {
-                            console.log("[Queue Time Debug] Trying PlaylistAPI.getMetadata for", uri);
-                            Spicetify.Platform.PlaylistAPI.getMetadata(uri).then(md => {
-                                console.log("[Queue Time Debug] getMetadata response:", md);
-                                let len = md?.length ?? md?.totalLength ?? md?.trackCount ?? md?.tracks?.length ?? md?.duration;
-                                if (typeof len === 'number') {
-                                    console.log("[Queue Time Debug] Success getMetadata length:", len);
-                                    cachedPlaylistLengths[uri] = len;
-                                    found = true;
-                                }
-                            }).catch(e => {
-                                console.error("[Queue Time Debug] getMetadata failed:", e);
-                            });
-                        }
-
-                        setTimeout(() => {
-                            if (found) return;
-                            
-                            // 2. Try internal local Cosmos API
-                            console.log("[Queue Time Debug] Trying Cosmos sp://core-playlist for", uri);
-                            Spicetify.CosmosAsync.get('sp://core-playlist/v1/playlist/' + uri).then(pl => {
-                                console.log("[Queue Time Debug] Cosmos core-playlist response:", pl);
-                                let len = pl?.playlist?.length ?? pl?.length ?? pl?.tracks?.length ?? pl?.tracks?.total;
-                                if (typeof len === 'number') {
-                                    console.log("[Queue Time Debug] Success core-playlist length:", len);
-                                    cachedPlaylistLengths[uri] = len;
-                                } else {
-                                    throw new Error("Local cache failed");
-                                }
-                            }).catch(e => {
-                                console.warn("[Queue Time Debug] Cosmos core-playlist failed:", e);
-                                // 3. Fallback to Web API
-                                console.log("[Queue Time Debug] Trying Web API for", playlistId);
-                                Spicetify.CosmosAsync.get('https://api.spotify.com/v1/playlists/' + playlistId).then(pl => {
-                                    console.log("[Queue Time Debug] Web API response:", pl);
-                                    let len = pl?.tracks?.total ?? pl?.tracks?.length ?? pl?.length;
-                                    if (typeof len === 'number') {
-                                        console.log("[Queue Time Debug] Success Web API length:", len);
-                                        cachedPlaylistLengths[uri] = len;
-                                    } else {
-                                        throw new Error("Invalid playlist response");
-                                    }
-                                }).catch(e => {
-                                    console.error("[Queue Time Debug] All APIs Failed to fetch playlist length", e);
-                                    setTimeout(() => { cachedPlaylistLengths[uri + "_fetching"] = false; }, 60000);
-                                });
-                            });
-                        }, 500);
-                    }
-                }
-                
-                if (!isNaN(contextCount) && contextCount > 80) {
-                    console.log("[Queue Time Debug] state.index:", JSON.stringify(state?.index));
-                    console.log("[Queue Time Debug] Estimating... contextCount:", contextCount, "currentIndex:", currentIndex, "numSongs:", numSongs);
-                    let queuedLength = 0;
-                    if (Spicetify.Queue?.nextTracks) {
-                        queuedLength = Spicetify.Queue.nextTracks.filter(t => t.provider === 'queue').length;
-                    }
-
-                    const contextRemaining = Math.max(0, contextCount - currentIndex - 1);
-                    const totalRemaining = contextRemaining + queuedLength;
-
-                    if (totalRemaining > numSongs) {
-                        const estimatedDurationAvg = totalTimeMs / numSongs;
-                        totalTimeMs = estimatedDurationAvg * totalRemaining;
-                        numSongs = totalRemaining + 1;
-                        isEstimated = true;
-                    } else if (totalRemaining < numSongs) {
-                        // The queue has MORE songs than the playlist has left!
-                        // This happens when Repeat or Autoplay is ON for small playlists and inflates nextTracks to 80.
-                        // We truncate the queue to only sum the true remaining songs of the current playlist context.
-                        numSongs = totalRemaining + 1;
-                        totalTimeMs = nextTracks.slice(0, numSongs).reduce((acc, cur) => {
-                            const duration = Number(cur.duration || cur.contextTrack?.metadata?.duration || cur.item?.duration?.milliseconds || cur.track?.metadata?.duration || cur.metadata?.duration) || 0;
-                            return acc + duration;
-                        }, 0);
-                        isEstimated = true;
-                    }
-                } else {
-                    console.log("[Queue Time Debug] Skipping estimation, contextCount is NaN. state.index:", state?.index);
-                }
-            }
 
             if (numSongs === 0) {
                 currentFormattedText = "Empty";
