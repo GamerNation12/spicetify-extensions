@@ -26,9 +26,9 @@
     
     window.__mgnQueueTimeState = {};
 
-    const QT_VERSION = "2.0.10";
+    const QT_VERSION = "2.0.11";
     let QT_CHANGELOG_LINES = [
-        "Added aggressive diagnostic logging to debug playlist estimation.",
+        "Fixed an edge case where Spotify reports the current track index in a non-standard way, breaking playlist estimation.",
         "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
     ];
 
@@ -493,19 +493,19 @@
                     }
                 }
                 
-                const currentIndex = Number(state?.index?.track);
+                const currentIndex = Number(state?.index?.track) || Number(state?.index?.itemIndex) || 0;
                 
-                if (!isNaN(contextCount) && !isNaN(currentIndex)) {
+                if (!isNaN(contextCount)) {
+                    console.log("[Queue Time Debug] Estimating... contextCount:", contextCount, "currentIndex:", currentIndex, "numSongs:", numSongs);
                     const contextRemaining = Math.max(0, contextCount - currentIndex - 1);
-                    const queuedLength = state?.queue?.queued?.length || 0;
-                    const calculatedRemaining = contextRemaining + queuedLength;
-                    
-                    if (calculatedRemaining > numSongs) {
+                    if (contextRemaining > numSongs) {
+                        const estimatedDurationAvg = totalTimeMs / numSongs;
+                        totalTimeMs = estimatedDurationAvg * contextRemaining;
+                        numSongs = contextRemaining;
                         isEstimated = true;
-                        const avgTime = totalTimeMs / numSongs;
-                        numSongs = calculatedRemaining;
-                        totalTimeMs = avgTime * numSongs;
                     }
+                } else {
+                    console.log("[Queue Time Debug] Skipping estimation, contextCount is NaN. state.index:", state?.index);
                 }
             }
 

@@ -1,6 +1,9 @@
 {
-  "version": "2.0.10",
+  "version": "2.0.11",
   "changelogs": {
+    "2.0.11": [
+      "Fixed an edge case where Spotify reports the current track index in a non-standard way, breaking playlist estimation."
+    ],
     "2.0.10": [
       "Added aggressive diagnostic logging to debug playlist estimation."
     ],
@@ -33,6 +36,6 @@
     ]
   },
   "changelog": [
-    "Added aggressive diagnostic logging to debug playlist estimation."
+    "Fixed an edge case where Spotify reports the current track index in a non-standard way, breaking playlist estimation."
   ]
 }
