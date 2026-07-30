@@ -26,10 +26,9 @@
     
     window.__mgnQueueTimeState = {};
 
-    const QT_VERSION = "2.0.19";
+    const QT_VERSION = "2.0.20";
     let QT_CHANGELOG_LINES = [
-        "Fixed an issue where Spotify's background track-switching caused the index to skip by 1.",
-        "Reverted the song count change to purely count upcoming tracks again."
+        "The queue song count now correctly includes the currently playing track again so that the math perfectly matches your expectations."
     ];
 
     // Default Settings
