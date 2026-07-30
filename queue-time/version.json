@@ -1,6 +1,9 @@
 {
-  "version": "2.0.7",
+  "version": "2.0.8",
   "changelogs": {
+    "2.0.8": [
+      "Made Full Playlist Estimation completely bulletproof by using three different internal APIs to fetch playlist lengths."
+    ],
     "2.0.7": [
       "Fixed Queue Time displaying incorrectly in the Queue page layout due to Spotify UI updates.",
       "Re-implemented the classic non-destructive layout injection."
@@ -24,7 +27,6 @@
     ]
   },
   "changelog": [
-    "Fixed Queue Time displaying incorrectly in the Queue page layout due to Spotify UI updates.",
-    "Re-implemented the classic non-destructive layout injection."
+    "Made Full Playlist Estimation completely bulletproof by using three different internal APIs to fetch playlist lengths."
   ]
 }

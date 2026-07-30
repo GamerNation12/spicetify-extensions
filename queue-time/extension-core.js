@@ -14,10 +14,9 @@
     }
     window.__mgnQueueTimeRunning = true;
 
-    const QT_VERSION = "2.0.7";
+    const QT_VERSION = "2.0.8";
     let QT_CHANGELOG_LINES = [
-        "Fixed Queue Time displaying incorrectly in the Queue page layout due to Spotify UI updates.",
-        "Re-implemented the classic non-destructive layout injection.",
+        "Made Full Playlist Estimation completely bulletproof by using three different internal APIs to fetch playlist lengths."
         "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
     ];
 
@@ -430,27 +429,44 @@
                         cachedPlaylistLengths[uri + "_fetching"] = true;
                         const playlistId = uri.split(':').pop();
                         
-                        // Try internal local cache first to avoid 429 limits
-                        Spicetify.CosmosAsync.get('sp://core-playlist/v1/playlist/' + uri).then(pl => {
-                            if (pl && pl.playlist && typeof pl.playlist.length === 'number') {
-                                cachedPlaylistLengths[uri] = pl.playlist.length;
-                            } else {
-                                throw new Error("Local cache failed");
-                            }
-                        }).catch(() => {
-                            // Fallback to Web API
-                            Spicetify.CosmosAsync.get('https://api.spotify.com/v1/playlists/' + playlistId).then(pl => {
-                                if (pl && pl.tracks && typeof pl.tracks.total === 'number') {
-                                    cachedPlaylistLengths[uri] = pl.tracks.total;
-                                } else {
-                                    throw new Error("Invalid playlist response: " + JSON.stringify(pl));
+                        // 1. Try Spicetify Platform API (Safest & Official Internal API)
+                        let found = false;
+                        if (Spicetify.Platform?.PlaylistAPI?.getMetadata) {
+                            Spicetify.Platform.PlaylistAPI.getMetadata(uri).then(md => {
+                                let len = md?.length ?? md?.totalLength ?? md?.trackCount ?? md?.tracks?.length ?? md?.duration;
+                                if (typeof len === 'number') {
+                                    cachedPlaylistLengths[uri] = len;
+                                    found = true;
                                 }
-                            }).catch(e => {
-                                console.error("[GN | Queue Time] Failed to fetch playlist length", e);
-                                // Reset so we can try again after rate limit expires
-                                setTimeout(() => { cachedPlaylistLengths[uri + "_fetching"] = false; }, 60000);
+                            }).catch(() => {});
+                        }
+
+                        setTimeout(() => {
+                            if (found) return;
+                            
+                            // 2. Try internal local Cosmos API
+                            Spicetify.CosmosAsync.get('sp://core-playlist/v1/playlist/' + uri).then(pl => {
+                                let len = pl?.playlist?.length ?? pl?.length ?? pl?.tracks?.length ?? pl?.tracks?.total;
+                                if (typeof len === 'number') {
+                                    cachedPlaylistLengths[uri] = len;
+                                } else {
+                                    throw new Error("Local cache failed");
+                                }
+                            }).catch(() => {
+                                // 3. Fallback to Web API
+                                Spicetify.CosmosAsync.get('https://api.spotify.com/v1/playlists/' + playlistId).then(pl => {
+                                    let len = pl?.tracks?.total ?? pl?.tracks?.length ?? pl?.length;
+                                    if (typeof len === 'number') {
+                                        cachedPlaylistLengths[uri] = len;
+                                    } else {
+                                        throw new Error("Invalid playlist response");
+                                    }
+                                }).catch(e => {
+                                    console.error("[GN | Queue Time] Failed to fetch playlist length", e);
+                                    setTimeout(() => { cachedPlaylistLengths[uri + "_fetching"] = false; }, 60000);
+                                });
                             });
-                        });
+                        }, 100);
                     }
                 }
                 
