@@ -1,7 +1,7 @@
 // NAME: Queue Time
 // AUTHOR: GamerNation12
 // DESCRIPTION: Displays Queue Time
-// VERSION: 2.0.14
+// VERSION: 2.0.15
 // MGN Auto-Updating Loader - Instant API OTA Version
 (async function loadExtension() {
   // Use raw.githubusercontent to bypass the 60 req/hr API rate limit!

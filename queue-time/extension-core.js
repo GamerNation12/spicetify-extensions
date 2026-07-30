@@ -26,10 +26,9 @@
     
     window.__mgnQueueTimeState = {};
 
-    const QT_VERSION = "2.0.14";
+    const QT_VERSION = "2.0.15";
     let QT_CHANGELOG_LINES = [
-        "Removed the '~' symbol from the time display for a cleaner UI.",
-        "Removed Calc Mode from settings; Full Playlist Estimation is now the default and only mode.",
+        "Added manual track index tracking for users whose Spotify client does not report the current track index natively.",
         "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
     ];
 
@@ -422,6 +421,31 @@
                 }, 0);
             }
             
+            // Try to find the exact current index using the context URI if native index is missing
+            let currentIndex = Number(state?.index?.track) ?? Number(state?.index?.itemIndex);
+            
+            // If the native index is missing or 0 (and we know it shouldn't always be 0), we can try to locate it in the nextTracks context
+            if (isNaN(currentIndex) || currentIndex === 0) {
+                // For now, if we can't find it natively, we just rely on our best guess.
+                // Actually, if we track the last known track URI, we can manually increment it!
+                if (!window.__mgnQueueTimeState.lastTrackUri) {
+                    window.__mgnQueueTimeState.lastTrackUri = state?.item?.uri;
+                    window.__mgnQueueTimeState.manualIndex = 0;
+                } else if (window.__mgnQueueTimeState.lastTrackUri !== state?.item?.uri) {
+                    // Song changed!
+                    window.__mgnQueueTimeState.lastTrackUri = state?.item?.uri;
+                    window.__mgnQueueTimeState.manualIndex = (window.__mgnQueueTimeState.manualIndex || 0) + 1;
+                }
+                
+                // Fallback to our manual counter if native is broken
+                if (isNaN(currentIndex)) {
+                    currentIndex = window.__mgnQueueTimeState.manualIndex || 0;
+                } else if (currentIndex === 0 && window.__mgnQueueTimeState.manualIndex > 0) {
+                    // If native says 0 but we know we've skipped songs, native is probably broken/stuck
+                    currentIndex = window.__mgnQueueTimeState.manualIndex;
+                }
+            }
+
             if (numSongs >= 80) {
                 const state = Spicetify.Platform?.PlayerAPI?.getState();
                 const uri = state?.context?.uri;
@@ -486,8 +510,6 @@
                         }, 500);
                     }
                 }
-                
-                const currentIndex = Number(state?.index?.track) || Number(state?.index?.itemIndex) || 0;
                 
                 if (!isNaN(contextCount)) {
                     console.log("[Queue Time Debug] state.index:", JSON.stringify(state?.index));

@@ -1,6 +1,9 @@
 {
-  "version": "2.0.14",
+  "version": "2.0.15",
   "changelogs": {
+    "2.0.15": [
+      "Added manual track index tracking for users whose Spotify client does not report the current track index natively."
+    ],
     "2.0.14": [
       "Removed the '~' symbol from the time display for a cleaner UI.",
       "Removed Calc Mode from settings; Full Playlist Estimation is now the default and only mode."
@@ -46,7 +49,6 @@
     ]
   },
   "changelog": [
-    "Removed the '~' symbol from the time display for a cleaner UI.",
-    "Removed Calc Mode from settings; Full Playlist Estimation is now the default and only mode."
+    "Added manual track index tracking for users whose Spotify client does not report the current track index natively."
   ]
 }
