@@ -1,6 +1,14 @@
 {
-  "version": "2.0.5",
+  "version": "2.0.7",
   "changelogs": {
+    "2.0.7": [
+      "Fixed Queue Time displaying incorrectly in the Queue page layout due to Spotify UI updates.",
+      "Re-implemented the classic non-destructive layout injection."
+    ],
+    "2.0.6": [
+      "Fixed Full Playlist Estimation crashing due to Spotify API 429 rate limits.",
+      "Added zero-latency local Cosmos API fallback for instant estimation."
+    ],
     "2.0.5": [
       "Added Full Playlist Time Estimation (bypasses 80 song limit)!",
       "Updated settings UI text to be more accurate (showing seconds).",
@@ -16,8 +24,7 @@
     ]
   },
   "changelog": [
-    "Added Full Playlist Time Estimation (bypasses 80 song limit)!",
-    "Updated settings UI text to be more accurate (showing seconds).",
-    "Minor calculation fixes."
+    "Fixed Queue Time displaying incorrectly in the Queue page layout due to Spotify UI updates.",
+    "Re-implemented the classic non-destructive layout injection."
   ]
 }

@@ -14,10 +14,10 @@
     }
     window.__mgnQueueTimeRunning = true;
 
-    const QT_VERSION = "2.0.5";
+    const QT_VERSION = "2.0.7";
     let QT_CHANGELOG_LINES = [
-        "Added Full Playlist Time Estimation (bypasses 80 song limit)!",
-        "Updated settings UI text to be more accurate (showing seconds).",
+        "Fixed Queue Time displaying incorrectly in the Queue page layout due to Spotify UI updates.",
+        "Re-implemented the classic non-destructive layout injection.",
         "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
     ];
 
@@ -429,10 +429,27 @@
                     } else if (!cachedPlaylistLengths[uri + "_fetching"]) {
                         cachedPlaylistLengths[uri + "_fetching"] = true;
                         const playlistId = uri.split(':').pop();
-                        Spicetify.CosmosAsync.get('https://api.spotify.com/v1/playlists/' + playlistId).then(pl => {
-                            cachedPlaylistLengths[uri] = pl.tracks.total;
-                        }).catch(e => {
-                            console.error("[Queue Time] Failed to fetch playlist length", e);
+                        
+                        // Try internal local cache first to avoid 429 limits
+                        Spicetify.CosmosAsync.get('sp://core-playlist/v1/playlist/' + uri).then(pl => {
+                            if (pl && pl.playlist && typeof pl.playlist.length === 'number') {
+                                cachedPlaylistLengths[uri] = pl.playlist.length;
+                            } else {
+                                throw new Error("Local cache failed");
+                            }
+                        }).catch(() => {
+                            // Fallback to Web API
+                            Spicetify.CosmosAsync.get('https://api.spotify.com/v1/playlists/' + playlistId).then(pl => {
+                                if (pl && pl.tracks && typeof pl.tracks.total === 'number') {
+                                    cachedPlaylistLengths[uri] = pl.tracks.total;
+                                } else {
+                                    throw new Error("Invalid playlist response: " + JSON.stringify(pl));
+                                }
+                            }).catch(e => {
+                                console.error("[GN | Queue Time] Failed to fetch playlist length", e);
+                                // Reset so we can try again after rate limit expires
+                                setTimeout(() => { cachedPlaylistLengths[uri + "_fetching"] = false; }, 60000);
+                            });
                         });
                     }
                 }
@@ -505,25 +522,27 @@
                         let container = h2.parentElement;
                         
                         if (container && !container.querySelector('.mgn-qt-inline')) {
-                            if (window.getComputedStyle(container).display !== 'flex') {
-                                container.style.display = 'flex';
-                                container.style.alignItems = 'center';
-                                container.style.justifyContent = 'space-between';
-                                container.style.width = '100%';
+                            // Non-destructive injection (like the old script's ::after)
+                            if (window.getComputedStyle(container).position === 'static') {
+                                container.style.position = 'relative';
                             }
                             
                             let injectDiv = document.createElement('div');
                             injectDiv.className = 'mgn-qt-inline';
+                            injectDiv.style.position = 'absolute';
+                            injectDiv.style.right = '0';
+                            injectDiv.style.bottom = '0';
                             injectDiv.style.display = 'flex';
                             injectDiv.style.alignItems = 'center';
                             injectDiv.style.gap = '8px';
-                            injectDiv.style.marginLeft = 'auto';
-                            injectDiv.style.paddingRight = '16px';
+                            injectDiv.style.paddingRight = '16px'; // Prevent hugging the very edge
                             
                             // 1. Text
                             let textSpan = document.createElement('span');
                             textSpan.className = 'mgn-qt-time-text';
-                            textSpan.style.color = settings.color;
+                            textSpan.style.color = settings.color || 'var(--spice-subtext)';
+                            textSpan.style.fontSize = '1rem';
+                            textSpan.style.fontWeight = 'initial';
                             injectDiv.appendChild(textSpan);
                             
                             // 2. Settings Gear
