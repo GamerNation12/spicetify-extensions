@@ -14,17 +14,18 @@
     }
     window.__mgnQueueTimeRunning = true;
 
-    const QT_VERSION = "2.0.4";
+    const QT_VERSION = "2.0.5";
     let QT_CHANGELOG_LINES = [
-        "Massive Queue Time Settings Redesign!",
-        "Added a sleek, native-feeling premium settings menu with rounded edges and micro-animations.",
+        "Added Full Playlist Time Estimation (bypasses 80 song limit)!",
+        "Updated settings UI text to be more accurate (showing seconds).",
         "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
     ];
 
     // Default Settings
     const defaultSettings = {
         mode: 'text', // 'pill' or 'text'
-        format: 'both', // 'both' (80 songs, 5hr 4m), 'time' (5hr 4m)
+        format: 'both', // 'both' (80 songs, 5hr 4m 16s), 'time' (5hr 4m 16s)
+        calc: 'playlist', // 'queue' (80 limit) or 'playlist' (estimate full length)
         color: '#ffffff'
     };
 
@@ -200,10 +201,17 @@
                     </select>
                 </div>
                 <div class="qt-setting-row">
+                    <label style="color: var(--spice-text); font-weight: 600; font-size: 14px;">Calc Mode</label>
+                    <select id="qt-calc" class="qt-select">
+                        <option value="playlist" ${settings.calc === 'playlist' ? 'selected' : ''}>Estimate Full Playlist</option>
+                        <option value="queue" ${settings.calc === 'queue' ? 'selected' : ''}>Queue Only (Max 80)</option>
+                    </select>
+                </div>
+                <div class="qt-setting-row">
                     <label style="color: var(--spice-text); font-weight: 600; font-size: 14px;">Text Format</label>
                     <select id="qt-format" class="qt-select">
-                        <option value="both" ${settings.format === 'both' ? 'selected' : ''}>Songs & Time (e.g. 80 songs • 5hr 4m)</option>
-                        <option value="time" ${settings.format === 'time' ? 'selected' : ''}>Time Only (e.g. 5hr 4m)</option>
+                        <option value="both" ${settings.format === 'both' ? 'selected' : ''}>Songs & Time (e.g. 80 songs • 5hr 4m 16s)</option>
+                        <option value="time" ${settings.format === 'time' ? 'selected' : ''}>Time Only (e.g. 5hr 4m 16s)</option>
                     </select>
                 </div>
                 <div class="qt-setting-row">
@@ -227,6 +235,7 @@
         container.querySelector("#qt-save").onclick = () => {
             settings.mode = container.querySelector("#qt-mode").value;
             settings.format = container.querySelector("#qt-format").value;
+            settings.calc = container.querySelector("#qt-calc")?.value || 'playlist';
             settings.color = container.querySelector("#qt-color").value;
             saveSettings();
             Spicetify.PopupModal.hide();
@@ -384,6 +393,7 @@
     }
 
     applySettings(); // initial
+    let cachedPlaylistLengths = {};
 
     setInterval(() => {
         try {
@@ -407,9 +417,25 @@
                 }, 0);
             }
             
-            if (numSongs >= 80) {
+            if (numSongs >= 80 && settings.calc !== 'queue') {
                 const state = Spicetify.Platform?.PlayerAPI?.getState();
-                const contextCount = Number(state?.context?.metadata?.track_count);
+                const uri = state?.context?.uri;
+                let contextCount = Number(state?.context?.metadata?.track_count);
+                
+                if (isNaN(contextCount) && uri && uri.includes('spotify:playlist:')) {
+                    if (cachedPlaylistLengths[uri] !== undefined) {
+                        contextCount = cachedPlaylistLengths[uri];
+                    } else if (!cachedPlaylistLengths[uri + "_fetching"]) {
+                        cachedPlaylistLengths[uri + "_fetching"] = true;
+                        const playlistId = uri.split(':').pop();
+                        Spicetify.CosmosAsync.get('https://api.spotify.com/v1/playlists/' + playlistId).then(pl => {
+                            cachedPlaylistLengths[uri] = pl.tracks.total;
+                        }).catch(e => {
+                            console.error("[Queue Time] Failed to fetch playlist length", e);
+                        });
+                    }
+                }
+                
                 const currentIndex = Number(state?.index?.track);
                 
                 if (!isNaN(contextCount) && !isNaN(currentIndex)) {
