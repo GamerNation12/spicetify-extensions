@@ -1,7 +1,7 @@
 // NAME: Queue Time
 // AUTHOR: GamerNation12
 // DESCRIPTION: Displays Queue Time
-// VERSION: 2.0.22
+// VERSION: 2.0.23
 // MGN Auto-Updating Loader - Instant API OTA Version
 (async function loadExtension() {
   // Using the API bypasses the 5-minute CDN cache, ensuring instant updates.

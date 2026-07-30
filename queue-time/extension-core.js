@@ -36,7 +36,7 @@
         lastUriTime: savedState.lastUriTime || 0
     };
 
-    const QT_VERSION = "2.0.21";
+    const QT_VERSION = "2.0.23";
     let QT_CHANGELOG_LINES = [
         "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
         "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -273,24 +273,23 @@
     }
 
     // Robust Menu Registration
-    let menuInterval = setInterval(() => {
-        if (Spicetify.Menu && Spicetify.Menu.Item) {
-            new Spicetify.Menu.Item(
-                "Queue Time Settings",
-                false,
-                openSettings,
-                '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>'
-            ).register();
-            clearInterval(menuInterval);
-        } else if (Spicetify.Topbar && Spicetify.Topbar.Button) {
-            new Spicetify.Topbar.Button(
-                "Queue Time Settings",
-                '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>',
-                openSettings
-            );
-            clearInterval(menuInterval);
-        }
-    }, 1000);
+    if (!window.__mgnQueueTimeMenuRegistered) {
+        window.__mgnQueueTimeMenuRegistered = true;
+        let menuInterval = setInterval(() => {
+            if (Spicetify.Menu && Spicetify.Menu.Item) {
+                new Spicetify.Menu.Item(
+                    "Queue Time Settings",
+                    false,
+                    openSettings,
+                    '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>'
+                ).register();
+                clearInterval(menuInterval);
+            } else if (Spicetify.Topbar && Spicetify.Topbar.Button) {
+                new Spicetify.Topbar.Button("Queue Time Settings", '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>', openSettings).register();
+                clearInterval(menuInterval);
+            }
+        }, 1000);
+    }
 
     // Save Queue to Playlist Logic
     async function saveQueueToPlaylist(nextTracks) {

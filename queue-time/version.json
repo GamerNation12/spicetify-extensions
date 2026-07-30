@@ -1,6 +1,9 @@
 {
-  "version": "2.0.22",
+  "version": "2.0.23",
   "changelogs": {
+    "2.0.23": [
+      "Fixed a bug where the settings menu button would duplicate multiple times."
+    ],
     "2.0.22": [
       "Fixed an issue where the extension would crash if the Spotify queue was populated by a third-party app like Shuffle+."
     ],
@@ -72,6 +75,6 @@
     ]
   },
   "changelog": [
-    "Fixed an issue where the extension would crash if the Spotify queue was populated by a third-party app like Shuffle+."
+    "Fixed a bug where the settings menu button would duplicate multiple times."
   ]
 }
