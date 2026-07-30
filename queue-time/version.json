@@ -1,6 +1,9 @@
 {
-  "version": "2.0.25",
+  "version": "2.0.26",
   "changelogs": {
+    "2.0.26": [
+      "Actually applied the fix for small playlists not updating their song count when skipping songs."
+    ],
     "2.0.25": [
       "Intelligently disable playlist estimation for playlists under 80 songs so they are completely immune to Shuffle+ bugs and track index glitches!"
     ],
@@ -81,6 +84,6 @@
     ]
   },
   "changelog": [
-    "Intelligently disable playlist estimation for playlists under 80 songs so they are completely immune to Shuffle+ bugs and track index glitches!"
+    "Actually applied the fix for small playlists not updating their song count when skipping songs."
   ]
 }

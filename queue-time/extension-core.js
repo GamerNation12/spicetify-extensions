@@ -36,7 +36,7 @@
         lastUriTime: savedState.lastUriTime || 0
     };
 
-    const QT_VERSION = "2.0.25";
+    const QT_VERSION = "2.0.26";
     let QT_CHANGELOG_LINES = [
         "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
         "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -533,7 +533,7 @@
                     }
                 }
                 
-                if (!isNaN(contextCount)) {
+                if (!isNaN(contextCount) && contextCount > 80) {
                     console.log("[Queue Time Debug] state.index:", JSON.stringify(state?.index));
                     console.log("[Queue Time Debug] Estimating... contextCount:", contextCount, "currentIndex:", currentIndex, "numSongs:", numSongs);
                     let queuedLength = 0;
