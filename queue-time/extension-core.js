@@ -26,10 +26,10 @@
     
     window.__mgnQueueTimeState = {};
 
-    const QT_VERSION = "2.0.18";
+    const QT_VERSION = "2.0.19";
     let QT_CHANGELOG_LINES = [
-        "The displayed song count now correctly includes the currently playing track so it mathematically matches the remaining time!",
-        "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
+        "Fixed an issue where Spotify's background track-switching caused the index to skip by 1.",
+        "Reverted the song count change to purely count upcoming tracks again."
     ];
 
     // Default Settings
@@ -433,10 +433,19 @@
                 if (!window.__mgnQueueTimeState.lastTrackUri) {
                     window.__mgnQueueTimeState.lastTrackUri = state?.item?.uri;
                     window.__mgnQueueTimeState.manualIndex = 0;
+                    window.__mgnQueueTimeState.lastUriTime = Date.now();
                 } else if (window.__mgnQueueTimeState.lastTrackUri !== state?.item?.uri) {
                     // Song changed!
+                    const now = Date.now();
+                    const timeSinceLastChange = now - (window.__mgnQueueTimeState.lastUriTime || 0);
+                    
+                    // If track changed in under 2.5s, it's a Spotify fast-switch (e.g. initial shuffle load), not a true skip
+                    if (timeSinceLastChange > 2500) {
+                        window.__mgnQueueTimeState.manualIndex = (window.__mgnQueueTimeState.manualIndex || 0) + 1;
+                    }
+                    
                     window.__mgnQueueTimeState.lastTrackUri = state?.item?.uri;
-                    window.__mgnQueueTimeState.manualIndex = (window.__mgnQueueTimeState.manualIndex || 0) + 1;
+                    window.__mgnQueueTimeState.lastUriTime = now;
                 }
                 
                 // Fallback to our manual counter if native is broken
@@ -564,8 +573,7 @@
                     timeStr = `${minutes}m ${seconds}s`;
                 }
                 
-                let displayedSongs = numSongs + 1;
-                let songString = displayedSongs === 1 ? '1 song' : `${displayedSongs} songs`;
+                let songString = numSongs === 1 ? '1 song' : `${numSongs} songs`;
                 
                 if (settings.format === 'time') {
                     currentFormattedText = timeStr;
