@@ -1,6 +1,9 @@
 {
-  "version": "2.0.11",
+  "version": "2.0.12",
   "changelogs": {
+    "2.0.12": [
+      "Fixed overlapping text in 'In-Queue Text' layout by switching to true inline injection."
+    ],
     "2.0.11": [
       "Fixed an edge case where Spotify reports the current track index in a non-standard way, breaking playlist estimation."
     ],
@@ -36,6 +39,6 @@
     ]
   },
   "changelog": [
-    "Fixed an edge case where Spotify reports the current track index in a non-standard way, breaking playlist estimation."
+    "Fixed overlapping text in 'In-Queue Text' layout by switching to true inline injection."
   ]
 }

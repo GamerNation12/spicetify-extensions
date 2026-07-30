@@ -26,9 +26,9 @@
     
     window.__mgnQueueTimeState = {};
 
-    const QT_VERSION = "2.0.11";
+    const QT_VERSION = "2.0.12";
     let QT_CHANGELOG_LINES = [
-        "Fixed an edge case where Spotify reports the current track index in a non-standard way, breaking playlist estimation.",
+        "Fixed overlapping text in 'In-Queue Text' layout by switching to true inline injection.",
         "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
     ];
 
@@ -558,30 +558,21 @@
                 headers.forEach(h2 => {
                     let text = h2.textContent.toLowerCase();
                     if (text.includes("next in queue") || text.includes("next from")) {
-                        let container = h2.parentElement;
-                        
-                        if (container && !container.querySelector('.mgn-qt-inline')) {
-                            // Non-destructive injection (like the old script's ::after)
-                            if (window.getComputedStyle(container).position === 'static') {
-                                container.style.position = 'relative';
-                            }
-                            
-                            let injectDiv = document.createElement('div');
+                        if (!h2.querySelector('.mgn-qt-inline')) {
+                            let injectDiv = document.createElement('span');
                             injectDiv.className = 'mgn-qt-inline';
-                            injectDiv.style.position = 'absolute';
-                            injectDiv.style.right = '0';
-                            injectDiv.style.bottom = '0';
-                            injectDiv.style.display = 'flex';
+                            injectDiv.style.display = 'inline-flex';
                             injectDiv.style.alignItems = 'center';
                             injectDiv.style.gap = '8px';
-                            injectDiv.style.paddingRight = '16px'; // Prevent hugging the very edge
+                            injectDiv.style.marginLeft = '16px';
+                            injectDiv.style.verticalAlign = 'middle';
                             
                             // 1. Text
                             let textSpan = document.createElement('span');
                             textSpan.className = 'mgn-qt-time-text';
                             textSpan.style.color = settings.color || 'var(--spice-subtext)';
-                            textSpan.style.fontSize = '1rem';
-                            textSpan.style.fontWeight = 'initial';
+                            textSpan.style.fontSize = '14px'; // Slightly smaller to match standard subtext
+                            textSpan.style.fontWeight = '400';
                             injectDiv.appendChild(textSpan);
                             
                             // 2. Settings Gear
@@ -600,10 +591,10 @@
                             saveBtn.onclick = () => saveQueueToPlaylist(nextTracks);
                             injectDiv.appendChild(saveBtn);
 
-                            container.appendChild(injectDiv);
+                            h2.appendChild(injectDiv);
                         }
                         
-                        let inlineSpan = container.querySelector('.mgn-qt-time-text');
+                        let inlineSpan = h2.querySelector('.mgn-qt-time-text');
                         if (inlineSpan) {
                             inlineSpan.textContent = currentFormattedText;
                             inlineSpan.style.color = settings.color;
