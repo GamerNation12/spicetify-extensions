@@ -26,9 +26,9 @@
     
     window.__mgnQueueTimeState = {};
 
-    const QT_VERSION = "2.0.12";
+    const QT_VERSION = "2.0.13";
     let QT_CHANGELOG_LINES = [
-        "Fixed overlapping text in 'In-Queue Text' layout by switching to true inline injection.",
+        "Fixed a bug where manually queued tracks were excluded from the total song count when Full Playlist Estimation was active.",
         "Added this beautiful startup changelog popup (brought over from Beautiful Release Date) so you always know what's new."
     ];
 
@@ -496,12 +496,20 @@
                 const currentIndex = Number(state?.index?.track) || Number(state?.index?.itemIndex) || 0;
                 
                 if (!isNaN(contextCount)) {
+                    console.log("[Queue Time Debug] state.index:", JSON.stringify(state?.index));
                     console.log("[Queue Time Debug] Estimating... contextCount:", contextCount, "currentIndex:", currentIndex, "numSongs:", numSongs);
+                    let queuedLength = 0;
+                    if (Spicetify.Queue?.nextTracks) {
+                        queuedLength = Spicetify.Queue.nextTracks.filter(t => t.provider === 'queue').length;
+                    }
+
                     const contextRemaining = Math.max(0, contextCount - currentIndex - 1);
-                    if (contextRemaining > numSongs) {
+                    const totalRemaining = contextRemaining + queuedLength;
+
+                    if (totalRemaining > numSongs) {
                         const estimatedDurationAvg = totalTimeMs / numSongs;
-                        totalTimeMs = estimatedDurationAvg * contextRemaining;
-                        numSongs = contextRemaining;
+                        totalTimeMs = estimatedDurationAvg * totalRemaining;
+                        numSongs = totalRemaining;
                         isEstimated = true;
                     }
                 } else {

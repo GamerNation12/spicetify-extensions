@@ -1,6 +1,9 @@
 {
-  "version": "2.0.12",
+  "version": "2.0.13",
   "changelogs": {
+    "2.0.13": [
+      "Fixed a bug where manually queued tracks were excluded from the total song count when Full Playlist Estimation was active."
+    ],
     "2.0.12": [
       "Fixed overlapping text in 'In-Queue Text' layout by switching to true inline injection."
     ],
@@ -39,6 +42,6 @@
     ]
   },
   "changelog": [
-    "Fixed overlapping text in 'In-Queue Text' layout by switching to true inline injection."
+    "Fixed a bug where manually queued tracks were excluded from the total song count when Full Playlist Estimation was active."
   ]
 }
