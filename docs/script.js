@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const MANIFEST_PATH = `${BASE_URL}/manifest.json`;
 
     try {
-        const res = await fetch(MANIFEST_PATH);
+        const res = await fetch(`${MANIFEST_PATH}?t=${Date.now()}`);
         if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
         const manifest = await res.json();
 
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let versionData = { version: '0.0.0', changelog: ['Updates pending...'] };
 
         try {
-            const vRes = await fetch(`${BASE_URL}/${folder}/version.json`);
+            const vRes = await fetch(`${BASE_URL}/${folder}/version.json?t=${Date.now()}`);
             if (vRes.ok) versionData = await vRes.json();
         } catch (e) {
             console.log(`Failed to fetch version for ${folder}`);
