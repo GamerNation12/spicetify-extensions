@@ -36,7 +36,7 @@
         lastUriTime: savedState.lastUriTime || 0
     };
 
-    const QT_VERSION = "2.0.27";
+    const QT_VERSION = "2.0.28";
     let QT_CHANGELOG_LINES = [
         "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
         "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -421,7 +421,15 @@
             
             // Filter out Autoplay and Shuffle+ delimiters to perfectly count actual remaining songs!
             if (nextTracks.length > 0) {
-                nextTracks = nextTracks.filter(t => t.provider !== 'autoplay' && t.uri !== 'spotify:delimiter' && t.contextTrack?.uri !== 'spotify:delimiter');
+                // Shuffle+ uses a delimiter, and Spotify dumps Autoplay songs after it. 
+                // Truncating at the delimiter guarantees we strip out ALL fake songs.
+                let delimiterIndex = nextTracks.findIndex(t => t.uri === 'spotify:delimiter' || t.contextTrack?.uri === 'spotify:delimiter');
+                if (delimiterIndex !== -1) {
+                    nextTracks = nextTracks.slice(0, delimiterIndex);
+                }
+                
+                // Fallback for native Spotify Autoplay songs
+                nextTracks = nextTracks.filter(t => t.provider !== 'autoplay' && !String(t.uri).includes('spotify:station:'));
             }
             
             let numSongs = nextTracks.length;

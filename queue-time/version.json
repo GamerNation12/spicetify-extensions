@@ -1,6 +1,9 @@
 {
-  "version": "2.0.27",
+  "version": "2.0.28",
   "changelogs": {
+    "2.0.28": [
+      "Bulletproofed the Autoplay filtering by physically truncating the queue at the Shuffle+ delimiter to guarantee 100% accuracy."
+    ],
     "2.0.27": [
       "Flawless fix for Autoplay and Shuffle+: perfectly ignores Spotify's added Autoplay songs and Shuffle+ delimiters so the count accurately reflects your playlist and goes down correctly when skipping!"
     ],
@@ -87,6 +90,6 @@
     ]
   },
   "changelog": [
-    "Flawless fix for Autoplay and Shuffle+: perfectly ignores Spotify's added Autoplay songs and Shuffle+ delimiters so the count accurately reflects your playlist and goes down correctly when skipping!"
+    "Bulletproofed the Autoplay filtering by physically truncating the queue at the Shuffle+ delimiter to guarantee 100% accuracy."
   ]
 }
