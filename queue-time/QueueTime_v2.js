@@ -3,7 +3,7 @@
 // DESCRIPTION: Displays Queue Time
 (function QueueTime() {
     console.log("[Queue Time] Script evaluating...");
-    if (!Spicetify || !Spicetify.Platform || !Spicetify.Player || !document.body || !Spicetify.Topbar) {
+    if (!Spicetify || !Spicetify.Platform || !Spicetify.Player || !document.body) {
         console.log("[Queue Time] Waiting for Spicetify Player API and document.body to load...");
         setTimeout(QueueTime, 300);
         return;
@@ -76,21 +76,25 @@
         };
     }
 
-    // Register Menu Item
-    if (Spicetify.Menu && Spicetify.Menu.Item) {
-        new Spicetify.Menu.Item(
-            "Queue Time Settings",
-            false,
-            openSettings,
-            '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>'
-        ).register();
-    } else if (Spicetify.Topbar && Spicetify.Topbar.Button) {
-        new Spicetify.Topbar.Button(
-            "Queue Time Settings",
-            '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>',
-            openSettings
-        );
-    }
+    // Robust Menu Registration
+    let menuInterval = setInterval(() => {
+        if (Spicetify.Menu && Spicetify.Menu.Item) {
+            new Spicetify.Menu.Item(
+                "Queue Time Settings",
+                false,
+                openSettings,
+                '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>'
+            ).register();
+            clearInterval(menuInterval);
+        } else if (Spicetify.Topbar && Spicetify.Topbar.Button) {
+            new Spicetify.Topbar.Button(
+                "Queue Time Settings",
+                '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>',
+                openSettings
+            );
+            clearInterval(menuInterval);
+        }
+    }, 1000);
 
     // DOM Elements setup
     let qt_style = document.createElement("style");
@@ -180,12 +184,6 @@
                     const duration = Number(cur.duration || cur.contextTrack?.metadata?.duration || cur.item?.duration?.milliseconds || cur.track?.metadata?.duration || cur.metadata?.duration) || 0;
                     return acc + duration;
                 }, 0);
-            } else {
-                const domRows = document.querySelectorAll('.Root__right-sidebar .main-trackList-row, .queue-panel .main-trackList-row, [data-testid="right-sidebar"] .main-trackList-row');
-                if (domRows.length > 0) {
-                    numSongs = Math.max(1, domRows.length - 1);
-                    totalTimeMs = numSongs * 210000;
-                }
             }
 
             if (numSongs === 0) {
@@ -219,9 +217,9 @@
                 }
             }
 
-            // In-Queue Text Injection
+            // In-Queue Text Injection (Global H2 Search)
             if (settings.mode === 'text') {
-                let headers = Array.from(document.querySelectorAll('.Root__right-sidebar h2, .queue-panel h2, [data-testid="right-sidebar"] h2'));
+                let headers = Array.from(document.querySelectorAll('h2'));
                 
                 headers.forEach(h2 => {
                     let text = h2.textContent.toLowerCase();
