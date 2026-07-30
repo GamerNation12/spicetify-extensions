@@ -21,6 +21,6 @@
     console.info('🟢 [GN Loader] Successfully synced: Queue Time');
     
   } catch (error) {
-    console.error('[MGN Loader] Failed to load Queue Time:', error);
+    console.error('[MGN Loader] Failed to load:', error);
   }
 })();
