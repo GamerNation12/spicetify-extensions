@@ -217,10 +217,13 @@
                   if (itunesRes && itunesRes.results && itunesRes.results.length > 0) {
                       let oldestTime = Infinity;
                       const queryArtist = artistName.toLowerCase();
+                      const queryTrackLower = cleanName.toLowerCase();
                       itunesRes.results.forEach(item => {
                           if (item.releaseDate) {
                               const itemArtist = (item.artistName || '').toLowerCase();
-                              if (itemArtist.includes(queryArtist) || queryArtist.includes(itemArtist)) {
+                              const itemTrack = (item.trackName || '').toLowerCase();
+                              if ((itemArtist.includes(queryArtist) || queryArtist.includes(itemArtist)) &&
+                                  (itemTrack.includes(queryTrackLower) || queryTrackLower.includes(itemTrack))) {
                                   const d = new Date(item.releaseDate);
                                   if (!isNaN(d.getTime()) && d.getTime() < oldestTime) {
                                       oldestTime = d.getTime();
@@ -239,10 +242,13 @@
                       if (searchRes?.tracks?.items && searchRes.tracks.items.length > 0) {
                           let oldestTime = Infinity;
                           const queryArtist = artistName.toLowerCase();
+                          const queryTrackLower = cleanName.toLowerCase();
                           searchRes.tracks.items.forEach(item => {
                               if (item.album?.release_date) {
                                   const itemArtist = (item.artists?.[0]?.name || '').toLowerCase();
-                                  if (itemArtist.includes(queryArtist) || queryArtist.includes(itemArtist)) {
+                                  const itemTrack = (item.name || '').toLowerCase();
+                                  if ((itemArtist.includes(queryArtist) || queryArtist.includes(itemArtist)) &&
+                                      (itemTrack.includes(queryTrackLower) || queryTrackLower.includes(itemTrack))) {
                                       const d = new Date(item.album.release_date);
                                       if (!isNaN(d.getTime()) && d.getTime() < oldestTime) {
                                           oldestTime = d.getTime();
