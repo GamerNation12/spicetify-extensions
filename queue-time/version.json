@@ -1,6 +1,9 @@
 {
-  "version": "2.0.23",
+  "version": "2.0.24",
   "changelogs": {
+    "2.0.24": [
+      "Fixed a bug where restarting a playlist would show the wrong song count because it remembered your previous spot in the queue."
+    ],
     "2.0.23": [
       "Fixed a bug where the settings menu button would duplicate multiple times."
     ],
@@ -75,6 +78,6 @@
     ]
   },
   "changelog": [
-    "Fixed a bug where the settings menu button would duplicate multiple times."
+    "Fixed a bug where restarting a playlist would show the wrong song count because it remembered your previous spot in the queue."
   ]
 }

@@ -36,7 +36,7 @@
         lastUriTime: savedState.lastUriTime || 0
     };
 
-    const QT_VERSION = "2.0.23";
+    const QT_VERSION = "2.0.24";
     let QT_CHANGELOG_LINES = [
         "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
         "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -466,9 +466,6 @@
                 // Fallback to our manual counter if native is broken
                 if (isNaN(currentIndex)) {
                     currentIndex = window.__mgnQueueTimeState.manualIndex || 0;
-                } else if (currentIndex === 0 && window.__mgnQueueTimeState.manualIndex > 0) {
-                    // If native says 0 but we know we've skipped songs, native is probably broken/stuck
-                    currentIndex = window.__mgnQueueTimeState.manualIndex;
                 }
             }
 
