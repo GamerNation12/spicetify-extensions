@@ -33,7 +33,7 @@
         interval: null
     };
 
-    const QT_VERSION = "3.0.0";
+    const QT_VERSION = "3.0.1";
     let QT_CHANGELOG_LINES = [
         "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
         "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -197,44 +197,130 @@
         const container = document.createElement("div");
         container.innerHTML = `
             <style>
-                .qt-setting-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px 16px; border-radius: 8px; transition: background 0.2s; }
-                .qt-setting-row:hover { background: rgba(255,255,255,0.08); }
-                .qt-select { background: rgba(0,0,0,0.2); color: var(--spice-text); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 6px; outline: none; cursor: pointer; font-family: inherit; font-size: 13px; }
-                .qt-select:hover { background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.2); }
-                .qt-color-picker { width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; background: none; overflow: hidden; padding: 0; }
+                @keyframes slideUpFade {
+                    0% { opacity: 0; transform: translateY(15px) scale(0.98); }
+                    100% { opacity: 1; transform: translateY(0) scale(1); }
+                }
+                @keyframes pulseGlow {
+                    0% { box-shadow: 0 0 0 0 rgba(30, 215, 96, 0.4); }
+                    70% { box-shadow: 0 0 0 10px rgba(30, 215, 96, 0); }
+                    100% { box-shadow: 0 0 0 0 rgba(30, 215, 96, 0); }
+                }
+                .qt-settings-wrapper {
+                    display: flex; flex-direction: column; gap: 14px; padding: 12px 8px;
+                    animation: slideUpFade 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+                }
+                .qt-setting-row { 
+                    display: flex; justify-content: space-between; align-items: center; 
+                    background: rgba(255,255,255,0.03); padding: 14px 18px; 
+                    border-radius: 12px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
+                    border: 1px solid rgba(255,255,255,0.02);
+                }
+                .qt-setting-row:hover { 
+                    background: rgba(255,255,255,0.08); 
+                    transform: translateY(-2px);
+                    border-color: rgba(255,255,255,0.1);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                }
+                .qt-label {
+                    color: var(--spice-text); font-weight: 700; font-size: 14px;
+                    letter-spacing: -0.2px; text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+                }
+                .qt-select { 
+                    background: rgba(0,0,0,0.3); color: var(--spice-text); 
+                    border: 1px solid rgba(255,255,255,0.1); padding: 8px 14px; 
+                    border-radius: 8px; outline: none; cursor: pointer; 
+                    font-family: inherit; font-size: 13px; font-weight: 600;
+                    transition: all 0.2s ease;
+                    backdrop-filter: blur(4px);
+                }
+                .qt-select:hover { 
+                    background: rgba(0,0,0,0.5); 
+                    border-color: rgba(255,255,255,0.3); 
+                }
+                .qt-select:focus {
+                    border-color: #1ed760;
+                }
+                .qt-color-picker { 
+                    width: 36px; height: 36px; border: none; border-radius: 50%; 
+                    cursor: pointer; background: none; overflow: hidden; padding: 0; 
+                    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                }
+                .qt-color-picker:hover { transform: scale(1.15) rotate(5deg); }
                 .qt-color-picker::-webkit-color-swatch-wrapper { padding: 0; }
-                .qt-color-picker::-webkit-color-swatch { border: none; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,0.2); }
-                .qt-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: 700; font-size: 13px; cursor: pointer; transition: transform 0.1s, filter 0.2s; color: #000; }
-                .qt-btn:hover { transform: scale(1.02); filter: brightness(1.1); }
-                .qt-btn:active { transform: scale(0.98); }
-                .qt-save-btn { background: #1ed760; }
-                .qt-update-btn { background: rgba(255,255,255,0.1); color: var(--spice-text); border: 1px solid rgba(255,255,255,0.1); }
+                .qt-color-picker::-webkit-color-swatch { 
+                    border: none; border-radius: 50%; 
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.2); 
+                }
+                .qt-btn { 
+                    flex: 1; padding: 14px; border-radius: 10px; border: none; 
+                    font-weight: 800; font-size: 14px; cursor: pointer; 
+                    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); 
+                    color: #000; letter-spacing: 0.2px;
+                }
+                .qt-btn:active { transform: scale(0.96); }
+                .qt-save-btn { 
+                    background: linear-gradient(135deg, #1ed760, #179c45); 
+                    box-shadow: 0 4px 15px rgba(30, 215, 96, 0.3);
+                }
+                .qt-save-btn:hover { 
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(30, 215, 96, 0.4);
+                    animation: pulseGlow 1.5s infinite;
+                }
+                .qt-update-btn { 
+                    background: rgba(255,255,255,0.05); color: var(--spice-text); 
+                    border: 1px solid rgba(255,255,255,0.1);
+                    backdrop-filter: blur(4px);
+                }
+                .qt-update-btn:hover {
+                    background: rgba(255,255,255,0.1);
+                    border-color: rgba(255,255,255,0.2);
+                    transform: translateY(-2px);
+                }
             </style>
-            <div style="display: flex; flex-direction: column; gap: 12px; padding: 8px 4px;">
-                <div class="qt-setting-row">
-                    <label style="color: var(--spice-text); font-weight: 600; font-size: 14px;">Display Mode</label>
+            <div class="qt-settings-wrapper">
+                <div class="qt-setting-row" style="animation-delay: 0.05s;">
+                    <label class="qt-label">Display Mode</label>
                     <select id="qt-mode" class="qt-select">
                         <option value="pill" ${settings.mode === 'pill' ? 'selected' : ''}>Floating Pill</option>
                         <option value="text" ${settings.mode === 'text' ? 'selected' : ''}>In-Queue Text</option>
                     </select>
                 </div>
 
-                <div class="qt-setting-row">
-                    <label style="color: var(--spice-text); font-weight: 600; font-size: 14px;">Text Format</label>
+                <div class="qt-setting-row" style="animation-delay: 0.1s;">
+                    <label class="qt-label">Text Format</label>
                     <select id="qt-format" class="qt-select">
-                        <option value="both" ${settings.format === 'both' ? 'selected' : ''}>Songs & Time (e.g. 80 songs • 5hr 4m 16s)</option>
+                        <option value="both" ${settings.format === 'both' ? 'selected' : ''}>Songs & Time (e.g. 80 songs • 5hr)</option>
                         <option value="time" ${settings.format === 'time' ? 'selected' : ''}>Time Only (e.g. 5hr 4m 16s)</option>
                     </select>
                 </div>
-                <div class="qt-setting-row">
-                    <label style="color: var(--spice-text); font-weight: 600; font-size: 14px;">Custom Color</label>
-                    <input type="color" id="qt-color" class="qt-color-picker" value="${settings.color}">
+                
+                <div class="qt-setting-row" style="animation-delay: 0.15s;">
+                    <label class="qt-label">Font Size</label>
+                    <select id="qt-fontsize" class="qt-select">
+                        <option value="11px" ${settings.fontSize === '11px' ? 'selected' : ''}>Small</option>
+                        <option value="12px" ${(!settings.fontSize || settings.fontSize === '12px') ? 'selected' : ''}>Medium</option>
+                        <option value="14px" ${settings.fontSize === '14px' ? 'selected' : ''}>Large</option>
+                        <option value="16px" ${settings.fontSize === '16px' ? 'selected' : ''}>Extra Large</option>
+                    </select>
                 </div>
-                <div style="display: flex; gap: 12px; margin-top: 8px;">
+
+                <div class="qt-setting-row" style="animation-delay: 0.2s;">
+                    <label class="qt-label">Text Color</label>
+                    <input type="color" id="qt-color" class="qt-color-picker" value="${settings.color || '#ffffff'}">
+                </div>
+                
+                <div class="qt-setting-row" style="animation-delay: 0.25s;">
+                    <label class="qt-label">Background Color (Pill Mode)</label>
+                    <input type="color" id="qt-bg-color" class="qt-color-picker" value="${settings.bgColor || '#000000'}">
+                </div>
+
+                <div style="display: flex; gap: 14px; margin-top: 12px; animation-delay: 0.3s; opacity: 0; animation: slideUpFade 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 0.3s;">
                     <button id="qt-save" class="qt-btn qt-save-btn">Save & Apply</button>
-                    <button id="qt-update-btn" class="qt-btn qt-update-btn">Check for Updates</button>
+                    <button id="qt-update-btn" class="qt-btn qt-update-btn">Check Updates</button>
                 </div>
-                <div style="text-align: center; font-size: 11px; color: var(--spice-subtext); margin-top: 4px; opacity: 0.6; font-weight: 600;">Queue Time v${QT_VERSION}</div>
+                <div style="text-align: center; font-size: 11px; color: var(--spice-subtext); margin-top: 6px; opacity: 0.4; font-weight: 700; letter-spacing: 0.5px;">QUEUE TIME v${QT_VERSION}</div>
             </div>
         `;
 
@@ -248,6 +334,8 @@
             settings.mode = container.querySelector("#qt-mode").value;
             settings.format = container.querySelector("#qt-format").value;
             settings.color = container.querySelector("#qt-color").value;
+            settings.fontSize = container.querySelector("#qt-fontsize").value;
+            settings.bgColor = container.querySelector("#qt-bg-color").value;
             saveSettings();
             Spicetify.PopupModal.hide();
         };
@@ -397,8 +485,23 @@
     function applySettings() {
         if (settings.mode === 'text') {
             pill.classList.remove('visible');
+            const container = document.getElementById('qt-text-container');
+            if (container) {
+                container.style.color = settings.color || '#ffffff';
+                container.style.fontSize = settings.fontSize || '12px';
+            }
         } else {
-            pill.style.color = settings.color;
+            pill.style.color = settings.color || '#ffffff';
+            pill.style.background = settings.bgColor || 'rgba(0, 0, 0, 0.7)';
+            pill.style.fontSize = settings.fontSize || '12px';
+            
+            // Fix svg size relative to font size
+            const svg = pill.querySelector('svg');
+            if (svg) {
+                const fs = parseInt(settings.fontSize || '12') || 12;
+                svg.style.width = `${fs}px`;
+                svg.style.height = `${fs}px`;
+            }
         }
     }
 
@@ -501,7 +604,7 @@
                             let textSpan = document.createElement('span');
                             textSpan.className = 'mgn-qt-time-text';
                             textSpan.style.color = settings.color || 'var(--spice-subtext)';
-                            textSpan.style.fontSize = '14px'; // Slightly smaller to match standard subtext
+                            textSpan.style.fontSize = settings.fontSize || '14px';
                             textSpan.style.fontWeight = '400';
                             injectDiv.appendChild(textSpan);
                             
@@ -527,7 +630,8 @@
                         let inlineSpan = h2.querySelector('.mgn-qt-time-text');
                         if (inlineSpan) {
                             inlineSpan.textContent = currentFormattedText;
-                            inlineSpan.style.color = settings.color;
+                            inlineSpan.style.color = settings.color || 'var(--spice-subtext)';
+                            inlineSpan.style.fontSize = settings.fontSize || '14px';
                         }
                     }
                 });

@@ -1,6 +1,9 @@
 {
-  "version": "3.0.0",
+  "version": "3.0.1",
   "changelogs": {
+    "3.0.1": [
+      "Completely redesigned Settings Menu with gorgeous animations and brand new personalization features: Font Size and Pill Background Color!"
+    ],
     "3.0.0": [
       "Complete rebuild from scratch! Removed all complex math and cache logic.",
       "Perfectly counts the actual queue. Native support for Shuffle+ and Autoplay."
@@ -94,7 +97,6 @@
     ]
   },
   "changelog": [
-    "Complete rebuild from scratch! Removed all complex math and cache logic.",
-    "Perfectly counts the actual queue. Native support for Shuffle+ and Autoplay."
+    "Completely redesigned Settings Menu with gorgeous animations and brand new personalization features: Font Size and Pill Background Color!"
   ]
 }
