@@ -1,6 +1,9 @@
 {
-  "version": "3.0.3",
+  "version": "3.0.4",
   "changelogs": {
+    "3.0.4": [
+      "UI Improvements: Added the Layout and Style tabs, glassmorphism pill blur, and font size/color pickers to perfectly match the Beautiful Release Date extension."
+    ],
     "3.0.3": [
       "Total UI Overhaul: The Settings Menu now uses the Beautiful Release Date architecture, featuring 5 interactive CSS themes (Material 3, Spotify Native, Aurora, Fluent, and OLED)!"
     ],
@@ -103,6 +106,6 @@
     ]
   },
   "changelog": [
-    "Total UI Overhaul: The Settings Menu now uses the Beautiful Release Date architecture, featuring 5 interactive CSS themes (Material 3, Spotify Native, Aurora, Fluent, and OLED)!"
+    "UI Improvements: Added the Layout and Style tabs, glassmorphism pill blur, and font size/color pickers to perfectly match the Beautiful Release Date extension."
   ]
 }

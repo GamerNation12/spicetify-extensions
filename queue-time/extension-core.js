@@ -33,7 +33,7 @@
         interval: null
     };
 
-    const QT_VERSION = "3.0.3";
+    const QT_VERSION = "3.0.4";
     let QT_CHANGELOG_LINES = [
         "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
         "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -517,6 +517,42 @@ function createCustomDropdown(id, label, options, onChange = null) {
         header.innerHTML = `<div style="display:flex;align-items:baseline;gap:8px;"><h2>Queue Time Settings</h2><span style="opacity:0.5;font-size:0.75rem;font-weight:600;">v${QT_VERSION}</span></div><button class="brd-close" aria-label="Close">&#10005;</button>`;
         menu.appendChild(header);
 
+        const tabsHeader = document.createElement('div');
+        tabsHeader.className = 'brd-tabs-header';
+        const tabNames = [
+           { id: 'tab-layout', name: 'Layout', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>' },
+           { id: 'tab-style', name: 'Style', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6z"></path></svg>' }
+        ];
+        
+        const tabContents = document.createElement('div');
+        tabContents.className = 'brd-tabs-body';
+
+        tabNames.forEach((tab, index) => {
+           const btn = document.createElement('button');
+           btn.className = `brd-tab-btn ${index === 0 ? 'brd-active' : ''}`;
+           btn.innerHTML = `${tab.icon} <span>${tab.name}</span>`;
+           
+           const content = document.createElement('div');
+           content.className = `brd-tab-content ${index === 0 ? 'brd-active' : ''}`;
+           content.id = tab.id;
+
+           btn.onclick = () => {
+              tabsHeader.querySelectorAll('.brd-tab-btn').forEach(b => b.classList.remove('brd-active'));
+              tabContents.querySelectorAll('.brd-tab-content').forEach(c => c.classList.remove('brd-active'));
+              btn.classList.add('brd-active');
+              content.classList.add('brd-active');
+           };
+
+           tabsHeader.appendChild(btn);
+           tabContents.appendChild(content);
+        });
+
+        menu.appendChild(tabsHeader);
+        menu.appendChild(tabContents);
+
+        const layoutTab = tabContents.querySelector('#tab-layout');
+        const styleTab = tabContents.querySelector('#tab-style');
+
         // Options
         const modeOpts = [
             { value: "pill", text: "Floating Pill" },
@@ -533,14 +569,45 @@ function createCustomDropdown(id, label, options, onChange = null) {
             { value: "fluent", text: "Windows 11 Fluent" },
             { value: "oled", text: "Pure OLED" }
         ];
+        const colorOpts = [
+          { value: "inherit", text: "Default (Subtext)" },
+          { value: "var(--spice-text)", text: "Dynamic: Text" },
+          { value: "var(--spice-subtext)", text: "Dynamic: Subtext" },
+          { value: "var(--spice-button)", text: "Dynamic: Button" },
+          { value: "var(--spice-button-active)", text: "Dynamic: Button Active" },
+          { value: "#ffffff", text: "Solid White" },
+          { value: "#1ed760", text: "Spotify Green" },
+          { value: "#60cdff", text: "Soft Blue" },
+          { value: "#ff5e5e", text: "Bright Red" }
+        ];
+        const sizeOpts = [
+          { value: "0.65rem", text: "Small" },
+          { value: "0.75rem", text: "Default" },
+          { value: "0.9rem", text: "Large" }
+        ];
+        const weightOpts = [
+          { value: "400", text: "Normal" },
+          { value: "600", text: "Semi-Bold" },
+          { value: "900", text: "Black" }
+        ];
+        const bgOpts = [
+          { value: "rgba(255,255,255,0.08)", text: "Glassmorphism (BRD)" },
+          { value: "rgba(30, 30, 30, 0.7)", text: "Default Queue Time" },
+          { value: "var(--spice-button)", text: "Spotify Button" }
+        ];
 
-        menu.appendChild(createCustomDropdown('mode', 'Display Mode', modeOpts));
-        menu.appendChild(createCustomDropdown('format', 'Text Format', formatOpts));
-        menu.appendChild(createCustomDropdown('menuTheme', 'Menu Theme', themeOpts, (newTheme) => {
+        layoutTab.appendChild(createCustomDropdown('mode', 'Display Mode', modeOpts));
+        layoutTab.appendChild(createCustomDropdown('format', 'Text Format', formatOpts));
+        
+        styleTab.appendChild(createCustomDropdown('menuTheme', 'Menu Theme', themeOpts, (newTheme) => {
             menu.className = `theme-${newTheme} brd-m3-animate`;
             settings.menuTheme = newTheme;
             saveSettings();
         }));
+        styleTab.appendChild(createCustomDropdown('color', 'Text Color', colorOpts));
+        styleTab.appendChild(createCustomDropdown('fontSize', 'Font Size', sizeOpts));
+        styleTab.appendChild(createCustomDropdown('fontWeight', 'Font Weight', weightOpts));
+        styleTab.appendChild(createCustomDropdown('bgColor', 'Pill Background', bgOpts));
 
         const updateBtnContainer = document.createElement('div');
         updateBtnContainer.style.display = 'flex';
@@ -632,7 +699,9 @@ function createCustomDropdown(id, label, options, onChange = null) {
         bottom: 145px;
         left: 16px;
         z-index: 9999;
-        background: rgba(30, 30, 30, 0.7);
+        background: var(--qt-bg-color, rgba(255,255,255,0.08));
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         border: 1px solid rgba(255,255,255,0.1);
         border-radius: 999px;
         padding: 4px 14px;
@@ -701,18 +770,13 @@ function createCustomDropdown(id, label, options, onChange = null) {
     let currentFormattedText = "";
 
     function applySettings() {
-        if (settings.mode === 'text') {
-            pill.classList.remove('visible');
-            const container = document.getElementById('qt-text-container');
-            if (container) {
-                container.style.color = settings.color || '#ffffff';
-                container.style.fontSize = settings.fontSize || '12px';
-            }
-        } else {
+        const pill = document.getElementById("mgn-queue-time-pill");
+        if (pill) {
+            pill.style.display = settings.mode === 'pill' ? 'flex' : 'none';
             pill.style.color = settings.color || '#ffffff';
-            pill.style.background = settings.bgColor || 'rgba(0, 0, 0, 0.7)';
-            pill.style.fontSize = settings.fontSize || '12px';
-            
+            pill.style.fontSize = settings.fontSize || '0.75rem';
+            pill.style.fontWeight = settings.fontWeight || '600';
+            pill.style.setProperty('--qt-bg-color', settings.bgColor || 'rgba(255,255,255,0.08)');
             // Fix svg size relative to font size
             const svg = pill.querySelector('svg');
             if (svg) {
