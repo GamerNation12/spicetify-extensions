@@ -33,7 +33,7 @@
         interval: null
     };
 
-    const QT_VERSION = "3.0.1";
+    const QT_VERSION = "3.0.2";
     let QT_CHANGELOG_LINES = [
         "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
         "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -84,6 +84,7 @@
                             await import(localUrl);
                             URL.revokeObjectURL(localUrl);
                             Spicetify.showNotification(`Successfully updated to v${latestVersion}!`);
+                            Spicetify.PopupModal.hide();
                         } catch (e) {
                             Spicetify.showNotification("Update failed. See console.", true);
                         }

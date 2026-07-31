@@ -1,6 +1,9 @@
 {
-  "version": "3.0.1",
+  "version": "3.0.2",
   "changelogs": {
+    "3.0.2": [
+      "Quality of Life improvement: The settings menu now automatically closes itself when an update finishes installing."
+    ],
     "3.0.1": [
       "Completely redesigned Settings Menu with gorgeous animations and brand new personalization features: Font Size and Pill Background Color!"
     ],
@@ -97,6 +100,6 @@
     ]
   },
   "changelog": [
-    "Completely redesigned Settings Menu with gorgeous animations and brand new personalization features: Font Size and Pill Background Color!"
+    "Quality of Life improvement: The settings menu now automatically closes itself when an update finishes installing."
   ]
 }
