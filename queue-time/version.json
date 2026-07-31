@@ -1,6 +1,9 @@
 {
-  "version": "3.0.2",
+  "version": "3.0.3",
   "changelogs": {
+    "3.0.3": [
+      "Total UI Overhaul: The Settings Menu now uses the Beautiful Release Date architecture, featuring 5 interactive CSS themes (Material 3, Spotify Native, Aurora, Fluent, and OLED)!"
+    ],
     "3.0.2": [
       "Quality of Life improvement: The settings menu now automatically closes itself when an update finishes installing."
     ],
@@ -100,6 +103,6 @@
     ]
   },
   "changelog": [
-    "Quality of Life improvement: The settings menu now automatically closes itself when an update finishes installing."
+    "Total UI Overhaul: The Settings Menu now uses the Beautiful Release Date architecture, featuring 5 interactive CSS themes (Material 3, Spotify Native, Aurora, Fluent, and OLED)!"
   ]
 }

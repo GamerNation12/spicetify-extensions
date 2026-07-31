@@ -33,7 +33,7 @@
         interval: null
     };
 
-    const QT_VERSION = "3.0.2";
+    const QT_VERSION = "3.0.3";
     let QT_CHANGELOG_LINES = [
         "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
         "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -44,7 +44,8 @@
         mode: 'text', // 'pill' or 'text'
         format: 'both', // 'both' (80 songs, 5hr 4m 16s), 'time' (5hr 4m 16s)
         calc: 'playlist', // 'queue' (80 limit) or 'playlist' (estimate full length)
-        color: '#ffffff'
+        color: '#ffffff',
+        menuTheme: 'm3'
     };
 
     let settings = { ...defaultSettings };
@@ -84,7 +85,7 @@
                             await import(localUrl);
                             URL.revokeObjectURL(localUrl);
                             Spicetify.showNotification(`Successfully updated to v${latestVersion}!`);
-                            Spicetify.PopupModal.hide();
+                            let m = document.getElementById('qt-settings-menu'); if (m) toggleSettingsMenu(m);
                         } catch (e) {
                             Spicetify.showNotification("Update failed. See console.", true);
                         }
@@ -193,155 +194,367 @@
         });
     }
 
-    // Settings Modal
-    function openSettings() {
-        const container = document.createElement("div");
-        container.innerHTML = `
-            <style>
-                @keyframes slideUpFade {
-                    0% { opacity: 0; transform: translateY(15px) scale(0.98); }
-                    100% { opacity: 1; transform: translateY(0) scale(1); }
-                }
-                @keyframes pulseGlow {
-                    0% { box-shadow: 0 0 0 0 rgba(30, 215, 96, 0.4); }
-                    70% { box-shadow: 0 0 0 10px rgba(30, 215, 96, 0); }
-                    100% { box-shadow: 0 0 0 0 rgba(30, 215, 96, 0); }
-                }
-                .qt-settings-wrapper {
-                    display: flex; flex-direction: column; gap: 14px; padding: 12px 8px;
-                    animation: slideUpFade 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-                }
-                .qt-setting-row { 
-                    display: flex; justify-content: space-between; align-items: center; 
-                    background: rgba(255,255,255,0.03); padding: 14px 18px; 
-                    border-radius: 12px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
-                    border: 1px solid rgba(255,255,255,0.02);
-                }
-                .qt-setting-row:hover { 
-                    background: rgba(255,255,255,0.08); 
-                    transform: translateY(-2px);
-                    border-color: rgba(255,255,255,0.1);
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                }
-                .qt-label {
-                    color: var(--spice-text); font-weight: 700; font-size: 14px;
-                    letter-spacing: -0.2px; text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-                }
-                .qt-select { 
-                    background: rgba(0,0,0,0.3); color: var(--spice-text); 
-                    border: 1px solid rgba(255,255,255,0.1); padding: 8px 14px; 
-                    border-radius: 8px; outline: none; cursor: pointer; 
-                    font-family: inherit; font-size: 13px; font-weight: 600;
-                    transition: all 0.2s ease;
-                    backdrop-filter: blur(4px);
-                }
-                .qt-select:hover { 
-                    background: rgba(0,0,0,0.5); 
-                    border-color: rgba(255,255,255,0.3); 
-                }
-                .qt-select:focus {
-                    border-color: #1ed760;
-                }
-                .qt-color-picker { 
-                    width: 36px; height: 36px; border: none; border-radius: 50%; 
-                    cursor: pointer; background: none; overflow: hidden; padding: 0; 
-                    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                }
-                .qt-color-picker:hover { transform: scale(1.15) rotate(5deg); }
-                .qt-color-picker::-webkit-color-swatch-wrapper { padding: 0; }
-                .qt-color-picker::-webkit-color-swatch { 
-                    border: none; border-radius: 50%; 
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.2); 
-                }
-                .qt-btn { 
-                    flex: 1; padding: 14px; border-radius: 10px; border: none; 
-                    font-weight: 800; font-size: 14px; cursor: pointer; 
-                    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); 
-                    color: #000; letter-spacing: 0.2px;
-                }
-                .qt-btn:active { transform: scale(0.96); }
-                .qt-save-btn { 
-                    background: linear-gradient(135deg, #1ed760, #179c45); 
-                    box-shadow: 0 4px 15px rgba(30, 215, 96, 0.3);
-                }
-                .qt-save-btn:hover { 
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba(30, 215, 96, 0.4);
-                    animation: pulseGlow 1.5s infinite;
-                }
-                .qt-update-btn { 
-                    background: rgba(255,255,255,0.05); color: var(--spice-text); 
-                    border: 1px solid rgba(255,255,255,0.1);
-                    backdrop-filter: blur(4px);
-                }
-                .qt-update-btn:hover {
-                    background: rgba(255,255,255,0.1);
-                    border-color: rgba(255,255,255,0.2);
-                    transform: translateY(-2px);
-                }
-            </style>
-            <div class="qt-settings-wrapper">
-                <div class="qt-setting-row" style="animation-delay: 0.05s;">
-                    <label class="qt-label">Display Mode</label>
-                    <select id="qt-mode" class="qt-select">
-                        <option value="pill" ${settings.mode === 'pill' ? 'selected' : ''}>Floating Pill</option>
-                        <option value="text" ${settings.mode === 'text' ? 'selected' : ''}>In-Queue Text</option>
-                    </select>
-                </div>
 
-                <div class="qt-setting-row" style="animation-delay: 0.1s;">
-                    <label class="qt-label">Text Format</label>
-                    <select id="qt-format" class="qt-select">
-                        <option value="both" ${settings.format === 'both' ? 'selected' : ''}>Songs & Time (e.g. 80 songs • 5hr)</option>
-                        <option value="time" ${settings.format === 'time' ? 'selected' : ''}>Time Only (e.g. 5hr 4m 16s)</option>
-                    </select>
-                </div>
-                
-                <div class="qt-setting-row" style="animation-delay: 0.15s;">
-                    <label class="qt-label">Font Size</label>
-                    <select id="qt-fontsize" class="qt-select">
-                        <option value="11px" ${settings.fontSize === '11px' ? 'selected' : ''}>Small</option>
-                        <option value="12px" ${(!settings.fontSize || settings.fontSize === '12px') ? 'selected' : ''}>Medium</option>
-                        <option value="14px" ${settings.fontSize === '14px' ? 'selected' : ''}>Large</option>
-                        <option value="16px" ${settings.fontSize === '16px' ? 'selected' : ''}>Extra Large</option>
-                    </select>
-                </div>
+function queueTimeCSS() {
+    const styleId = 'qt-settings-style';
+    if (document.getElementById(styleId)) return null;
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.innerHTML = `
+      /* BASE CSS (Structure & Layout) */
+      #qt-settings-menu { 
+        display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); 
+        padding: 24px; flex-direction: column; width: min(90vw, 440px); z-index: 10001; gap: 16px; 
+        box-sizing: border-box; opacity: 0;
+        transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s cubic-bezier(0.2, 0, 0, 1);
+        font-family: var(--font-family, inherit);
+      }
+      #qt-settings-menu.brd-m3-animate { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      #qt-settings-menu * { box-sizing: border-box; }
+      #qt-settings-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; opacity: 0; transition: opacity 0.25s linear; backdrop-filter: blur(4px); }
+      #qt-settings-backdrop.brd-m3-animate { opacity: 1; }
+      
+      #qt-settings-menu .brd-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+      #qt-settings-menu h2 { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.01em; margin: 0; }
+      #qt-settings-menu .brd-close { border: none; border-radius: 50%; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; transition: background 0.2s, color 0.2s; font-size: 14px; }
+      
+      .Dropdown-container { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-weight: 500; font-size: 0.9rem; gap: 12px; }
+      .brd-select {
+        position: relative; min-width: 180px; border-radius: 8px; padding: 8px 30px 8px 12px; 
+        font-family: inherit; cursor: pointer; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: space-between; gap: 8px;
+        transition: border-color 0.18s ease, background 0.18s ease;
+      }
+      .brd-select-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .brd-options {
+        position: absolute; inset-inline: 0; top: calc(100% + 6px); border-radius: 8px; padding: 4px; z-index: 10; max-height: 220px; overflow-y: auto;
+      }
+      .brd-option { padding: 8px 12px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+      
+      /* Switches */
+      .brd-switch { position: relative; display: inline-block; width: 52px; height: 32px; flex-shrink: 0; }
+      .brd-switch input { opacity: 0; width: 0; height: 0; }
+      .brd-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; transition: .25s cubic-bezier(0.2, 0, 0, 1); }
+      .brd-slider:before { position: absolute; content: ""; transition: .25s cubic-bezier(0.2, 0, 0, 1); }
+      
+      /* Tabs */
+      .brd-tabs-header { display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+      .brd-tab-btn { display: flex; align-items: center; justify-content: center; gap: 6px; background: transparent; border: none; font-weight: 600; font-size: 0.85rem; padding: 6px 12px; cursor: pointer; border-radius: 8px; transition: 0.2s; flex: 1; text-align: center; }
+      .brd-tab-content { display: none; flex-direction: column; animation: brdFadeIn 0.3s cubic-bezier(0.2, 0, 0, 1); }
+      .brd-tab-content.brd-active { display: flex; }
+      @keyframes brdFadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-                <div class="qt-setting-row" style="animation-delay: 0.2s;">
-                    <label class="qt-label">Text Color</label>
-                    <input type="color" id="qt-color" class="qt-color-picker" value="${settings.color || '#ffffff'}">
-                </div>
-                
-                <div class="qt-setting-row" style="animation-delay: 0.25s;">
-                    <label class="qt-label">Background Color (Pill Mode)</label>
-                    <input type="color" id="qt-bg-color" class="qt-color-picker" value="${settings.bgColor || '#000000'}">
-                </div>
+      
+      .brd-update-btn-base { transition: 0.2s; font-family: inherit; font-size: 0.85rem; font-weight: 600; }
+      #qt-settings-menu.theme-m3 .brd-update-btn-base { background: rgba(30,215,96,1); color: #000; }
+      #qt-settings-menu.theme-m3 .brd-update-btn-base:hover { transform: scale(1.02); filter: brightness(1.1); }
 
-                <div style="display: flex; gap: 14px; margin-top: 12px; animation-delay: 0.3s; opacity: 0; animation: slideUpFade 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 0.3s;">
-                    <button id="qt-save" class="qt-btn qt-save-btn">Save & Apply</button>
-                    <button id="qt-update-btn" class="qt-btn qt-update-btn">Check Updates</button>
-                </div>
-                <div style="text-align: center; font-size: 11px; color: var(--spice-subtext); margin-top: 6px; opacity: 0.4; font-weight: 700; letter-spacing: 0.5px;">QUEUE TIME v${QT_VERSION}</div>
-            </div>
-        `;
+      /* ========================================================
+         THEME 1: MATERIAL 3 (Default Android look)
+         ======================================================== */
+      #qt-settings-menu.theme-m3 { background: #1c1b1f; color: #e6e1e5; border-radius: 28px; box-shadow: 0px 8px 24px rgba(0,0,0,0.4); border: none; }
+      #qt-settings-menu.theme-m3 .brd-close { background: rgba(255,255,255,0.05); color: #e6e1e5; }
+      #qt-settings-menu.theme-m3 .brd-close:hover { background: rgba(255,255,255,0.15); }
+      #qt-settings-menu.theme-m3 .brd-select { background: #49454f; color: #e6e1e5; border: 1px solid #938f99; }
+      #qt-settings-menu.theme-m3 .brd-select:hover { border-color: #e6e1e5; background: #605d66; }
+      #qt-settings-menu.theme-m3 .brd-select.brd-open { border-color: #1ed760; background: #323035; }
+      #qt-settings-menu.theme-m3 .brd-options { background: #323035; box-shadow: 0 4px 12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1); }
+      #qt-settings-menu.theme-m3 .brd-option { color: #c8c5ca; }
+      #qt-settings-menu.theme-m3 .brd-option:hover { background: rgba(255,255,255,0.08); color: #e6e1e5; }
+      #qt-settings-menu.theme-m3 .brd-option.brd-selected { background: rgba(30,215,96,0.2); color: #1ed760; }
+      #qt-settings-menu.theme-m3 .brd-slider { background-color: #49454f; border: 2px solid #938f99; border-radius: 32px; }
+      #qt-settings-menu.theme-m3 .brd-slider:before { height: 16px; width: 16px; left: 6px; top: 6px; background-color: #938f99; border-radius: 50%; }
+      #qt-settings-menu.theme-m3 .brd-switch input:checked + .brd-slider { background-color: #1ed760; border-color: #1ed760; }
+      #qt-settings-menu.theme-m3 .brd-switch input:checked + .brd-slider:before { transform: translateX(20px) scale(1.5); background-color: #000; }
+      #qt-settings-menu.theme-m3 .brd-tab-btn { color: #938f99; }
+      #qt-settings-menu.theme-m3 .brd-tab-btn:hover { background: rgba(255,255,255,0.05); color: #e6e1e5; }
+      #qt-settings-menu.theme-m3 .brd-tab-btn.brd-active { background: rgba(30,215,96,0.1); color: #1ed760; }
 
-        Spicetify.PopupModal.display({
-            title: "Queue Time Settings",
-            content: container,
-            isLarge: false
+      /* ========================================================
+         THEME 2: SPOTIFY NATIVE (Premium seamless integration)
+         ======================================================== */
+      #qt-settings-menu.theme-spotify { background: #242424; color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); font-family: 'CircularSp', 'CircularSp-Arab', 'CircularSp-Hebr', 'CircularSp-Cyrl', 'CircularSp-Grek', 'CircularSp-Deva', var(--fallback-fonts, sans-serif); }
+      #qt-settings-menu.theme-spotify .brd-close { background: transparent; color: #b3b3b3; }
+      #qt-settings-menu.theme-spotify .brd-close:hover { background: #333; color: #fff; }
+      #qt-settings-menu.theme-spotify .brd-select { background: #242424; color: #fff; border: 1px solid #555; border-radius: 4px; font-weight: 400; }
+      #qt-settings-menu.theme-spotify .brd-select:hover { border-color: #888; background: #2a2a2a; }
+      #qt-settings-menu.theme-spotify .brd-select.brd-open { border-color: #fff; background: #333; }
+      #qt-settings-menu.theme-spotify .brd-options { background: #282828; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border-radius: 4px; }
+      #qt-settings-menu.theme-spotify .brd-option { color: #b3b3b3; border-radius: 2px; }
+      #qt-settings-menu.theme-spotify .brd-option:hover { background: #333; color: #fff; }
+      #qt-settings-menu.theme-spotify .brd-option.brd-selected { color: #1ed760; background: rgba(30,215,96,0.1); }
+      /* Spotify Switch */
+      #qt-settings-menu.theme-spotify .brd-switch { width: 40px; height: 24px; }
+      #qt-settings-menu.theme-spotify .brd-slider { background-color: #5a5a5a; border-radius: 24px; border: none; }
+      #qt-settings-menu.theme-spotify .brd-slider:before { height: 18px; width: 18px; left: 3px; top: 3px; background-color: #fff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+      #qt-settings-menu.theme-spotify .brd-switch input:checked + .brd-slider { background-color: #1ed760; }
+      #qt-settings-menu.theme-spotify .brd-switch input:checked + .brd-slider:before { transform: translateX(16px); background-color: #fff; }
+      #qt-settings-menu.theme-spotify .brd-tab-btn { color: #b3b3b3; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 500px; padding: 8px; }
+      #qt-settings-menu.theme-spotify .brd-tab-btn:hover { color: #fff; }
+      #qt-settings-menu.theme-spotify .brd-tab-btn.brd-active { background: #333; color: #fff; }
+      #qt-settings-menu.theme-spotify #brd-update-btn { background: #1ed760 !important; color: #000 !important; border-radius: 500px !important; text-transform: uppercase; font-weight: 700 !important; font-size: 0.8rem; letter-spacing: 0.1em; transform: scale(1); transition: transform 0.1s; }
+      #qt-settings-menu.theme-spotify #brd-update-btn:hover { transform: scale(1.04); background: #1fdf64 !important; }
+
+      /* ========================================================
+         THEME 3: AURORA GRADIENTS (Ethereal flowing colors)
+         ======================================================== */
+      #qt-settings-menu.theme-aurora { 
+        background: linear-gradient(135deg, #1f005c, #5b0060, #870160, #ac255e, #ca485c, #e16b5c, #f39060, #ffb56b);
+        background-size: 300% 300%; animation: auroraShift 12s ease infinite;
+        color: #fff; border-radius: 24px; box-shadow: 0 12px 40px rgba(172,37,94,0.4); border: 1px solid rgba(255,255,255,0.2); 
+      }
+      @keyframes auroraShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+      #qt-settings-menu.theme-aurora .brd-close { background: rgba(255,255,255,0.1); color: #fff; }
+      #qt-settings-menu.theme-aurora .brd-close:hover { background: rgba(255,255,255,0.3); }
+      #qt-settings-menu.theme-aurora .brd-select { background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); }
+      #qt-settings-menu.theme-aurora .brd-select:hover { background: rgba(0,0,0,0.5); }
+      #qt-settings-menu.theme-aurora .brd-select.brd-open { border-color: #fff; }
+      #qt-settings-menu.theme-aurora .brd-options { background: rgba(30,0,60,0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2); }
+      #qt-settings-menu.theme-aurora .brd-option { color: rgba(255,255,255,0.8); }
+      #qt-settings-menu.theme-aurora .brd-option:hover { background: rgba(255,255,255,0.15); color: #fff; }
+      #qt-settings-menu.theme-aurora .brd-option.brd-selected { background: rgba(255,255,255,0.3); color: #fff; font-weight: bold; }
+      #qt-settings-menu.theme-aurora .brd-switch { width: 50px; height: 28px; }
+      #qt-settings-menu.theme-aurora .brd-slider { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; }
+      #qt-settings-menu.theme-aurora .brd-slider:before { height: 20px; width: 20px; left: 3px; top: 3px; background: rgba(255,255,255,0.6); border-radius: 50%; }
+      #qt-settings-menu.theme-aurora .brd-switch input:checked + .brd-slider { background: rgba(255,255,255,0.4); border-color: #fff; }
+      #qt-settings-menu.theme-aurora .brd-switch input:checked + .brd-slider:before { transform: translateX(22px); background: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.8); }
+      #qt-settings-menu.theme-aurora .brd-tab-btn { color: rgba(255,255,255,0.6); }
+      #qt-settings-menu.theme-aurora .brd-tab-btn.brd-active { background: rgba(255,255,255,0.2); color: #fff; box-shadow: inset 0 0 10px rgba(255,255,255,0.1); }
+      #qt-settings-menu.theme-aurora #brd-update-btn { background: rgba(255,255,255,0.9) !important; color: #870160 !important; border-radius: 12px !important; font-weight: 800 !important; }
+
+      /* ========================================================
+         THEME 4: WINDOWS 11 FLUENT (Acrylic blur & glass)
+         ======================================================== */
+      #qt-settings-menu.theme-fluent { background: rgba(30, 30, 30, 0.6); backdrop-filter: blur(40px) saturate(150%); color: #fff; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+      #qt-settings-menu.theme-fluent .brd-close { background: transparent; color: #fff; border-radius: 6px; }
+      #qt-settings-menu.theme-fluent .brd-close:hover { background: rgba(255,255,255,0.1); }
+      #qt-settings-menu.theme-fluent .brd-select { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-bottom: 2px solid rgba(255,255,255,0.2); border-radius: 6px; }
+      #qt-settings-menu.theme-fluent .brd-select:hover { background: rgba(255,255,255,0.08); border-bottom-color: rgba(255,255,255,0.4); }
+      #qt-settings-menu.theme-fluent .brd-select.brd-open { border-bottom-color: #60cdff; background: rgba(255,255,255,0.1); }
+      #qt-settings-menu.theme-fluent .brd-options { background: rgba(40,40,40,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; }
+      #qt-settings-menu.theme-fluent .brd-option { color: #eee; border-radius: 4px; }
+      #qt-settings-menu.theme-fluent .brd-option:hover { background: rgba(255,255,255,0.06); }
+      #qt-settings-menu.theme-fluent .brd-option.brd-selected { background: rgba(96,205,255,0.1); color: #60cdff; position: relative; }
+      #qt-settings-menu.theme-fluent .brd-option.brd-selected::before { content: ""; position: absolute; left: 2px; top: 20%; bottom: 20%; width: 3px; background: #60cdff; border-radius: 2px; }
+      #qt-settings-menu.theme-fluent .brd-switch { width: 44px; height: 22px; }
+      #qt-settings-menu.theme-fluent .brd-slider { background-color: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 11px; }
+      #qt-settings-menu.theme-fluent .brd-slider:before { height: 14px; width: 14px; left: 3px; top: 3px; background-color: #ccc; border-radius: 50%; }
+      #qt-settings-menu.theme-fluent .brd-switch input:checked + .brd-slider { background-color: #60cdff; border-color: #60cdff; }
+      #qt-settings-menu.theme-fluent .brd-switch input:checked + .brd-slider:before { transform: translateX(22px); background-color: #000; }
+      #qt-settings-menu.theme-fluent .brd-tab-btn { color: #ccc; border-radius: 6px; }
+      #qt-settings-menu.theme-fluent .brd-tab-btn:hover { background: rgba(255,255,255,0.05); }
+      #qt-settings-menu.theme-fluent .brd-tab-btn.brd-active { background: rgba(255,255,255,0.1); color: #fff; }
+      #qt-settings-menu.theme-fluent #brd-update-btn { background: #60cdff !important; color: #000 !important; border-radius: 6px !important; font-weight: 600 !important; }
+
+      /* ========================================================
+         THEME 5: PURE OLED (Pitch black, white lines)
+         ======================================================== */
+
+      #qt-settings-menu.theme-oled { background: #000000; color: #ffffff; border-radius: 0; box-shadow: none; border: 1px solid #333; }
+      #qt-settings-menu.theme-oled .brd-close { background: #000; border: 1px solid #333; color: #fff; border-radius: 0; }
+      #qt-settings-menu.theme-oled .brd-close:hover { background: #fff; color: #000; }
+      #qt-settings-menu.theme-oled .brd-select { background: #000; color: #fff; border: 1px solid #555; border-radius: 0; }
+      #qt-settings-menu.theme-oled .brd-select:hover { border-color: #fff; }
+      #qt-settings-menu.theme-oled .brd-select.brd-open { border-color: #fff; background: #111; }
+      #qt-settings-menu.theme-oled .brd-options { background: #000; border: 1px solid #555; border-radius: 0; box-shadow: none; }
+      #qt-settings-menu.theme-oled .brd-option { color: #aaa; border-radius: 0; }
+      #qt-settings-menu.theme-oled .brd-option:hover { background: #111; color: #fff; }
+      #qt-settings-menu.theme-oled .brd-option.brd-selected { background: #fff; color: #000; }
+      #qt-settings-menu.theme-oled .brd-switch { width: 40px; height: 20px; }
+      #qt-settings-menu.theme-oled .brd-slider { background-color: #000; border: 1px solid #555; border-radius: 0; }
+      #qt-settings-menu.theme-oled .brd-slider:before { height: 12px; width: 18px; left: 2px; top: 3px; background-color: #555; border-radius: 0; }
+      #qt-settings-menu.theme-oled .brd-switch input:checked + .brd-slider { border-color: #fff; }
+      #qt-settings-menu.theme-oled .brd-switch input:checked + .brd-slider:before { transform: translateX(16px); background-color: #fff; }
+      #qt-settings-menu.theme-oled .brd-tab-btn { color: #555; border-radius: 0; }
+      #qt-settings-menu.theme-oled .brd-tab-btn:hover { color: #fff; }
+      #qt-settings-menu.theme-oled .brd-tab-btn.brd-active { background: #fff; color: #000; }
+      #qt-settings-menu.theme-oled #brd-update-btn { background: #000 !important; color: #fff !important; border: 1px solid #fff !important; border-radius: 0 !important; font-weight: 400 !important; }
+      #qt-settings-menu.theme-oled #brd-update-btn:hover { background: #fff !important; color: #000 !important; }
+    `;
+    return style;
+  }
+
+function createCustomDropdown(id, label, options, onChange = null) {
+    const div = document.createElement('div');
+    div.className = 'Dropdown-container';
+
+    const stored = settings[id] ?? options[0]?.value;
+    const labelEl = document.createElement('label');
+    labelEl.textContent = label;
+
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'relative';
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'brd-select';
+
+    const valueSpan = document.createElement('span');
+    valueSpan.className = 'brd-select-label';
+    valueSpan.textContent = options.find(o => o.value === stored)?.text ?? options[0]?.text ?? '';
+
+    const chevron = document.createElement('div');
+    chevron.className = 'brd-chevron';
+    chevron.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+    chevron.style.display = 'flex';
+    chevron.style.alignItems = 'center';
+    chevron.style.transition = 'transform 0.2s';
+    
+    button.appendChild(valueSpan);
+    button.appendChild(chevron);
+
+    const list = document.createElement('div');
+    list.className = 'brd-options';
+    list.style.display = 'none';
+
+    const closeAll = () => {
+      button.classList.remove('brd-open');
+      list.style.display = 'none';
+      chevron.style.transform = 'rotate(0deg)';
+      document.removeEventListener('click', onDocClick);
+    };
+
+    const onDocClick = (e) => {
+      if (!wrapper.contains(e.target)) closeAll();
+    };
+
+    options.forEach(o => {
+      const opt = document.createElement('div');
+      opt.className = 'brd-option' + (o.value === stored ? ' brd-selected' : '');
+      opt.textContent = o.text;
+      opt.onclick = () => {
+        settings[id] = o.value; saveSettings();
+        valueSpan.textContent = o.text;
+        list.querySelectorAll('.brd-option').forEach(el => el.classList.remove('brd-selected'));
+        opt.classList.add('brd-selected');
+        closeAll();
+        if (onChange) onChange(o.value);
+        else applySettings();
+      };
+      list.appendChild(opt);
+    });
+
+    button.onclick = () => {
+      const open = list.style.display === 'block';
+      if (open) {
+        closeAll();
+      } else {
+        document.querySelectorAll('.brd-options').forEach(el => {
+          if (el !== list) {
+            el.style.display = 'none';
+            el.previousElementSibling.classList.remove('brd-open');
+            const otherChevron = el.previousElementSibling.querySelector('.brd-chevron');
+            if (otherChevron) otherChevron.style.transform = 'rotate(0deg)';
+          }
         });
+        button.classList.add('brd-open');
+        list.style.display = 'block';
+        chevron.style.transform = 'rotate(180deg)';
+        setTimeout(() => document.addEventListener('click', onDocClick), 10);
+      }
+    };
 
-        container.querySelector("#qt-save").onclick = () => {
-            settings.mode = container.querySelector("#qt-mode").value;
-            settings.format = container.querySelector("#qt-format").value;
-            settings.color = container.querySelector("#qt-color").value;
-            settings.fontSize = container.querySelector("#qt-fontsize").value;
-            settings.bgColor = container.querySelector("#qt-bg-color").value;
-            saveSettings();
-            Spicetify.PopupModal.hide();
+    wrapper.appendChild(button);
+    wrapper.appendChild(list);
+
+    div.appendChild(labelEl);
+    div.appendChild(wrapper);
+    return div;
+  }
+
+
+    function toggleSettingsMenu(menu) {
+        const backdrop = document.getElementById('qt-settings-backdrop');
+        const isHidden = menu.style.display === 'none' || !menu.classList.contains('brd-m3-animate');
+        
+        const close = () => {
+            menu.classList.remove('brd-m3-animate');
+            backdrop.classList.remove('brd-m3-animate');
+            setTimeout(() => {
+                menu.style.display = 'none';
+                backdrop.style.display = 'none';
+                backdrop.onclick = null;
+            }, 250);
         };
         
-        const updateBtn = container.querySelector("#qt-update-btn");
+        backdrop.onclick = close;
+        const closeBtn = menu.querySelector('.brd-close');
+        if (closeBtn) closeBtn.onclick = close;
+
+        if (isHidden) {
+            backdrop.style.display = 'block';
+            menu.style.display = 'flex';
+            void menu.offsetWidth;
+            backdrop.classList.add('brd-m3-animate');
+            menu.classList.add('brd-m3-animate');
+        } else {
+            close();
+        }
+    }
+
+    function createSettingsMenu() {
+        if (document.getElementById('qt-settings-menu')) document.getElementById('qt-settings-menu').remove();
+        if (!document.getElementById('qt-settings-backdrop')) {
+            const bd = document.createElement('div');
+            bd.id = 'qt-settings-backdrop';
+            bd.className = 'brd-backdrop';
+            bd.style.display = 'none';
+            bd.style.position = 'fixed';
+            bd.style.inset = '0';
+            bd.style.background = 'rgba(0,0,0,0.5)';
+            bd.style.zIndex = '10000';
+            bd.style.opacity = '0';
+            bd.style.transition = 'opacity 0.25s linear';
+            bd.style.backdropFilter = 'blur(4px)';
+            document.body.appendChild(bd);
+        }
+        
+        const menu = document.createElement('div');
+        menu.id = 'qt-settings-menu';
+        menu.className = `theme-${settings.menuTheme || 'm3'}`;
+
+        const header = document.createElement('div');
+        header.className = 'brd-header';
+        header.innerHTML = `<div style="display:flex;align-items:baseline;gap:8px;"><h2>Queue Time Settings</h2><span style="opacity:0.5;font-size:0.75rem;font-weight:600;">v${QT_VERSION}</span></div><button class="brd-close" aria-label="Close">&#10005;</button>`;
+        menu.appendChild(header);
+
+        // Options
+        const modeOpts = [
+            { value: "pill", text: "Floating Pill" },
+            { value: "text", text: "In-Queue Text" }
+        ];
+        const formatOpts = [
+            { value: "both", text: "Songs & Time" },
+            { value: "time", text: "Time Only" }
+        ];
+        const themeOpts = [
+            { value: "m3", text: "Material 3" },
+            { value: "spotify", text: "Spotify Native" },
+            { value: "aurora", text: "Aurora Gradients" },
+            { value: "fluent", text: "Windows 11 Fluent" },
+            { value: "oled", text: "Pure OLED" }
+        ];
+
+        menu.appendChild(createCustomDropdown('mode', 'Display Mode', modeOpts));
+        menu.appendChild(createCustomDropdown('format', 'Text Format', formatOpts));
+        menu.appendChild(createCustomDropdown('menuTheme', 'Menu Theme', themeOpts, (newTheme) => {
+            menu.className = `theme-${newTheme} brd-m3-animate`;
+            settings.menuTheme = newTheme;
+            saveSettings();
+        }));
+
+        const updateBtnContainer = document.createElement('div');
+        updateBtnContainer.style.display = 'flex';
+        updateBtnContainer.style.justifyContent = 'center';
+        updateBtnContainer.style.marginTop = '16px';
+        const updateBtn = document.createElement('button');
+        updateBtn.id = 'brd-update-btn';
+        updateBtn.className = 'brd-update-btn-base';
+        updateBtn.style.padding = '8px 16px';
+        updateBtn.style.cursor = 'pointer';
+        updateBtn.textContent = 'Check for Updates';
+        updateBtn.style.border = 'none';
+        updateBtn.style.borderRadius = '999px';
+        
         updateBtn.onclick = () => {
             updateBtn.textContent = 'Checking...';
             updateBtn.disabled = true;
@@ -356,6 +569,10 @@
                 }, 1500);
             });
         };
+        updateBtnContainer.appendChild(updateBtn);
+        menu.appendChild(updateBtnContainer);
+
+        document.body.appendChild(menu);
     }
 
     // Robust Menu Registration
@@ -475,7 +692,7 @@
 
     let pill = document.createElement('div');
     pill.id = 'mgn-queue-time-pill';
-    pill.onclick = openSettings;
+    pill.onclick = () => { let m = document.getElementById('qt-settings-menu'); if (!m) { createSettingsMenu(); m = document.getElementById('qt-settings-menu'); } toggleSettingsMenu(m); };
     pill.title = "Queue Time Settings";
     pill.innerHTML = `<svg viewBox="0 0 16 16"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg><span id="mgn-qt-text"></span>`;
     document.body.appendChild(pill);
@@ -505,6 +722,10 @@
             }
         }
     }
+
+    const css = queueTimeCSS();
+    if (css) document.head.appendChild(css);
+    createSettingsMenu();
 
     applySettings(); // initial
     let cachedPlaylistLengths = {};
@@ -614,7 +835,7 @@
                             gearBtn.className = 'mgn-qt-icon-btn';
                             gearBtn.title = 'Settings';
                             gearBtn.innerHTML = '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>';
-                            gearBtn.onclick = openSettings;
+                            gearBtn.onclick = () => { let m = document.getElementById('qt-settings-menu'); if (!m) { createSettingsMenu(); m = document.getElementById('qt-settings-menu'); } toggleSettingsMenu(m); };
                             injectDiv.appendChild(gearBtn);
                             
                             // 3. Save Playlist
