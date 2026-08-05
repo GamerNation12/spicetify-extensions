@@ -1,6 +1,9 @@
 {
-  "version": "3.0.7",
+  "version": "3.0.8",
   "changelogs": {
+    "3.0.8": [
+      "Bug Fix: Increased the delay before auto-navigating to the newly created playlist. This gives the Spotify Desktop client enough time to sync the playlist from the servers so it doesn't say 'Couldn't find that playlist'."
+    ],
     "3.0.7": [
       "QoL: The extension will now automatically open and navigate to the newly created playlist after you save the queue!"
     ],
@@ -116,6 +119,6 @@
     ]
   },
   "changelog": [
-    "QoL: The extension will now automatically open and navigate to the newly created playlist after you save the queue!"
+    "Bug Fix: Increased the delay before auto-navigating to the newly created playlist. This gives the Spotify Desktop client enough time to sync the playlist from the servers so it doesn't say 'Couldn't find that playlist'."
   ]
 }
