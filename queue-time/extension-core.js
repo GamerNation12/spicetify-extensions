@@ -33,7 +33,7 @@
         interval: null
     };
 
-    const QT_VERSION = "3.0.6";
+    const QT_VERSION = "3.0.7";
     let QT_CHANGELOG_LINES = [
         "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
         "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -722,7 +722,12 @@ function createCustomDropdown(id, label, options, onChange = null) {
                 const chunk = uris.slice(i, i + 100);
                 await Spicetify.CosmosAsync.post(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, { uris: chunk });
             }
-            Spicetify.showNotification("Successfully Saved Queue!");
+            Spicetify.showNotification("Successfully Saved Queue! Opening playlist...");
+            setTimeout(() => {
+                if (Spicetify.Platform?.History?.push) {
+                    Spicetify.Platform.History.push(`/playlist/${playlist.id}`);
+                }
+            }, 1000);
         } catch (e) {
             console.error("[Queue Time] Save failed:", e);
             Spicetify.showNotification("Failed to save Queue (check console)", true);

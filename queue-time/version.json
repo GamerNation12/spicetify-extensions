@@ -1,6 +1,9 @@
 {
-  "version": "3.0.6",
+  "version": "3.0.7",
   "changelogs": {
+    "3.0.7": [
+      "QoL: The extension will now automatically open and navigate to the newly created playlist after you save the queue!"
+    ],
     "3.0.6": [
       "Bug Fix: Fixed an issue where saving the queue to a playlist would incorrectly save an empty playlist."
     ],
@@ -113,6 +116,6 @@
     ]
   },
   "changelog": [
-    "Bug Fix: Fixed an issue where saving the queue to a playlist would incorrectly save an empty playlist."
+    "QoL: The extension will now automatically open and navigate to the newly created playlist after you save the queue!"
   ]
 }
