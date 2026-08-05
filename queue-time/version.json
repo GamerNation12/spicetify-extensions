@@ -1,6 +1,9 @@
 {
-  "version": "3.0.5",
+  "version": "3.0.6",
   "changelogs": {
+    "3.0.6": [
+      "Bug Fix: Fixed an issue where saving the queue to a playlist would incorrectly save an empty playlist."
+    ],
     "3.0.5": [
       "Bug Fix: Fixed a critical error that prevented the Queue Time Settings from opening via the top bar or profile menu.",
       "Bug Fix: Fixed an issue where the settings menu would reopen automatically after installing an update."
@@ -110,7 +113,6 @@
     ]
   },
   "changelog": [
-    "Bug Fix: Fixed a critical error that prevented the Queue Time Settings from opening via the top bar or profile menu.",
-    "Bug Fix: Fixed an issue where the settings menu would reopen automatically after installing an update."
+    "Bug Fix: Fixed an issue where saving the queue to a playlist would incorrectly save an empty playlist."
   ]
 }

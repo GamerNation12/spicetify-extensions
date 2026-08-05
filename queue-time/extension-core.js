@@ -33,7 +33,7 @@
         interval: null
     };
 
-    const QT_VERSION = "3.0.5";
+    const QT_VERSION = "3.0.6";
     let QT_CHANGELOG_LINES = [
         "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
         "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -684,8 +684,23 @@ function createCustomDropdown(id, label, options, onChange = null) {
         }, 1000);
     }
 
-    // Save Queue to Playlist Logic
-    async function saveQueueToPlaylist(nextTracks) {
+    async function saveQueueToPlaylist() {
+        let nextTracks = [];
+        let stateQueue = Spicetify.Platform?.PlayerAPI?.getState()?.queue?.nextTracks;
+        if (stateQueue && stateQueue.length > 0) {
+            nextTracks = stateQueue;
+        } else if (Spicetify.Queue?.nextTracks?.length > 0) {
+            nextTracks = Spicetify.Queue.nextTracks;
+        }
+        
+        if (nextTracks.length > 0) {
+            let delimiterIndex = nextTracks.findIndex(t => t.uri === 'spotify:delimiter' || t.contextTrack?.uri === 'spotify:delimiter');
+            if (delimiterIndex !== -1) {
+                nextTracks = nextTracks.slice(0, delimiterIndex);
+            }
+            nextTracks = nextTracks.filter(t => t.provider !== 'autoplay' && !String(t.uri).includes('spotify:station:'));
+        }
+
         if (!nextTracks || nextTracks.length === 0) {
             Spicetify.showNotification("Queue is empty!");
             return;
@@ -929,7 +944,7 @@ function createCustomDropdown(id, label, options, onChange = null) {
                             saveBtn.className = 'mgn-qt-icon-btn';
                             saveBtn.title = 'Save Queue to Playlist';
                             saveBtn.innerHTML = '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M14 2H2v12h12V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2z"></path><path d="M8 4.5a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 .5-.5z"></path></svg>';
-                            saveBtn.onclick = () => saveQueueToPlaylist(nextTracks);
+                            saveBtn.onclick = () => saveQueueToPlaylist();
                             injectDiv.appendChild(saveBtn);
 
                             h2.appendChild(injectDiv);
