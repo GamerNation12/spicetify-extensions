@@ -33,7 +33,7 @@
         interval: null
     };
 
-    const QT_VERSION = "3.0.4";
+    const QT_VERSION = "3.0.5";
     let QT_CHANGELOG_LINES = [
         "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
         "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -85,7 +85,16 @@
                             await import(localUrl);
                             URL.revokeObjectURL(localUrl);
                             Spicetify.showNotification(`Successfully updated to v${latestVersion}!`);
-                            let m = document.getElementById('qt-settings-menu'); if (m) toggleSettingsMenu(m);
+                            let m = document.getElementById('qt-settings-menu'); 
+                            let bd = document.getElementById('qt-settings-backdrop');
+                            if (m) {
+                                m.classList.remove('brd-m3-animate');
+                                m.style.display = 'none';
+                            }
+                            if (bd) {
+                                bd.classList.remove('brd-m3-animate');
+                                bd.style.display = 'none';
+                            }
                         } catch (e) {
                             Spicetify.showNotification("Update failed. See console.", true);
                         }
@@ -462,6 +471,23 @@ function createCustomDropdown(id, label, options, onChange = null) {
   }
 
 
+    function openSettings() {
+        let m = document.getElementById('qt-settings-menu');
+        if (!m) {
+            createSettingsMenu();
+            m = document.getElementById('qt-settings-menu');
+        }
+        
+        const backdrop = document.getElementById('qt-settings-backdrop');
+        if (m && backdrop) {
+            backdrop.style.display = 'block';
+            m.style.display = 'flex';
+            void m.offsetWidth;
+            backdrop.classList.add('brd-m3-animate');
+            m.classList.add('brd-m3-animate');
+        }
+    }
+
     function toggleSettingsMenu(menu) {
         const backdrop = document.getElementById('qt-settings-backdrop');
         const isHidden = menu.style.display === 'none' || !menu.classList.contains('brd-m3-animate');
@@ -481,11 +507,8 @@ function createCustomDropdown(id, label, options, onChange = null) {
         if (closeBtn) closeBtn.onclick = close;
 
         if (isHidden) {
-            backdrop.style.display = 'block';
-            menu.style.display = 'flex';
-            void menu.offsetWidth;
-            backdrop.classList.add('brd-m3-animate');
-            menu.classList.add('brd-m3-animate');
+            openSettings();
+            backdrop.onclick = close;
         } else {
             close();
         }
@@ -737,7 +760,6 @@ function createCustomDropdown(id, label, options, onChange = null) {
         margin-left: auto;
         font-size: 0.875rem;
         font-weight: 400;
-        opacity: 0.7;
         transition: opacity 0.2s;
         padding-right: 16px;
     }

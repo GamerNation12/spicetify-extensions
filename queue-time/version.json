@@ -1,6 +1,10 @@
 {
-  "version": "3.0.4",
+  "version": "3.0.5",
   "changelogs": {
+    "3.0.5": [
+      "Bug Fix: Fixed a critical error that prevented the Queue Time Settings from opening via the top bar or profile menu.",
+      "Bug Fix: Fixed an issue where the settings menu would reopen automatically after installing an update."
+    ],
     "3.0.4": [
       "UI Improvements: Added the Layout and Style tabs, glassmorphism pill blur, and font size/color pickers to perfectly match the Beautiful Release Date extension."
     ],
@@ -106,6 +110,7 @@
     ]
   },
   "changelog": [
-    "UI Improvements: Added the Layout and Style tabs, glassmorphism pill blur, and font size/color pickers to perfectly match the Beautiful Release Date extension."
+    "Bug Fix: Fixed a critical error that prevented the Queue Time Settings from opening via the top bar or profile menu.",
+    "Bug Fix: Fixed an issue where the settings menu would reopen automatically after installing an update."
   ]
 }
