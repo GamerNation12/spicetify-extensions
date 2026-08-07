@@ -1,6 +1,10 @@
 {
-  "version": "3.0.9",
+  "version": "3.1.0",
   "changelogs": {
+    "3.1.0": [
+      "Massive QoL: Completely overhauled how the Save Queue feature creates playlists! It now bypasses the Web API and creates the playlist instantly in your local Spotify client, guaranteeing it will appear in your sidebar instantly without any caching delays or 'Couldn't find that playlist' errors!",
+      "CRITICAL HOTFIX: Fixed a fatal syntax error introduced in v3.0.8 that caused the extension to completely crash. Sincerest apologies for the downtime!"
+    ],
     "3.0.9": [
       "CRITICAL HOTFIX: Fixed a fatal syntax error introduced in v3.0.8 that caused the extension to completely crash. Sincerest apologies for the downtime!"
     ],
@@ -122,6 +126,7 @@
     ]
   },
   "changelog": [
+    "Massive QoL: Completely overhauled how the Save Queue feature creates playlists! It now bypasses the Web API and creates the playlist instantly in your local Spotify client, guaranteeing it will appear in your sidebar instantly without any caching delays or 'Couldn't find that playlist' errors!",
     "CRITICAL HOTFIX: Fixed a fatal syntax error introduced in v3.0.8 that caused the extension to completely crash. Sincerest apologies for the downtime!"
   ]
 }

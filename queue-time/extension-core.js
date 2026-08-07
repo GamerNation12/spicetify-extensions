@@ -33,7 +33,7 @@
         interval: null
     };
 
-    const QT_VERSION = "3.0.9";
+    const QT_VERSION = "3.1.0";
     let QT_CHANGELOG_LINES = [
         "Enabled Full Playlist Estimation by default for all sizes, meaning the queue time will perfectly match the time shown at the top of your playlist!",
         "Added local storage persistence so your place in the queue is remembered even if you completely close or restart Spotify."
@@ -701,31 +701,40 @@ function createCustomDropdown(id, label, options, onChange = null) {
             nextTracks = nextTracks.filter(t => t.provider !== 'autoplay' && !String(t.uri).includes('spotify:station:'));
         }
 
-        if (!nextTracks || nextTracks.length === 0) {
-            Spicetify.showNotification("Queue is empty!");
-            return;
-        }
-        try {
-            Spicetify.showNotification("Saving Queue to Playlist...");
-            const me = await Spicetify.CosmosAsync.get('https://api.spotify.com/v1/me');
-            const userId = me.id;
-            const dateStr = new Date().toLocaleString();
-            const playlist = await Spicetify.CosmosAsync.post(`https://api.spotify.com/v1/users/${userId}/playlists`, {
-                name: `Saved Queue (${dateStr})`,
-                public: false,
-                description: "Saved from Queue Time Extension"
-            });
-            
             const uris = nextTracks.map(cur => cur.uri || cur.contextTrack?.uri || cur.item?.uri || cur.track?.uri || cur.metadata?.uri).filter(Boolean);
-            
-            for (let i = 0; i < uris.length; i += 100) {
-                const chunk = uris.slice(i, i + 100);
-                await Spicetify.CosmosAsync.post(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, { uris: chunk });
+            if (uris.length === 0) {
+                Spicetify.showNotification("Could not find any playable tracks in queue!");
+                return;
             }
+
+            try {
+                Spicetify.showNotification("Saving Queue to Playlist...");
+            const dateStr = new Date().toLocaleString();
+            let playlistId = "";
+
+            if (Spicetify.Platform?.RootlistAPI?.createPlaylist && Spicetify.Platform?.PlaylistAPI?.add) {
+                const playlistUri = await Spicetify.Platform.RootlistAPI.createPlaylist(`Saved Queue (${dateStr})`);
+                await Spicetify.Platform.PlaylistAPI.add(playlistUri, uris);
+                playlistId = playlistUri.split(':')[2];
+            } else {
+                const me = await Spicetify.CosmosAsync.get('https://api.spotify.com/v1/me');
+                const playlist = await Spicetify.CosmosAsync.post(`https://api.spotify.com/v1/users/${me.id}/playlists`, {
+                    name: `Saved Queue (${dateStr})`,
+                    public: false,
+                    description: "Saved from Queue Time Extension"
+                });
+                playlistId = playlist.id;
+                
+                for (let i = 0; i < uris.length; i += 100) {
+                    const chunk = uris.slice(i, i + 100);
+                    await Spicetify.CosmosAsync.post(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, { uris: chunk });
+                }
+            }
+
             Spicetify.showNotification("Successfully Saved! Waiting for Spotify to sync...");
             setTimeout(() => {
-                if (Spicetify.Platform?.History?.push) {
-                    Spicetify.Platform.History.push(`/playlist/${playlist.id}`);
+                if (Spicetify.Platform?.History?.push && playlistId) {
+                    Spicetify.Platform.History.push(`/playlist/${playlistId}`);
                 }
             }, 3000);
         } catch (e) {
