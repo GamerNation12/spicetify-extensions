@@ -1,6 +1,9 @@
 {
-  "version": "3.0.8",
+  "version": "3.0.9",
   "changelogs": {
+    "3.0.9": [
+      "CRITICAL HOTFIX: Fixed a fatal syntax error introduced in v3.0.8 that caused the extension to completely crash. Sincerest apologies for the downtime!"
+    ],
     "3.0.8": [
       "Bug Fix: Increased the delay before auto-navigating to the newly created playlist. This gives the Spotify Desktop client enough time to sync the playlist from the servers so it doesn't say 'Couldn't find that playlist'."
     ],
@@ -119,6 +122,6 @@
     ]
   },
   "changelog": [
-    "Bug Fix: Increased the delay before auto-navigating to the newly created playlist. This gives the Spotify Desktop client enough time to sync the playlist from the servers so it doesn't say 'Couldn't find that playlist'."
+    "CRITICAL HOTFIX: Fixed a fatal syntax error introduced in v3.0.8 that caused the extension to completely crash. Sincerest apologies for the downtime!"
   ]
 }
