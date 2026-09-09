@@ -3,24 +3,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     const loading = document.getElementById('loading');
     const errorAlert = document.getElementById('error-alert');
 
-    // Detect environment
-    const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname;
-    
-    // GitHub Raw fallback base URL (for images)
-    const BASE_URL = IS_LOCAL 
-        ? '..' 
-        : 'https://raw.githubusercontent.com/GamerNation12/spicetify-extensions/main';
+    const GH_RAW = 'https://raw.githubusercontent.com/GamerNation12/spicetify-extensions/main';
 
-    const API_BASE = IS_LOCAL
-        ? '..'
-        : 'https://raw.githubusercontent.com/GamerNation12/spicetify-extensions/main';
-
-    const MANIFEST_PATH = `${API_BASE}/manifest.json`;
+    // Try same-origin API first (no rate limits, always fresh), fall back to GitHub Raw.
+    async function fetchJson(urls) {
+        let lastErr = null;
+        for (const u of urls) {
+            try {
+                const res = await fetch(u);
+                if (res.ok) return await res.json();
+                lastErr = new Error(`Fetch failed: ${res.status} for ${u}`);
+            } catch (e) {
+                lastErr = e;
+            }
+        }
+        throw lastErr || new Error('All sources failed');
+    }
 
     try {
-        const res = await fetch(`${MANIFEST_PATH}?t=${Date.now()}`);
-        if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
-        const manifest = await res.json();
+        const manifest = await fetchJson([
+            `/api/extensions`,
+            `${GH_RAW}/manifest.json?t=${Date.now()}`
+        ]);
 
         loading.style.display = 'none';
 
@@ -42,8 +46,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         let versionData = { version: '0.0.0', changelog: ['Updates pending...'] };
 
         try {
-            const vRes = await fetch(`${API_BASE}/${folder}/version.json?t=${Date.now()}`);
-            if (vRes.ok) versionData = await vRes.json();
+            versionData = await fetchJson([
+                `/api/version?folder=${encodeURIComponent(folder)}`,
+                `${GH_RAW}/${folder}/version.json?t=${Date.now()}`
+            ]);
+            if (!versionData.version) versionData.version = '0.0.0';
+            if (!Array.isArray(versionData.changelog)) versionData.changelog = ['Updates pending...'];
         } catch (e) {
             console.log(`Failed to fetch version for ${folder}`);
         }
@@ -51,8 +59,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const card = document.createElement('div');
         card.className = 'card';
 
-        const bannerPath = `${BASE_URL}/${item.preview}`;
-        
+        const bannerPath = `${GH_RAW}/${item.preview}`;
+
         card.innerHTML = `
             <div class="card-banner">
                 <img src="${bannerPath}" alt="${item.name}" onerror="this.src='https://placehold.co/600x300/13151c/94a3b8?text=Extension'">
@@ -63,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <span class="badge">v${versionData.version}</span>
                 </div>
                 <p class="card-desc">${item.description}</p>
-                
+
                 <div class="changelog-section">
                     <div class="changelog-title">Latest Changes</div>
                     <ul class="changelog-list">
