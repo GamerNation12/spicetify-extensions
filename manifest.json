@@ -107,27 +107,5 @@
             "UI",
             "Hide"
         ]
-    },
-    {
-        "name": "LiteDeck",
-        "description": "Ultra-lightweight fast controls + queue + search panel with one-click Lite Mode for laggy setups. No blur, no animations.",
-        "preview": "spicetify.png",
-        "main": "lite-deck/LiteDeck.js",
-        "readme": "lite-deck/README.md",
-        "authors": [
-            {
-                "name": "GamerNation12",
-                "url": "https://github.com/GamerNation12/spicetify-extensions"
-            }
-        ],
-        "tags": [
-            "GamerNation12",
-            "GN",
-            "performance",
-            "lite",
-            "controls",
-            "queue",
-            "utility"
-        ]
     }
 ]
