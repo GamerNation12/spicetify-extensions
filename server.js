@@ -17,7 +17,20 @@ app.use(cors());
 app.use(express.json());
 
 // Serve static files from /docs for the dashboard
+// __dirname fallback covers serverless envs where process.cwd() differs.
 app.use(express.static(path.join(process.cwd(), 'docs')));
+app.use(express.static(path.join(__dirname, 'docs')));
+
+// TEMPORARY debug route — remove after diagnosing production disk.
+app.get('/debug-disk-9f3k2', (req, res) => {
+    const roots = [path.join(process.cwd(), 'docs'), path.join(__dirname, 'docs')];
+    const out = { cwd: process.cwd(), dirname: __dirname, roots: {} };
+    for (const r of roots) {
+        try { out.roots[r] = fs.readdirSync(r); }
+        catch (e) { out.roots[r] = `ERR: ${e.message}`; }
+    }
+    res.json(out);
+});
 
 // Constants for GitHub API
 const GH_TOKEN = process.env.GITHUB_TOKEN;
