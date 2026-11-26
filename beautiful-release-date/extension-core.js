@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.42';
+  let BRD_VERSION = '1.11.43';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -63,7 +63,7 @@
   ];
 
   const separatorOpts = [
-    { value: "â€¢", text: "Dot" },
+    { value: "•", text: "Dot" },
     { value: "-", text: "Dash" },
     { value: "\u200E", text: "None" },
   ];
@@ -98,6 +98,11 @@
   if (curPos && !curPos.includes('main-nowPlayingWidget-nowPlaying') && curPos !== 'top-header-pill') {
       if (curPos.includes('artists')) localStorage.setItem('position', '.main-nowPlayingWidget-nowPlaying:not(#upcomingSongDiv) .main-trackInfo-artists');
       else localStorage.setItem('position', '.main-nowPlayingWidget-nowPlaying:not(#upcomingSongDiv) .main-trackInfo-name');
+  }
+  // Normalize legacy mojibake separator values (â€¢, â€€, etc.) to real bullet
+  const storedSep = localStorage.getItem('separator');
+  if (storedSep && storedSep !== '•' && storedSep !== '-' && storedSep !== '\u200E' && (/â|â€|¢/.test(storedSep))) {
+    localStorage.setItem('separator', '•');
   }
   for (const [k, v] of Object.entries(featureDefaults)) {
     if (localStorage.getItem(k) == null) localStorage.setItem(k, v);
@@ -864,7 +869,11 @@
   }
 
   function buildReleaseDateElement({ releaseDate, album, popularity, audioFeatures, explicit, label, trackId }) {
-      const lsSeparator = localStorage.getItem('separator');
+      let lsSeparator = localStorage.getItem('separator');
+      // Normalize any lingering mojibake separator values
+      if (lsSeparator && lsSeparator !== '•' && lsSeparator !== '-' && lsSeparator !== '\u200E' && (/â|â€|¢/.test(lsSeparator))) {
+          lsSeparator = '•';
+      }
       const lsDateFormat = localStorage.getItem('dateFormat');
 
       const root = document.createElement('span');

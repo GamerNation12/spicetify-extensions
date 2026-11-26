@@ -1,6 +1,9 @@
 {
-  "version": "1.11.42",
+  "version": "1.11.43",
   "changelogs": {
+    "1.11.43": [
+      "Fixed mojibake separator corruption: source default changed from â€¢ to real • bullet, plus legacy localStorage value normalization so no weird characters appear before the date."
+    ],
     "1.11.42": [
       "Added Spicy Lyrics fullscreen settings toggle (Layout tab > 'Show Release Date in Spicy Lyrics Fullscreen') so you can enable/disable inline release date injection in fullscreen mode."
     ],
@@ -33,6 +36,6 @@
     ]
   },
   "changelog": [
-    "Added Spicy Lyrics fullscreen settings toggle (Layout tab > 'Show Release Date in Spicy Lyrics Fullscreen') so you can enable/disable inline release date injection in fullscreen mode."
+    "Fixed mojibake separator corruption: source default changed from â€¢ to real • bullet, plus legacy localStorage value normalization so no weird characters appear before the date."
   ]
 }
