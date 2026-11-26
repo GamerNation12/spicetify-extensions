@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.46';
+  let BRD_VERSION = '1.11.47';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -317,13 +317,13 @@
     style.innerHTML = `
       /* BASE CSS (Structure & Layout) */
       #settingsMenu { 
-        display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); 
-        padding: 24px; flex-direction: column; width: min(90vw, 440px); z-index: 10001; gap: 16px; 
-        box-sizing: border-box; opacity: 0;
+        display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+        padding: 24px; flex-direction: column; width: min(92vw, 460px); max-height: 90vh; z-index: 10001; gap: 16px; 
+        box-sizing: border-box; opacity: 0; overflow-y: auto;
         transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s cubic-bezier(0.2, 0, 0, 1);
         font-family: var(--font-family, inherit);
       }
-      #settingsMenu.brd-m3-animate { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      #settingsMenu.brd-m3-animate { transform: translate(-50%, -50%); opacity: 1; }
       #settingsMenu * { box-sizing: border-box; }
       #brd-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; opacity: 0; transition: opacity 0.25s linear; backdrop-filter: blur(4px); }
       #brd-backdrop.brd-m3-animate { opacity: 1; }
@@ -353,7 +353,7 @@
       /* Tabs */
       .brd-tabs-header { display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
       .brd-tab-btn { display: flex; align-items: center; justify-content: center; gap: 6px; background: transparent; border: none; font-weight: 600; font-size: 0.85rem; padding: 6px 12px; cursor: pointer; border-radius: 8px; transition: 0.2s; flex: 1; text-align: center; }
-      .brd-tab-content { display: none; flex-direction: column; animation: brdFadeIn 0.3s cubic-bezier(0.2, 0, 0, 1); }
+      .brd-tab-content { display: none; flex-direction: column; animation: brdFadeIn 0.3s cubic-bezier(0.2, 0, 0, 1); max-height: 70vh; overflow-y: auto; }
       .brd-tab-content.brd-active { display: flex; }
       @keyframes brdFadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 

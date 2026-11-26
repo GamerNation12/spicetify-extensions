@@ -1,6 +1,9 @@
 {
-  "version": "1.11.46",
+  "version": "1.11.47",
   "changelogs": {
+    "1.11.47": [
+      "Fixed settings popup going off-screen: added max-height: 90vh with overflow-y: auto to #settingsMenu and max-height: 70vh to tab contents so the menu never exceeds the viewport on small screens."
+    ],
     "1.11.46": [
       "Reverted overflow: visible CSS on Spicy Lyrics fullscreen .Header/.Metadata/.SongName/.Artists that was clipping media controls off-screen. Fullscreen injection now uses JS-only span append with no CSS layout changes."
     ],
@@ -45,6 +48,6 @@
     ]
   },
   "changelog": [
-    "Reverted overflow: visible CSS on Spicy Lyrics fullscreen .Header/.Metadata/.SongName/.Artists that was clipping media controls off-screen. Fullscreen injection now uses JS-only span append with no CSS layout changes."
+    "Fixed settings popup going off-screen: added max-height: 90vh with overflow-y: auto to #settingsMenu and max-height: 70vh to tab contents so the menu never exceeds the viewport on small screens."
   ]
 }
