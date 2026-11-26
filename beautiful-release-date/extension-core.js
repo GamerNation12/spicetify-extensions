@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.35';
+  let BRD_VERSION = '1.11.36';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -1218,7 +1218,7 @@
       if (window.BRD_STATE.songchange) Spicetify.Player.removeEventListener('songchange', window.BRD_STATE.songchange);
       if (window.BRD_STATE.interval) clearInterval(window.BRD_STATE.interval);
       if (window.BRD_STATE.observer) window.BRD_STATE.observer.disconnect();
-      if (window.BRD_STATE.fullscreen) window.removeEventListener('fullscreenchange', window.BRD_STATE.fullscreen);
+      if (window.BRD_STATE.fullscreen) document.removeEventListener('fullscreenchange', window.BRD_STATE.fullscreen);
       if (window.BRD_STATE.testPluginHandler) window.removeEventListener('testPluginToggle', window.BRD_STATE.testPluginHandler);
       if (document.getElementById('brd-style')) document.getElementById('brd-style').remove();
       if (document.getElementById('brd-backdrop')) document.getElementById('brd-backdrop').remove();
@@ -1282,7 +1282,7 @@
     displayReleaseDate();
 
     const onFullscreenChange = () => displayReleaseDate();
-    window.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('fullscreenchange', onFullscreenChange);
     window.BRD_STATE.fullscreen = onFullscreenChange;
 
         

@@ -1,6 +1,9 @@
 {
-  "version": "1.11.35",
+  "version": "1.11.36",
   "changelogs": {
+    "1.11.36": [
+      "Fixed fullscreen listener bug: fullscreenchange event now attaches to document (not window) so the release date pill correctly appears when entering/leaving Spicy Lyrics fullscreen."
+    ],
     "1.11.35": [
       "Added fullscreen support for Spicy Lyrics: release date now shows as a floating pill overlay when the now-playing sidebar is hidden in fullscreen mode."
     ],
@@ -12,6 +15,6 @@
     ]
   },
   "changelog": [
-    "Added fullscreen support for Spicy Lyrics: release date now shows as a floating pill overlay when the now-playing sidebar is hidden in fullscreen mode."
+    "Fixed fullscreen listener bug: fullscreenchange event now attaches to document (not window) so the release date pill correctly appears when entering/leaving Spicy Lyrics fullscreen."
   ]
 }
