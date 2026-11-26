@@ -1,6 +1,9 @@
 {
-  "version": "1.11.44",
+  "version": "1.11.45",
   "changelogs": {
+    "1.11.45": [
+      "Changed fullscreen injection to append release date inside Spicy Lyrics' own .Metadata .Artists span / .SongName span elements so it uses Spicy Lyrics' native styling (fonts, colors, marquee) instead of custom BRD CSS."
+    ],
     "1.11.44": [
       "Made fullscreen inline injection more robust: added fallback target chain (.Metadata → .SongName → .Artists), unclipped .SongName/.Artists overflow+masks in fullscreen, and ensured .Header/.Metadata overflow is visible so song info isn't cut off when the release date is injected."
     ],
@@ -39,6 +42,6 @@
     ]
   },
   "changelog": [
-    "Made fullscreen inline injection more robust: added fallback target chain (.Metadata → .SongName → .Artists), unclipped .SongName/.Artists overflow+masks in fullscreen, and ensured .Header/.Metadata overflow is visible so song info isn't cut off when the release date is injected."
+    "Changed fullscreen injection to append release date inside Spicy Lyrics' own .Metadata .Artists span / .SongName span elements so it uses Spicy Lyrics' native styling (fonts, colors, marquee) instead of custom BRD CSS."
   ]
 }

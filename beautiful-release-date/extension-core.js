@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.44';
+  let BRD_VERSION = '1.11.45';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -500,7 +500,9 @@
       #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header .Metadata { height: auto !important; overflow: visible !important; flex-direction: column; gap: 3px !important; }
       #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header .Metadata .SongName { overflow: visible !important; mask-image: none !important; -webkit-mask-image: none !important; }
       #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header .Metadata .Artists { overflow: visible !important; mask-image: none !important; -webkit-mask-image: none !important; }
-      #releaseDate.brd-spicy-inline { margin-top: 4px !important; margin-left: 0 !important; flex-shrink: 0; white-space: nowrap; display: block; width: 100%; text-align: center; }
+      #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header .Metadata .SongName span { overflow: visible !important; mask-image: none !important; -webkit-mask-image: none !important; }
+      #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header .Metadata .Artists span { overflow: visible !important; mask-image: none !important; -webkit-mask-image: none !important; }
+      #releaseDate.brd-spicy-inline { margin-left: 4px !important; flex-shrink: 0; white-space: nowrap; display: inline; }
       .brd-refresh { background: transparent; border: none; padding: 0; margin-left: 6px; cursor: pointer; display: inline-flex; align-items: center; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; color: inherit; }
 
       .brd-refresh:hover { opacity: 1; transform: rotate(90deg); }
@@ -1057,10 +1059,10 @@
 
       let target;
       if (spicyFullscreen && localStorage.getItem('spicyLyricsFullscreen') !== 'false') {
+          // Inject into Spicy Lyrics' own Artists/SongName span so it uses Spicy Lyrics' styling
           const tryTargets = [
-              spicyPage?.querySelector('.Metadata'),
-              spicyPage?.querySelector('.Metadata .SongName'),
-              spicyPage?.querySelector('.Metadata .Artists'),
+              spicyPage?.querySelector('.Metadata .Artists span'),
+              spicyPage?.querySelector('.Metadata .SongName span'),
           ].filter(Boolean);
           target = tryTargets[0];
           if (target) {
@@ -1069,9 +1071,8 @@
           } else {
               setTimeout(() => {
                   const retry = [
-                      spicyPage?.querySelector('.Metadata'),
-                      spicyPage?.querySelector('.Metadata .SongName'),
-                      spicyPage?.querySelector('.Metadata .Artists'),
+                      spicyPage?.querySelector('.Metadata .Artists span'),
+                      spicyPage?.querySelector('.Metadata .SongName span'),
                   ].filter(Boolean)[0];
                   if (retry && !retry.querySelector('#releaseDate')) {
                       root.classList.add('brd-spicy-inline');
