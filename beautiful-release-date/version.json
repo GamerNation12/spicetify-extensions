@@ -1,6 +1,9 @@
 {
-  "version": "1.11.53",
+  "version": "1.11.54",
   "changelogs": {
+    "1.11.54": [
+      "Added auto-refresh: when in Spicy Lyrics fullscreen, a 3-second check verifies #releaseDate is present; if missing (e.g., removed by Spicy Lyrics DOM changes), it automatically re-injects the release date so it never disappears."
+    ],
     "1.11.53": [
       "Fixed release date cut off by long artist names: added overflow: visible + mask-image removal on .Metadata/.Artists/.SongName and their spans when they contain #releaseDate, so long artist names with multiple artists no longer clip the release date."
     ],
@@ -66,6 +69,6 @@
     ]
   },
   "changelog": [
-    "Fixed release date cut off by long artist names: added overflow: visible + mask-image removal on .Metadata/.Artists/.SongName and their spans when they contain #releaseDate, so long artist names with multiple artists no longer clip the release date."
+    "Added auto-refresh: when in Spicy Lyrics fullscreen, a 3-second check verifies #releaseDate is present; if missing (e.g., removed by Spicy Lyrics DOM changes), it automatically re-injects the release date so it never disappears."
   ]
 }

@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.53';
+  let BRD_VERSION = '1.11.54';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -1117,6 +1117,19 @@
           Spicetify.showNotification("BRD Error: Could not find target container!");
       }
 
+      // Auto-refresh: if in Spicy Lyrics fullscreen and release date element is missing, re-inject
+      if (spicyFullscreen && localStorage.getItem('spicyLyricsFullscreen') !== 'false') {
+          if (window.BRD_STATE.spicyAutoCheck) clearInterval(window.BRD_STATE.spicyAutoCheck);
+          window.BRD_STATE.spicyAutoCheck = setInterval(() => {
+              if (!spicyPage?.querySelector('#releaseDate')) {
+                  displayReleaseDate();
+              }
+          }, 3000);
+      } else if (window.BRD_STATE.spicyAutoCheck) {
+          clearInterval(window.BRD_STATE.spicyAutoCheck);
+          window.BRD_STATE.spicyAutoCheck = null;
+      }
+
 
       if (localStorage.getItem('hideVideoBtn') === 'true') {
           document.body.classList.add('brd-hide-video');
@@ -1282,6 +1295,7 @@
       if (window.BRD_STATE.observer) window.BRD_STATE.observer.disconnect();
       if (window.BRD_STATE.fullscreen) document.removeEventListener('fullscreenchange', window.BRD_STATE.fullscreen);
       if (window.BRD_STATE.spicyObserver) window.BRD_STATE.spicyObserver.disconnect();
+      if (window.BRD_STATE.spicyAutoCheck) clearInterval(window.BRD_STATE.spicyAutoCheck);
       if (window.BRD_STATE.testPluginHandler) window.removeEventListener('testPluginToggle', window.BRD_STATE.testPluginHandler);
       if (document.getElementById('brd-style')) document.getElementById('brd-style').remove();
       if (document.getElementById('brd-backdrop')) document.getElementById('brd-backdrop').remove();
