@@ -1,6 +1,9 @@
 {
-  "version": "1.11.47",
+  "version": "1.11.48",
   "changelogs": {
+    "1.11.48": [
+      "Added Spicy Lyrics fullscreen position setting (Layout tab > 'Spicy Lyrics Fullscreen Position'): choose to render the release date under the Artist or under the Song Name inside Spicy Lyrics fullscreen mode."
+    ],
     "1.11.47": [
       "Fixed settings popup going off-screen: added max-height: 90vh with overflow-y: auto to #settingsMenu and max-height: 70vh to tab contents so the menu never exceeds the viewport on small screens."
     ],
@@ -48,6 +51,6 @@
     ]
   },
   "changelog": [
-    "Fixed settings popup going off-screen: added max-height: 90vh with overflow-y: auto to #settingsMenu and max-height: 70vh to tab contents so the menu never exceeds the viewport on small screens."
+    "Added Spicy Lyrics fullscreen position setting (Layout tab > 'Spicy Lyrics Fullscreen Position'): choose to render the release date under the Artist or under the Song Name inside Spicy Lyrics fullscreen mode."
   ]
 }

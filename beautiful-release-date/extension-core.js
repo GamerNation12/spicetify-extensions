@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.47';
+  let BRD_VERSION = '1.11.48';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -62,6 +62,11 @@
     { value: "oled", text: "Pure OLED Monochrome" },
   ];
 
+  const spicyPositions = [
+    { value: ".Metadata .Artists", text: "Under Artist" },
+    { value: ".Metadata .SongName", text: "Under Song Name" },
+  ];
+
   const separatorOpts = [
     { value: "•", text: "Dot" },
     { value: "-", text: "Dash" },
@@ -82,6 +87,7 @@
     fontSize: '0.75rem',
     fontWeight: '400',
     spicyLyricsFullscreen: 'true',
+    spicyLyricsPosition: '.Metadata .Artists',
   };
 
   // Initialize Settings
@@ -580,6 +586,7 @@
     layoutTab.appendChild(createToggle('hideVideoBtn', 'Hide Music Video Button'));
     layoutTab.appendChild(createToggle('showRefreshBtn', 'Show Refresh Button'));
     layoutTab.appendChild(createToggle('spicyLyricsFullscreen', 'Show Release Date in Spicy Lyrics Fullscreen'));
+    layoutTab.appendChild(createCustomDropdown('spicyLyricsPosition', 'Spicy Lyrics Fullscreen Position', spicyPositions));
 
     const analyticsTab = tabContents.querySelector('#tab-analytics-info');
     analyticsTab.appendChild(createToggle('showAudioFeatures', 'BPM & Musical Key'));
@@ -1052,10 +1059,11 @@
 
       let target;
       if (spicyFullscreen && localStorage.getItem('spicyLyricsFullscreen') !== 'false') {
-          // Inject into Spicy Lyrics' own Artists/SongName span so it uses Spicy Lyrics' styling
+          // Inject into Spicy Lyrics' own span so it uses Spicy Lyrics' native styling
+          const spicyPos = localStorage.getItem('spicyLyricsPosition') || '.Metadata .Artists';
+          const targetSelector = spicyPos.endsWith('.Artists') ? '.Metadata .Artists span' : '.Metadata .SongName span';
           const tryTargets = [
-              spicyPage?.querySelector('.Metadata .Artists span'),
-              spicyPage?.querySelector('.Metadata .SongName span'),
+              spicyPage?.querySelector(targetSelector),
           ].filter(Boolean);
           target = tryTargets[0];
           if (target) {
@@ -1063,10 +1071,7 @@
               target.appendChild(root);
           } else {
               setTimeout(() => {
-                  const retry = [
-                      spicyPage?.querySelector('.Metadata .Artists span'),
-                      spicyPage?.querySelector('.Metadata .SongName span'),
-                  ].filter(Boolean)[0];
+                  const retry = spicyPage?.querySelector(targetSelector);
                   if (retry && !retry.querySelector('#releaseDate')) {
                       root.classList.add('brd-spicy-inline');
                       retry.appendChild(root);
