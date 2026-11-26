@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.50';
+  let BRD_VERSION = '1.11.51';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -1046,7 +1046,7 @@
       log('displayReleaseDate(): Got track details', { releaseDate, popularity, explicit });
       const lsPosition = localStorage.getItem('position');
       const spicyPage = document.querySelector('#SpicyLyricsPage');
-      const spicyFullscreen = !!spicyPage?.classList.contains('Fullscreen');
+      const spicyFullscreen = !!document.fullscreenElement || !!spicyPage?.classList.contains('Fullscreen');
       
       const trackUri = Spicetify.Player.data?.item?.uri;
       const trackId = trackUri?.includes(':track:') ? trackUri.split(':')[2] : null;
@@ -1260,6 +1260,7 @@
       if (window.BRD_STATE.interval) clearInterval(window.BRD_STATE.interval);
       if (window.BRD_STATE.observer) window.BRD_STATE.observer.disconnect();
       if (window.BRD_STATE.fullscreen) document.removeEventListener('fullscreenchange', window.BRD_STATE.fullscreen);
+      if (window.BRD_STATE.spicyObserver) window.BRD_STATE.spicyObserver.disconnect();
       if (window.BRD_STATE.testPluginHandler) window.removeEventListener('testPluginToggle', window.BRD_STATE.testPluginHandler);
       if (document.getElementById('brd-style')) document.getElementById('brd-style').remove();
       if (document.getElementById('brd-backdrop')) document.getElementById('brd-backdrop').remove();
@@ -1325,6 +1326,20 @@
     const onFullscreenChange = () => displayReleaseDate();
     document.addEventListener('fullscreenchange', onFullscreenChange);
     window.BRD_STATE.fullscreen = onFullscreenChange;
+
+    // MutationObserver to catch Spicy Lyrics' custom fullscreen toggle
+    // (CSS class change that does NOT fire fullscreenchange)
+    let lastFullscreen = !!document.fullscreenElement || !!document.querySelector('#SpicyLyricsPage')?.classList.contains('Fullscreen');
+    const spicyObserver = new MutationObserver(() => {
+        const now = !!document.fullscreenElement || !!document.querySelector('#SpicyLyricsPage')?.classList.contains('Fullscreen');
+        if (now !== lastFullscreen) {
+            lastFullscreen = now;
+            displayReleaseDate();
+        }
+    });
+    const spicyPageEl = document.querySelector('#SpicyLyricsPage');
+    if (spicyPageEl) spicyObserver.observe(spicyPageEl, { attributes: true, attributeFilter: ['class'] });
+    window.BRD_STATE.spicyObserver = spicyObserver;
 
         
     // Dynamic reactivity for test plugin toggle overriding
