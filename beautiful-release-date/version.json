@@ -1,6 +1,9 @@
 {
-  "version": "1.11.43",
+  "version": "1.11.44",
   "changelogs": {
+    "1.11.44": [
+      "Made fullscreen inline injection more robust: added fallback target chain (.Metadata → .SongName → .Artists), unclipped .SongName/.Artists overflow+masks in fullscreen, and ensured .Header/.Metadata overflow is visible so song info isn't cut off when the release date is injected."
+    ],
     "1.11.43": [
       "Fixed mojibake separator corruption: source default changed from â€¢ to real • bullet, plus legacy localStorage value normalization so no weird characters appear before the date."
     ],
@@ -36,6 +39,6 @@
     ]
   },
   "changelog": [
-    "Fixed mojibake separator corruption: source default changed from â€¢ to real • bullet, plus legacy localStorage value normalization so no weird characters appear before the date."
+    "Made fullscreen inline injection more robust: added fallback target chain (.Metadata → .SongName → .Artists), unclipped .SongName/.Artists overflow+masks in fullscreen, and ensured .Header/.Metadata overflow is visible so song info isn't cut off when the release date is injected."
   ]
 }

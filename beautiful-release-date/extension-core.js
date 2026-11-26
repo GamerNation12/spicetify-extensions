@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.43';
+  let BRD_VERSION = '1.11.44';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -496,7 +496,10 @@
       #releaseDate.brd-pill:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
       #releaseDate.brd-pill .brd-sep { display: none; }
       #releaseDate.brd-pill a { border: none !important; padding: 0; }
-      #SpicyLyricsPage.Fullscreen .Metadata { height: auto !important; overflow: visible !important; }
+      #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header { overflow: visible !important; }
+      #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header .Metadata { height: auto !important; overflow: visible !important; flex-direction: column; gap: 3px !important; }
+      #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header .Metadata .SongName { overflow: visible !important; mask-image: none !important; -webkit-mask-image: none !important; }
+      #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header .Metadata .Artists { overflow: visible !important; mask-image: none !important; -webkit-mask-image: none !important; }
       #releaseDate.brd-spicy-inline { margin-top: 4px !important; margin-left: 0 !important; flex-shrink: 0; white-space: nowrap; display: block; width: 100%; text-align: center; }
       .brd-refresh { background: transparent; border: none; padding: 0; margin-left: 6px; cursor: pointer; display: inline-flex; align-items: center; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; color: inherit; }
 
@@ -1054,16 +1057,25 @@
 
       let target;
       if (spicyFullscreen && localStorage.getItem('spicyLyricsFullscreen') !== 'false') {
-          target = spicyPage.querySelector('.Metadata');
+          const tryTargets = [
+              spicyPage?.querySelector('.Metadata'),
+              spicyPage?.querySelector('.Metadata .SongName'),
+              spicyPage?.querySelector('.Metadata .Artists'),
+          ].filter(Boolean);
+          target = tryTargets[0];
           if (target) {
               root.classList.add('brd-spicy-inline');
               target.appendChild(root);
           } else {
               setTimeout(() => {
-                  const retryTarget = spicyPage?.querySelector('.Metadata');
-                  if (retryTarget && !retryTarget.querySelector('#releaseDate')) {
+                  const retry = [
+                      spicyPage?.querySelector('.Metadata'),
+                      spicyPage?.querySelector('.Metadata .SongName'),
+                      spicyPage?.querySelector('.Metadata .Artists'),
+                  ].filter(Boolean)[0];
+                  if (retry && !retry.querySelector('#releaseDate')) {
                       root.classList.add('brd-spicy-inline');
-                      retryTarget.appendChild(root);
+                      retry.appendChild(root);
                   }
               }, 200);
           }
