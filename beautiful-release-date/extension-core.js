@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.51';
+  let BRD_VERSION = '1.11.52';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -1062,19 +1062,27 @@
       if (spicyFullscreen && localStorage.getItem('spicyLyricsFullscreen') !== 'false') {
           // Inject into Spicy Lyrics' own span so it uses Spicy Lyrics' native styling
           const spicyPos = localStorage.getItem('spicyLyricsPosition') || '.Metadata .Artists';
-          const targetSelector = spicyPos.endsWith('.Artists') ? '.Metadata .Artists span' : '.Metadata .SongName span';
-          target = spicyPage?.querySelector(targetSelector);
+          const primarySelector = spicyPos.endsWith('.Artists') ? '.Metadata .Artists span' : '.Metadata .SongName span';
+          const fallbackSelector = spicyPos.endsWith('.Artists') ? '.Metadata .SongName span' : '.Metadata .Artists span';
+          const tryTargets = [
+              spicyPage?.querySelector(primarySelector),
+              spicyPage?.querySelector(fallbackSelector),
+          ].filter(Boolean);
+          target = tryTargets[0];
           if (target) {
               root.classList.add('brd-spicy-inline');
               target.appendChild(root);
           } else {
               setTimeout(() => {
-                  const retry = spicyPage?.querySelector(targetSelector);
+                  const retry = [
+                      spicyPage?.querySelector(primarySelector),
+                      spicyPage?.querySelector(fallbackSelector),
+                  ].filter(Boolean)[0];
                   if (retry && !retry.querySelector('#releaseDate')) {
                       root.classList.add('brd-spicy-inline');
                       retry.appendChild(root);
                   }
-              }, 200);
+              }, 500);
           }
       } else if (lsPosition === 'top-header-pill') {
           target = document.body;

@@ -1,8 +1,11 @@
 {
-  "version": "1.11.51",
+  "version": "1.11.52",
   "changelogs": {
+    "1.11.52": [
+      "Fixed release date not showing in Spicy Lyrics fullscreen: added both .Metadata .Artists span AND .Metadata .SongName span as fallback targets (not just the selected position), and increased retry delay from 200ms to 500ms so Spicy Lyrics has time to finish its fullscreen DOM reconstruction before the release date is injected."
+    ],
     "1.11.51": [
-      "Fixed pill not coming back after exiting Spicy Lyrics fullscreen: added MutationObserver to catch Spicy Lyrics' custom fullscreen CSS class toggles (which don't fire fullscreenchange), plus document.fullscreenElement detection, so displayReleaseDate() re-runs when entering/leaving fullscreen via any method."
+      "Fixed pill not coming back after exiting Spicy Lyrics fullscreen: added MutationObserver to catch Spicy Lyrics' custom fullscreen CSS class toggles (which dont fire fullscreenchange), plus document.fullscreenElement detection, so displayReleaseDate() re-runs when entering/leaving fullscreen via any method."
     ],
     "1.11.50": [
       "Added 'Now Playing Bar' position (non-Spicy-Lyrics): renders release date on Spotify's normal now playing widget container (.main-nowPlayingWidget-nowPlaying)."
@@ -60,6 +63,6 @@
     ]
   },
   "changelog": [
-    "Fixed pill not coming back after exiting Spicy Lyrics fullscreen: added MutationObserver to catch Spicy Lyrics' custom fullscreen CSS class toggles (which don't fire fullscreenchange), plus document.fullscreenElement detection, so displayReleaseDate() re-runs when entering/leaving fullscreen via any method."
+    "Fixed release date not showing in Spicy Lyrics fullscreen: added both .Metadata .Artists span AND .Metadata .SongName span as fallback targets (not just the selected position), and increased retry delay from 200ms to 500ms so Spicy Lyrics has time to finish its fullscreen DOM reconstruction before the release date is injected."
   ]
 }
