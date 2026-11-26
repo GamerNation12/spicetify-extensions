@@ -1026,6 +1026,7 @@
       if (reqId !== currentDisplayRequestId) return;
       log('displayReleaseDate(): Got track details', { releaseDate, popularity, explicit });
       const lsPosition = localStorage.getItem('position');
+      const fullscreenActive = !!document.fullscreenElement || !!document.querySelector('#SpicyLyricsPage.Fullscreen');
       
       const trackUri = Spicetify.Player.data?.item?.uri;
       const trackId = trackUri?.includes(':track:') ? trackUri.split(':')[2] : null;
@@ -1038,7 +1039,8 @@
       root.id = 'releaseDate';
 
       let target;
-      if (lsPosition === 'top-header-pill') {
+      const usePill = lsPosition === 'top-header-pill' || fullscreenActive;
+      if (usePill) {
           target = document.body;
           root.classList.add('brd-pill');
       } else {
@@ -1216,6 +1218,7 @@
       if (window.BRD_STATE.songchange) Spicetify.Player.removeEventListener('songchange', window.BRD_STATE.songchange);
       if (window.BRD_STATE.interval) clearInterval(window.BRD_STATE.interval);
       if (window.BRD_STATE.observer) window.BRD_STATE.observer.disconnect();
+      if (window.BRD_STATE.fullscreen) window.removeEventListener('fullscreenchange', window.BRD_STATE.fullscreen);
       if (window.BRD_STATE.testPluginHandler) window.removeEventListener('testPluginToggle', window.BRD_STATE.testPluginHandler);
       if (document.getElementById('brd-style')) document.getElementById('brd-style').remove();
       if (document.getElementById('brd-backdrop')) document.getElementById('brd-backdrop').remove();
@@ -1278,7 +1281,11 @@
     
     displayReleaseDate();
 
-    
+    const onFullscreenChange = () => displayReleaseDate();
+    window.addEventListener('fullscreenchange', onFullscreenChange);
+    window.BRD_STATE.fullscreen = onFullscreenChange;
+
+        
     // Dynamic reactivity for test plugin toggle overriding
     window.BRD_STATE.testPluginHandler = (e) => {
       displayReleaseDate();
