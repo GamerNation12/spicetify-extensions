@@ -1,6 +1,9 @@
 {
-  "version": "1.11.34",
+  "version": "1.11.35",
   "changelogs": {
+    "1.11.35": [
+      "Added fullscreen support for Spicy Lyrics: release date now shows as a floating pill overlay when the now-playing sidebar is hidden in fullscreen mode."
+    ],
     "1.11.34": [
       "Fixed an issue where iTunes/Spotify fallback search logic would grab the release date of popular older songs (like 'In the End') when searching for a newer song (like 'Two Faced') by enforcing strict track name matching in addition to artist matching."
     ],
@@ -9,6 +12,6 @@
     ]
   },
   "changelog": [
-    "Fixed an issue where iTunes/Spotify fallback search logic would grab the release date of popular older songs (like 'In the End') when searching for a newer song (like 'Two Faced') by enforcing strict track name matching in addition to artist matching."
+    "Added fullscreen support for Spicy Lyrics: release date now shows as a floating pill overlay when the now-playing sidebar is hidden in fullscreen mode."
   ]
 }
