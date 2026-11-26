@@ -1,6 +1,12 @@
 {
-  "version": "1.11.48",
+  "version": "1.11.50",
   "changelogs": {
+    "1.11.50": [
+      "Added 'Now Playing Bar' position (non-Spicy-Lyrics): renders release date on Spotify's normal now playing widget container (.main-nowPlayingWidget-nowPlaying)."
+    ],
+    "1.11.49": [
+      "Fixed pill not coming back after closing fullscreen: added fallback to render as floating pill on body when position selector doesn't match."
+    ],
     "1.11.48": [
       "Added Spicy Lyrics fullscreen position setting (Layout tab > 'Spicy Lyrics Fullscreen Position'): choose to render the release date under the Artist or under the Song Name inside Spicy Lyrics fullscreen mode."
     ],
@@ -51,6 +57,6 @@
     ]
   },
   "changelog": [
-    "Added Spicy Lyrics fullscreen position setting (Layout tab > 'Spicy Lyrics Fullscreen Position'): choose to render the release date under the Artist or under the Song Name inside Spicy Lyrics fullscreen mode."
+    "Added 'Now Playing Bar' position (non-Spicy-Lyrics): renders release date on Spotify's normal now playing widget container (.main-nowPlayingWidget-nowPlaying)."
   ]
 }

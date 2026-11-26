@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.48';
+  let BRD_VERSION = '1.11.50';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -46,6 +46,7 @@
   const positions = [
     { value: ".main-nowPlayingWidget-nowPlaying:not(#upcomingSongDiv) .main-trackInfo-name", text: "Song name" },
     { value: ".main-nowPlayingWidget-nowPlaying:not(#upcomingSongDiv) .main-trackInfo-artists", text: "Artist" },
+    { value: ".main-nowPlayingWidget-nowPlaying", text: "Now Playing Bar" },
     { value: "top-header-pill", text: "Floating Pill (Above Track)" }
   ];
   const dateformat = [
@@ -1062,10 +1063,7 @@
           // Inject into Spicy Lyrics' own span so it uses Spicy Lyrics' native styling
           const spicyPos = localStorage.getItem('spicyLyricsPosition') || '.Metadata .Artists';
           const targetSelector = spicyPos.endsWith('.Artists') ? '.Metadata .Artists span' : '.Metadata .SongName span';
-          const tryTargets = [
-              spicyPage?.querySelector(targetSelector),
-          ].filter(Boolean);
-          target = tryTargets[0];
+          target = spicyPage?.querySelector(targetSelector);
           if (target) {
               root.classList.add('brd-spicy-inline');
               target.appendChild(root);
@@ -1084,7 +1082,14 @@
           if (target) target.appendChild(root);
       } else {
           target = document.querySelector(lsPosition);
-          if (target) target.appendChild(root);
+          if (target) {
+              target.appendChild(root);
+          } else {
+              // Fallback: render as pill on body if position selector doesn't match
+              target = document.body;
+              root.classList.add('brd-pill');
+              target.appendChild(root);
+          }
       }
       
       if (!target && !spicyFullscreen) {
