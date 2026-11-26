@@ -1,6 +1,9 @@
 {
-  "version": "1.11.45",
+  "version": "1.11.46",
   "changelogs": {
+    "1.11.46": [
+      "Reverted overflow: visible CSS on Spicy Lyrics fullscreen .Header/.Metadata/.SongName/.Artists that was clipping media controls off-screen. Fullscreen injection now uses JS-only span append with no CSS layout changes."
+    ],
     "1.11.45": [
       "Changed fullscreen injection to append release date inside Spicy Lyrics' own .Metadata .Artists span / .SongName span elements so it uses Spicy Lyrics' native styling (fonts, colors, marquee) instead of custom BRD CSS."
     ],
@@ -42,6 +45,6 @@
     ]
   },
   "changelog": [
-    "Changed fullscreen injection to append release date inside Spicy Lyrics' own .Metadata .Artists span / .SongName span elements so it uses Spicy Lyrics' native styling (fonts, colors, marquee) instead of custom BRD CSS."
+    "Reverted overflow: visible CSS on Spicy Lyrics fullscreen .Header/.Metadata/.SongName/.Artists that was clipping media controls off-screen. Fullscreen injection now uses JS-only span append with no CSS layout changes."
   ]
 }

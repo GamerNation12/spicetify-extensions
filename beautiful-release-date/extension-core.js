@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.45';
+  let BRD_VERSION = '1.11.46';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -496,13 +496,6 @@
       #releaseDate.brd-pill:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
       #releaseDate.brd-pill .brd-sep { display: none; }
       #releaseDate.brd-pill a { border: none !important; padding: 0; }
-      #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header { overflow: visible !important; }
-      #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header .Metadata { height: auto !important; overflow: visible !important; flex-direction: column; gap: 3px !important; }
-      #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header .Metadata .SongName { overflow: visible !important; mask-image: none !important; -webkit-mask-image: none !important; }
-      #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header .Metadata .Artists { overflow: visible !important; mask-image: none !important; -webkit-mask-image: none !important; }
-      #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header .Metadata .SongName span { overflow: visible !important; mask-image: none !important; -webkit-mask-image: none !important; }
-      #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header .Metadata .Artists span { overflow: visible !important; mask-image: none !important; -webkit-mask-image: none !important; }
-      #releaseDate.brd-spicy-inline { margin-left: 4px !important; flex-shrink: 0; white-space: nowrap; display: inline; }
       .brd-refresh { background: transparent; border: none; padding: 0; margin-left: 6px; cursor: pointer; display: inline-flex; align-items: center; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; color: inherit; }
 
       .brd-refresh:hover { opacity: 1; transform: rotate(90deg); }
