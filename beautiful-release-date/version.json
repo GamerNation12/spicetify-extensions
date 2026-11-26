@@ -1,6 +1,9 @@
 {
-  "version": "1.11.40",
+  "version": "1.11.41",
   "changelogs": {
+    "1.11.41": [
+      "Fixed mojibake separator (â€¢ → •) causing weird characters before the date, and fixed .Metadata fixed-height clipping that cut off the song title and artist in Spicy Lyrics fullscreen."
+    ],
     "1.11.40": [
       "Fixed fullscreen inline injection target: release date now appends to .Metadata (below both song name and artist) instead of .Metadata .Artists, avoiding overflow/mask clipping so it works correctly with or without background video."
     ],
@@ -27,6 +30,6 @@
     ]
   },
   "changelog": [
-    "Fixed fullscreen inline injection target: release date now appends to .Metadata (below both song name and artist) instead of .Metadata .Artists, avoiding overflow/mask clipping so it works correctly with or without background video."
+    "Fixed mojibake separator (â€¢ → •) causing weird characters before the date, and fixed .Metadata fixed-height clipping that cut off the song title and artist in Spicy Lyrics fullscreen."
   ]
 }

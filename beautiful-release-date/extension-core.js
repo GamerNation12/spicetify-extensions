@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.40';
+  let BRD_VERSION = '1.11.41';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -490,9 +490,8 @@
       #releaseDate.brd-pill:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
       #releaseDate.brd-pill .brd-sep { display: none; }
       #releaseDate.brd-pill a { border: none !important; padding: 0; }
-      #SpicyLyricsPage.Fullscreen .Metadata .SongName { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
-      #SpicyLyricsPage.Fullscreen .Metadata .SongName span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; }
-      #releaseDate.brd-spicy-inline { margin-top: 2px !important; margin-left: 0 !important; flex-shrink: 0; white-space: nowrap; }
+      #SpicyLyricsPage.Fullscreen .Metadata { height: auto !important; overflow: visible !important; }
+      #releaseDate.brd-spicy-inline { margin-top: 4px !important; margin-left: 0 !important; flex-shrink: 0; white-space: nowrap; display: block; width: 100%; text-align: center; }
       .brd-refresh { background: transparent; border: none; padding: 0; margin-left: 6px; cursor: pointer; display: inline-flex; align-items: center; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; color: inherit; }
 
       .brd-refresh:hover { opacity: 1; transform: rotate(90deg); }
@@ -873,7 +872,7 @@
       if (lsSeparator && lsSeparator !== '\u200E') {
         const sep = document.createElement('span');
         sep.className = 'brd-sep';
-        sep.textContent = lsSeparator === 'â€¢' ? 'â€¢' : lsSeparator;
+        sep.textContent = lsSeparator === '•' ? '•' : lsSeparator;
         root.appendChild(sep);
       }
 
