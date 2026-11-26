@@ -1,6 +1,9 @@
 {
-  "version": "1.11.52",
+  "version": "1.11.53",
   "changelogs": {
+    "1.11.53": [
+      "Fixed release date cut off by long artist names: added overflow: visible + mask-image removal on .Metadata/.Artists/.SongName and their spans when they contain #releaseDate, so long artist names with multiple artists no longer clip the release date."
+    ],
     "1.11.52": [
       "Fixed release date not showing in Spicy Lyrics fullscreen: added both .Metadata .Artists span AND .Metadata .SongName span as fallback targets (not just the selected position), and increased retry delay from 200ms to 500ms so Spicy Lyrics has time to finish its fullscreen DOM reconstruction before the release date is injected."
     ],
@@ -63,6 +66,6 @@
     ]
   },
   "changelog": [
-    "Fixed release date not showing in Spicy Lyrics fullscreen: added both .Metadata .Artists span AND .Metadata .SongName span as fallback targets (not just the selected position), and increased retry delay from 200ms to 500ms so Spicy Lyrics has time to finish its fullscreen DOM reconstruction before the release date is injected."
+    "Fixed release date cut off by long artist names: added overflow: visible + mask-image removal on .Metadata/.Artists/.SongName and their spans when they contain #releaseDate, so long artist names with multiple artists no longer clip the release date."
   ]
 }
