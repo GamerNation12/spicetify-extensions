@@ -1,6 +1,9 @@
 {
-  "version": "1.11.36",
+  "version": "1.11.37",
   "changelogs": {
+    "1.11.37": [
+      "Release date now renders inline inside Spicy Lyrics fullscreen header (next to the song name) instead of a floating pill, so it looks built into the lyrics UI."
+    ],
     "1.11.36": [
       "Fixed fullscreen listener bug: fullscreenchange event now attaches to document (not window) so the release date pill correctly appears when entering/leaving Spicy Lyrics fullscreen."
     ],
@@ -15,6 +18,6 @@
     ]
   },
   "changelog": [
-    "Fixed fullscreen listener bug: fullscreenchange event now attaches to document (not window) so the release date pill correctly appears when entering/leaving Spicy Lyrics fullscreen."
+    "Release date now renders inline inside Spicy Lyrics fullscreen header (next to the song name) instead of a floating pill, so it looks built into the lyrics UI."
   ]
 }

@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.36';
+  let BRD_VERSION = '1.11.37';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -490,6 +490,9 @@
       #releaseDate.brd-pill:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
       #releaseDate.brd-pill .brd-sep { display: none; }
       #releaseDate.brd-pill a { border: none !important; padding: 0; }
+      #SpicyLyricsPage.Fullscreen .Metadata .SongName { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+      #SpicyLyricsPage.Fullscreen .Metadata .SongName span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; }
+      #releaseDate.brd-spicy-inline { margin-left: 8px !important; flex-shrink: 0; white-space: nowrap; }
       .brd-refresh { background: transparent; border: none; padding: 0; margin-left: 6px; cursor: pointer; display: inline-flex; align-items: center; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; color: inherit; }
 
       .brd-refresh:hover { opacity: 1; transform: rotate(90deg); }
@@ -1026,7 +1029,7 @@
       if (reqId !== currentDisplayRequestId) return;
       log('displayReleaseDate(): Got track details', { releaseDate, popularity, explicit });
       const lsPosition = localStorage.getItem('position');
-      const fullscreenActive = !!document.fullscreenElement || !!document.querySelector('#SpicyLyricsPage.Fullscreen');
+      const spicyFullscreen = !!document.querySelector('#SpicyLyricsPage.Fullscreen');
       
       const trackUri = Spicetify.Player.data?.item?.uri;
       const trackId = trackUri?.includes(':track:') ? trackUri.split(':')[2] : null;
@@ -1039,8 +1042,10 @@
       root.id = 'releaseDate';
 
       let target;
-      const usePill = lsPosition === 'top-header-pill' || fullscreenActive;
-      if (usePill) {
+      if (spicyFullscreen) {
+          target = document.querySelector('#SpicyLyricsPage.Fullscreen .Metadata .SongName');
+          if (target) root.classList.add('brd-spicy-inline');
+      } else if (lsPosition === 'top-header-pill') {
           target = document.body;
           root.classList.add('brd-pill');
       } else {
