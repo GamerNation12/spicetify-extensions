@@ -1,6 +1,9 @@
 {
-  "version": "1.11.39",
+  "version": "1.11.40",
   "changelogs": {
+    "1.11.40": [
+      "Fixed fullscreen inline injection target: release date now appends to .Metadata (below both song name and artist) instead of .Metadata .Artists, avoiding overflow/mask clipping so it works correctly with or without background video."
+    ],
     "1.11.39": [
       "Release date now renders under the artist name (.Metadata .Artists) inside Spicy Lyrics fullscreen header instead of next to the song title, so it looks built into the lyrics UI."
     ],
@@ -24,6 +27,6 @@
     ]
   },
   "changelog": [
-    "Release date now renders under the artist name (.Metadata .Artists) inside Spicy Lyrics fullscreen header instead of next to the song title, so it looks built into the lyrics UI."
+    "Fixed fullscreen inline injection target: release date now appends to .Metadata (below both song name and artist) instead of .Metadata .Artists, avoiding overflow/mask clipping so it works correctly with or without background video."
   ]
 }
