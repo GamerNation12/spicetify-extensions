@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.38';
+  let BRD_VERSION = '1.11.39';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -1044,13 +1044,13 @@
 
       let target;
       if (spicyFullscreen) {
-          target = spicyPage.querySelector('.Metadata .SongName');
+          target = spicyPage.querySelector('.Metadata .Artists');
           if (target) {
               root.classList.add('brd-spicy-inline');
               target.appendChild(root);
           } else {
               setTimeout(() => {
-                  const retryTarget = spicyPage?.querySelector('.Metadata .SongName');
+                  const retryTarget = spicyPage?.querySelector('.Metadata .Artists');
                   if (retryTarget && !retryTarget.querySelector('#releaseDate')) {
                       root.classList.add('brd-spicy-inline');
                       retryTarget.appendChild(root);

@@ -1,6 +1,9 @@
 {
-  "version": "1.11.38",
+  "version": "1.11.39",
   "changelogs": {
+    "1.11.39": [
+      "Release date now renders under the artist name (.Metadata .Artists) inside Spicy Lyrics fullscreen header instead of next to the song title, so it looks built into the lyrics UI."
+    ],
     "1.11.38": [
       "Fixed fullscreen inline injection: uses spicyPage.classList.contains('Fullscreen') for reliable detection, adds .Metadata .SongName target with retry fallback, and never auto-adds the floating pill in fullscreen mode."
     ],
@@ -21,6 +24,6 @@
     ]
   },
   "changelog": [
-    "Fixed fullscreen inline injection: uses spicyPage.classList.contains('Fullscreen') for reliable detection, adds .Metadata .SongName target with retry fallback, and never auto-adds the floating pill in fullscreen mode."
+    "Release date now renders under the artist name (.Metadata .Artists) inside Spicy Lyrics fullscreen header instead of next to the song title, so it looks built into the lyrics UI."
   ]
 }
