@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.37';
+  let BRD_VERSION = '1.11.38';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -1029,7 +1029,8 @@
       if (reqId !== currentDisplayRequestId) return;
       log('displayReleaseDate(): Got track details', { releaseDate, popularity, explicit });
       const lsPosition = localStorage.getItem('position');
-      const spicyFullscreen = !!document.querySelector('#SpicyLyricsPage.Fullscreen');
+      const spicyPage = document.querySelector('#SpicyLyricsPage');
+      const spicyFullscreen = !!spicyPage?.classList.contains('Fullscreen');
       
       const trackUri = Spicetify.Player.data?.item?.uri;
       const trackId = trackUri?.includes(':track:') ? trackUri.split(':')[2] : null;
@@ -1043,21 +1044,30 @@
 
       let target;
       if (spicyFullscreen) {
-          target = document.querySelector('#SpicyLyricsPage.Fullscreen .Metadata .SongName');
-          if (target) root.classList.add('brd-spicy-inline');
+          target = spicyPage.querySelector('.Metadata .SongName');
+          if (target) {
+              root.classList.add('brd-spicy-inline');
+              target.appendChild(root);
+          } else {
+              setTimeout(() => {
+                  const retryTarget = spicyPage?.querySelector('.Metadata .SongName');
+                  if (retryTarget && !retryTarget.querySelector('#releaseDate')) {
+                      root.classList.add('brd-spicy-inline');
+                      retryTarget.appendChild(root);
+                  }
+              }, 200);
+          }
       } else if (lsPosition === 'top-header-pill') {
           target = document.body;
           root.classList.add('brd-pill');
+          if (target) target.appendChild(root);
       } else {
           target = document.querySelector(lsPosition);
+          if (target) target.appendChild(root);
       }
       
-      if (!target) {
+      if (!target && !spicyFullscreen) {
           Spicetify.showNotification("BRD Error: Could not find target container!");
-      }
-
-      if (target) {
-          target.appendChild(root);
       }
 
 
