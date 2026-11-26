@@ -1,6 +1,9 @@
 {
-  "version": "1.11.41",
+  "version": "1.11.42",
   "changelogs": {
+    "1.11.42": [
+      "Added Spicy Lyrics fullscreen settings toggle (Layout tab > 'Show Release Date in Spicy Lyrics Fullscreen') so you can enable/disable inline release date injection in fullscreen mode."
+    ],
     "1.11.41": [
       "Fixed mojibake separator (â€¢ → •) causing weird characters before the date, and fixed .Metadata fixed-height clipping that cut off the song title and artist in Spicy Lyrics fullscreen."
     ],
@@ -30,6 +33,6 @@
     ]
   },
   "changelog": [
-    "Fixed mojibake separator (â€¢ → •) causing weird characters before the date, and fixed .Metadata fixed-height clipping that cut off the song title and artist in Spicy Lyrics fullscreen."
+    "Added Spicy Lyrics fullscreen settings toggle (Layout tab > 'Show Release Date in Spicy Lyrics Fullscreen') so you can enable/disable inline release date injection in fullscreen mode."
   ]
 }

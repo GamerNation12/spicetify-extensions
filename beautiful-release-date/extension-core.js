@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.41';
+  let BRD_VERSION = '1.11.42';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -81,6 +81,7 @@
     textColor: 'inherit',
     fontSize: '0.75rem',
     fontWeight: '400',
+    spicyLyricsFullscreen: 'true',
   };
 
   // Initialize Settings
@@ -575,6 +576,7 @@
     layoutTab.appendChild(createCustomDropdown('separator', 'Separator Style', separatorOpts));
     layoutTab.appendChild(createToggle('hideVideoBtn', 'Hide Music Video Button'));
     layoutTab.appendChild(createToggle('showRefreshBtn', 'Show Refresh Button'));
+    layoutTab.appendChild(createToggle('spicyLyricsFullscreen', 'Show Release Date in Spicy Lyrics Fullscreen'));
 
     const analyticsTab = tabContents.querySelector('#tab-analytics-info');
     analyticsTab.appendChild(createToggle('showAudioFeatures', 'BPM & Musical Key'));
@@ -1042,7 +1044,7 @@
       root.id = 'releaseDate';
 
       let target;
-      if (spicyFullscreen) {
+      if (spicyFullscreen && localStorage.getItem('spicyLyricsFullscreen') !== 'false') {
           target = spicyPage.querySelector('.Metadata');
           if (target) {
               root.classList.add('brd-spicy-inline');
