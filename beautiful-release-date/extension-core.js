@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.60';
+  let BRD_VERSION = '1.11.61';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -63,11 +63,6 @@
     { value: "oled", text: "Pure OLED Monochrome" },
   ];
 
-  const spicyPositions = [
-    { value: ".Metadata .Artists", text: "Under Artist" },
-    { value: ".Metadata .SongName", text: "Under Song Name" },
-  ];
-
   const separatorOpts = [
     { value: "•", text: "Dot" },
     { value: "-", text: "Dash" },
@@ -88,7 +83,6 @@
     fontSize: '0.75rem',
     fontWeight: '400',
     spicyLyricsFullscreen: 'true',
-    spicyLyricsPosition: '.Metadata .Artists',
   };
 
   // Initialize Settings
@@ -587,7 +581,6 @@
     layoutTab.appendChild(createToggle('hideVideoBtn', 'Hide Music Video Button'));
     layoutTab.appendChild(createToggle('showRefreshBtn', 'Show Refresh Button'));
     layoutTab.appendChild(createToggle('spicyLyricsFullscreen', 'Show Release Date in Spicy Lyrics Fullscreen'));
-    layoutTab.appendChild(createCustomDropdown('spicyLyricsPosition', 'Spicy Lyrics Fullscreen Position', spicyPositions));
 
     const analyticsTab = tabContents.querySelector('#tab-analytics-info');
     analyticsTab.appendChild(createToggle('showAudioFeatures', 'BPM & Musical Key'));
@@ -874,7 +867,7 @@
     return div;
   }
 
-  function buildReleaseDateElement({ releaseDate, album, popularity, audioFeatures, explicit, label, trackId, spicyLyricsPosition }) {
+  function buildReleaseDateElement({ releaseDate, album, popularity, audioFeatures, explicit, label, trackId }) {
       let lsSeparator = localStorage.getItem('separator');
       // Normalize any lingering mojibake separator values
       if (lsSeparator && lsSeparator !== '•' && lsSeparator !== '-' && lsSeparator !== '\u200E' && (/â|â€|¢/.test(lsSeparator))) {
@@ -885,9 +878,8 @@
       const root = document.createElement('span');
       root.className = 'brd-pill-content';
 
-      // Render our own separator (bigger dot / dash) unless "None" or fullscreen inline
-      const isFullscreenInline = spicyLyricsPosition === '.Metadata .Artists' || spicyLyricsPosition === '.Metadata .SongName';
-      if (lsSeparator && lsSeparator !== '\u200E' && !isFullscreenInline) {
+      // Render our own separator (bigger dot / dash) unless "None"
+      if (lsSeparator && lsSeparator !== '\u200E') {
         const sep = document.createElement('span');
         sep.className = 'brd-sep';
         sep.textContent = lsSeparator === '•' ? '•' : lsSeparator;
@@ -1015,7 +1007,7 @@
       if (reqId !== currentPreviewRequestId) return;
       if (!window.BRD_STATE?.previewContainer) return;
       
-      const el = buildReleaseDateElement({ ...trackData, spicyLyricsPosition: localStorage.getItem('spicyLyricsPosition') || '.Metadata .Artists' });
+      const el = buildReleaseDateElement(trackData);
       el.id = 'releaseDate';
       
       const lsPosition = localStorage.getItem('position');
@@ -1056,40 +1048,15 @@
           if (!el.closest('.brd-preview-container')) el.remove();
       });
 
-      const root = buildReleaseDateElement({ releaseDate, album, popularity, audioFeatures, explicit, label, trackId, spicyLyricsPosition: localStorage.getItem('spicyLyricsPosition') || '.Metadata .Artists' });
+      const root = buildReleaseDateElement({ releaseDate, album, popularity, audioFeatures, explicit, label, trackId });
       root.id = 'releaseDate';
 
       let target;
       if (spicyFullscreen && localStorage.getItem('spicyLyricsFullscreen') !== 'false') {
-          // Inject into Spicy Lyrics' own .Metadata column as a separate row
-          // (below song name + artist), NOT inside the text spans so it won't
-          // look mixed into the lyrics/artist line
-          const spicyPos = localStorage.getItem('spicyLyricsPosition') || '.Metadata .Artists';
-          const isArtist = spicyPos.endsWith('.Artists');
-          const artistSelector = '.Metadata .Artists';
-          const songSelector = '.Metadata .SongName';
-          const tryTargets = [
-              spicyPage?.querySelector(isArtist ? artistSelector : songSelector),
-              spicyPage?.querySelector(isArtist ? songSelector : artistSelector),
-              spicyPage?.querySelector('.Metadata'),
-          ].filter(Boolean);
-          target = tryTargets[0];
-          if (target) {
-              root.classList.add('brd-spicy-inline');
-              target.appendChild(root);
-          } else {
-              setTimeout(() => {
-                  const retry = [
-                      spicyPage?.querySelector(isArtist ? artistSelector : songSelector),
-                      spicyPage?.querySelector(isArtist ? songSelector : artistSelector),
-                      spicyPage?.querySelector('.Metadata'),
-                  ].filter(Boolean)[0];
-                  if (retry && !retry.querySelector('#releaseDate')) {
-                      root.classList.add('brd-spicy-inline');
-                      retry.appendChild(root);
-                  }
-              }, 500);
-          }
+          // Render as pill on body — keeps Spicy Lyrics layout intact, no CSS overrides
+          target = document.body;
+          root.classList.add('brd-pill');
+          if (target) target.appendChild(root);
       } else if (lsPosition === 'top-header-pill') {
           target = document.body;
           root.classList.add('brd-pill');
