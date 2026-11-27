@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.55';
+  let BRD_VERSION = '1.11.56';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -894,8 +894,9 @@
       const root = document.createElement('span');
       root.className = 'brd-pill-content';
 
-      // Render our own separator (bigger dot / dash) unless "None"
-      if (lsSeparator && lsSeparator !== '\u200E') {
+      // Render our own separator (bigger dot / dash) unless "None" or fullscreen inline
+      const isFullscreenInline = lsPosition === '.Metadata .Artists' || lsPosition === '.Metadata .SongName';
+      if (lsSeparator && lsSeparator !== '\u200E' && !isFullscreenInline) {
         const sep = document.createElement('span');
         sep.className = 'brd-sep';
         sep.textContent = lsSeparator === '•' ? '•' : lsSeparator;
