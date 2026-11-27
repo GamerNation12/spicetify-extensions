@@ -1,6 +1,9 @@
 {
-  "version": "1.11.59",
+  "version": "1.11.60",
   "changelogs": {
+    "1.11.60": [
+      "Reverted all CSS overrides on Spicy Lyrics fullscreen .Metadata/.Artists/.SongName that were smashing and overlapping lyrics text. Release date now injects into .Metadata as a child row using only JS — no CSS layout changes — so Spicy Lyrics' native layout is preserved."
+    ],
     "1.11.59": [
       "Fixed fullscreen inline release date still not centered and getting cut off: scoped overflow: visible + text-align: center + height: auto + align-items: center to .Metadata:has(#releaseDate) so the date row is never clipped and is properly centered below artist name."
     ],
@@ -84,6 +87,6 @@
     ]
   },
   "changelog": [
-    "Fixed fullscreen inline release date still not centered and getting cut off: scoped overflow: visible + text-align: center + height: auto + align-items: center to .Metadata:has(#releaseDate) so the date row is never clipped and is properly centered below artist name."
+    "Reverted all CSS overrides on Spicy Lyrics fullscreen .Metadata/.Artists/.SongName that were smashing and overlapping lyrics text. Release date now injects into .Metadata as a child row using only JS — no CSS layout changes — so Spicy Lyrics' native layout is preserved."
   ]
 }
