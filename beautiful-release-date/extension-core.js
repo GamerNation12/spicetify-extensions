@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.57';
+  let BRD_VERSION = '1.11.58';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -883,7 +883,7 @@
     return div;
   }
 
-  function buildReleaseDateElement({ releaseDate, album, popularity, audioFeatures, explicit, label, trackId }) {
+  function buildReleaseDateElement({ releaseDate, album, popularity, audioFeatures, explicit, label, trackId, spicyLyricsPosition }) {
       let lsSeparator = localStorage.getItem('separator');
       // Normalize any lingering mojibake separator values
       if (lsSeparator && lsSeparator !== '•' && lsSeparator !== '-' && lsSeparator !== '\u200E' && (/â|â€|¢/.test(lsSeparator))) {
@@ -895,8 +895,7 @@
       root.className = 'brd-pill-content';
 
       // Render our own separator (bigger dot / dash) unless "None" or fullscreen inline
-      const position = localStorage.getItem('position') || '';
-      const isFullscreenInline = position === '.Metadata .Artists' || position === '.Metadata .SongName';
+      const isFullscreenInline = spicyLyricsPosition === '.Metadata .Artists' || spicyLyricsPosition === '.Metadata .SongName';
       if (lsSeparator && lsSeparator !== '\u200E' && !isFullscreenInline) {
         const sep = document.createElement('span');
         sep.className = 'brd-sep';
@@ -1025,7 +1024,7 @@
       if (reqId !== currentPreviewRequestId) return;
       if (!window.BRD_STATE?.previewContainer) return;
       
-      const el = buildReleaseDateElement(trackData);
+      const el = buildReleaseDateElement({ ...trackData, spicyLyricsPosition: localStorage.getItem('spicyLyricsPosition') || '.Metadata .Artists' });
       el.id = 'releaseDate';
       
       const lsPosition = localStorage.getItem('position');
@@ -1066,7 +1065,7 @@
           if (!el.closest('.brd-preview-container')) el.remove();
       });
 
-      const root = buildReleaseDateElement({ releaseDate, album, popularity, audioFeatures, explicit, label, trackId });
+      const root = buildReleaseDateElement({ releaseDate, album, popularity, audioFeatures, explicit, label, trackId, spicyLyricsPosition: localStorage.getItem('spicyLyricsPosition') || '.Metadata .Artists' });
       root.id = 'releaseDate';
 
       let target;

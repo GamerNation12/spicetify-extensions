@@ -1,6 +1,9 @@
 {
-  "version": "1.11.57",
+  "version": "1.11.58",
   "changelogs": {
+    "1.11.58": [
+      "Fixed fullscreen inline release date still showing separator dot: spicyLyricsPosition setting was not passed into buildReleaseDateElement(), so the separator suppression never triggered in fullscreen mode. Now passes spicyLyricsPosition to buildReleaseDateElement() so the dot is correctly hidden on its own line below artist name."
+    ],
     "1.11.57": [
       "Fixed BRD Crash: IsPosition is not defined: lsPosition was referenced inside buildReleaseDateElement() but only exists in displayReleaseDate() scope. Now reads localStorage.getItem('position') directly inside buildReleaseDateElement()."
     ],
@@ -78,6 +81,6 @@
     ]
   },
   "changelog": [
-    "Fixed BRD Crash: IsPosition is not defined: lsPosition was referenced inside buildReleaseDateElement() but only exists in displayReleaseDate() scope. Now reads localStorage.getItem('position') directly inside buildReleaseDateElement()."
+    "Fixed fullscreen inline release date still showing separator dot: spicyLyricsPosition setting was not passed into buildReleaseDateElement(), so the separator suppression never triggered in fullscreen mode. Now passes spicyLyricsPosition to buildReleaseDateElement() so the dot is correctly hidden on its own line below artist name."
   ]
 }
