@@ -1,6 +1,9 @@
 {
-  "version": "1.11.62",
+  "version": "1.11.63",
   "changelogs": {
+    "1.11.63": [
+      "Fixed fullscreen inline release date: passes spicyLyricsPosition to buildReleaseDateElement() so separator dot is correctly suppressed when rendered on its own row below artist name in Spicy Lyrics fullscreen mode."
+    ],
     "1.11.62": [
       "Fixed Spicy Lyrics fullscreen: release date now slides into .Metadata as a clean row below song name + artist using slide-in animation. No CSS layout overrides — Spicy Lyrics' native layout is fully preserved."
     ],
