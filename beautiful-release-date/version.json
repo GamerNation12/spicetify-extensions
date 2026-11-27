@@ -1,11 +1,8 @@
 {
-  "version": "1.11.63",
+  "version": "1.11.64",
   "changelogs": {
-    "1.11.63": [
-      "Fixed fullscreen inline release date: passes spicyLyricsPosition to buildReleaseDateElement() so separator dot is correctly suppressed when rendered on its own row below artist name in Spicy Lyrics fullscreen mode."
-    ],
-    "1.11.62": [
-      "Fixed Spicy Lyrics fullscreen: release date now slides into .Metadata as a clean row below song name + artist using slide-in animation. No CSS layout overrides — Spicy Lyrics' native layout is fully preserved."
+    "1.11.64": [
+      "Reverted to v9f658f7 stable base: fullscreen release date injects into Spicy Lyrics' own .Metadata .Artists span / .SongName span (built into lyrics UI). Added slide-in animation (brdSlideIn) so the date smoothly appears instead of popping in instantly. No CSS layout overrides."
     ],
     "1.11.46": [
       "Reverted overflow: visible CSS on Spicy Lyrics fullscreen .Header/.Metadata/.SongName/.Artists that was clipping media controls off-screen. Fullscreen injection now uses JS-only span append with no CSS layout changes."
@@ -51,6 +48,6 @@
     ]
   },
   "changelog": [
-    "Fixed Spicy Lyrics fullscreen: release date now slides into .Metadata as a clean row below song name + artist using slide-in animation. No CSS layout overrides — Spicy Lyrics' native layout is fully preserved."
+    "Reverted to v9f658f7 stable base: fullscreen release date injects into Spicy Lyrics' own .Metadata .Artists span / .SongName span (built into lyrics UI). Added slide-in animation (brdSlideIn) so the date smoothly appears instead of popping in instantly. No CSS layout overrides."
   ]
 }

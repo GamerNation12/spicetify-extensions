@@ -496,7 +496,7 @@
       #releaseDate.brd-pill:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
       #releaseDate.brd-pill .brd-sep { display: none; }
       #releaseDate.brd-pill a { border: none !important; padding: 0; }
-      #releaseDate.brd-spicy-slide { display: block; width: 100%; text-align: center; margin-top: 4px; opacity: 0; animation: brdSlideIn 0.4s ease forwards; }
+      #releaseDate.brd-spicy-inline { opacity: 0; animation: brdSlideIn 0.4s ease forwards; }
       @keyframes brdSlideIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
       .brd-refresh { background: transparent; border: none; padding: 0; margin-left: 6px; cursor: pointer; display: inline-flex; align-items: center; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; color: inherit; }
 
@@ -1055,17 +1055,23 @@
 
       let target;
       if (spicyFullscreen && localStorage.getItem('spicyLyricsFullscreen') !== 'false') {
-          // Inject into Spicy Lyrics' own .Metadata column as a separate row
-          // below song name + artist — uses Spicy Lyrics' native layout, no CSS overrides
-          target = spicyPage?.querySelector('.Metadata');
+          // Inject into Spicy Lyrics' own span so it uses Spicy Lyrics' native styling
+          const tryTargets = [
+              spicyPage?.querySelector('.Metadata .Artists span'),
+              spicyPage?.querySelector('.Metadata .SongName span'),
+          ].filter(Boolean);
+          target = tryTargets[0];
           if (target) {
-              root.classList.add('brd-spicy-slide');
+              root.classList.add('brd-spicy-inline');
               target.appendChild(root);
           } else {
               setTimeout(() => {
-                  const retry = spicyPage?.querySelector('.Metadata');
+                  const retry = [
+                      spicyPage?.querySelector('.Metadata .Artists span'),
+                      spicyPage?.querySelector('.Metadata .SongName span'),
+                  ].filter(Boolean)[0];
                   if (retry && !retry.querySelector('#releaseDate')) {
-                      root.classList.add('brd-spicy-slide');
+                      root.classList.add('brd-spicy-inline');
                       retry.appendChild(root);
                   }
               }, 200);
