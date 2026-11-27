@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.54';
+  let BRD_VERSION = '1.11.55';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -499,18 +499,14 @@
       #releaseDate .brd-label { margin-left: 6px; font-size: 0.8em; opacity: 0.6; display: inline-flex; align-items: center; font-style: italic; }
       #releaseDate .brd-popularity svg, #releaseDate .brd-audio-features svg, #releaseDate .brd-label svg { margin-right: 4px; opacity: 0.9; }
       
-      #SpicyLyricsPage.Fullscreen .Metadata .Artists:has(#releaseDate),
-      #SpicyLyricsPage.Fullscreen .Metadata .SongName:has(#releaseDate),
-      #SpicyLyricsPage.Fullscreen .Metadata .Artists span:has(#releaseDate),
-      #SpicyLyricsPage.Fullscreen .Metadata .SongName span:has(#releaseDate) {
+      #SpicyLyricsPage.Fullscreen .Metadata { overflow: visible !important; }
+      #SpicyLyricsPage.Fullscreen .Metadata .Artists span,
+      #SpicyLyricsPage.Fullscreen .Metadata .SongName span {
           overflow: visible !important;
           mask-image: none !important;
           -webkit-mask-image: none !important;
       }
-      
-      #SpicyLyricsPage.Fullscreen .Metadata { overflow: visible !important; }
-      
-      #releaseDate.brd-spicy-inline { margin-left: 6px !important; flex-shrink: 0; white-space: nowrap; display: inline-block; }
+      #releaseDate.brd-spicy-inline { margin-top: 4px !important; margin-left: 0 !important; flex-shrink: 0; white-space: nowrap; display: block; width: 100%; text-align: center; }
       
       #releaseDate.brd-pill { position: fixed; bottom: 105px; left: 16px; z-index: 9999; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 4px 14px; color: var(--spice-text, #fff); box-shadow: 0 4px 12px rgba(0,0,0,0.4); backdrop-filter: blur(8px); pointer-events: auto; }
       #releaseDate.brd-pill:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
@@ -1073,13 +1069,17 @@
 
       let target;
       if (spicyFullscreen && localStorage.getItem('spicyLyricsFullscreen') !== 'false') {
-          // Inject into Spicy Lyrics' own span so it uses Spicy Lyrics' native styling
+          // Inject into Spicy Lyrics' own .Metadata column as a separate row
+          // (below song name + artist), NOT inside the text spans so it won't
+          // look mixed into the lyrics/artist line
           const spicyPos = localStorage.getItem('spicyLyricsPosition') || '.Metadata .Artists';
-          const primarySelector = spicyPos.endsWith('.Artists') ? '.Metadata .Artists span' : '.Metadata .SongName span';
-          const fallbackSelector = spicyPos.endsWith('.Artists') ? '.Metadata .SongName span' : '.Metadata .Artists span';
+          const isArtist = spicyPos.endsWith('.Artists');
+          const artistSelector = '.Metadata .Artists';
+          const songSelector = '.Metadata .SongName';
           const tryTargets = [
-              spicyPage?.querySelector(primarySelector),
-              spicyPage?.querySelector(fallbackSelector),
+              spicyPage?.querySelector(isArtist ? artistSelector : songSelector),
+              spicyPage?.querySelector(isArtist ? songSelector : artistSelector),
+              spicyPage?.querySelector('.Metadata'),
           ].filter(Boolean);
           target = tryTargets[0];
           if (target) {
@@ -1088,8 +1088,9 @@
           } else {
               setTimeout(() => {
                   const retry = [
-                      spicyPage?.querySelector(primarySelector),
-                      spicyPage?.querySelector(fallbackSelector),
+                      spicyPage?.querySelector(isArtist ? artistSelector : songSelector),
+                      spicyPage?.querySelector(isArtist ? songSelector : artistSelector),
+                      spicyPage?.querySelector('.Metadata'),
                   ].filter(Boolean)[0];
                   if (retry && !retry.querySelector('#releaseDate')) {
                       root.classList.add('brd-spicy-inline');

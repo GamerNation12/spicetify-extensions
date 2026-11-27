@@ -1,6 +1,9 @@
 {
-  "version": "1.11.54",
+  "version": "1.11.55",
   "changelogs": {
+    "1.11.55": [
+      "Fixed release date looking mixed into lyrics: changed fullscreen injection target from inside .Metadata .Artists/.SongName spans to .Metadata itself as a separate child row below both song name and artist name. No longer appears crammed into the artist text line."
+    ],
     "1.11.54": [
       "Added auto-refresh: when in Spicy Lyrics fullscreen, a 3-second check verifies #releaseDate is present; if missing (e.g., removed by Spicy Lyrics DOM changes), it automatically re-injects the release date so it never disappears."
     ],
@@ -69,6 +72,6 @@
     ]
   },
   "changelog": [
-    "Added auto-refresh: when in Spicy Lyrics fullscreen, a 3-second check verifies #releaseDate is present; if missing (e.g., removed by Spicy Lyrics DOM changes), it automatically re-injects the release date so it never disappears."
+    "Fixed release date looking mixed into lyrics: changed fullscreen injection target from inside .Metadata .Artists/.SongName spans to .Metadata itself as a separate child row below both song name and artist name."
   ]
 }
