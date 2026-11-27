@@ -1,6 +1,9 @@
 {
-  "version": "1.11.58",
+  "version": "1.11.59",
   "changelogs": {
+    "1.11.59": [
+      "Fixed fullscreen inline release date still not centered and getting cut off: scoped overflow: visible + text-align: center + height: auto + align-items: center to .Metadata:has(#releaseDate) so the date row is never clipped and is properly centered below artist name."
+    ],
     "1.11.58": [
       "Fixed fullscreen inline release date still showing separator dot: spicyLyricsPosition setting was not passed into buildReleaseDateElement(), so the separator suppression never triggered in fullscreen mode. Now passes spicyLyricsPosition to buildReleaseDateElement() so the dot is correctly hidden on its own line below artist name."
     ],
@@ -81,6 +84,6 @@
     ]
   },
   "changelog": [
-    "Fixed fullscreen inline release date still showing separator dot: spicyLyricsPosition setting was not passed into buildReleaseDateElement(), so the separator suppression never triggered in fullscreen mode. Now passes spicyLyricsPosition to buildReleaseDateElement() so the dot is correctly hidden on its own line below artist name."
+    "Fixed fullscreen inline release date still not centered and getting cut off: scoped overflow: visible + text-align: center + height: auto + align-items: center to .Metadata:has(#releaseDate) so the date row is never clipped and is properly centered below artist name."
   ]
 }

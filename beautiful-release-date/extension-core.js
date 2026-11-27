@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.58';
+  let BRD_VERSION = '1.11.59';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -499,14 +499,19 @@
       #releaseDate .brd-label { margin-left: 6px; font-size: 0.8em; opacity: 0.6; display: inline-flex; align-items: center; font-style: italic; }
       #releaseDate .brd-popularity svg, #releaseDate .brd-audio-features svg, #releaseDate .brd-label svg { margin-right: 4px; opacity: 0.9; }
       
-      #SpicyLyricsPage.Fullscreen .Metadata { overflow: visible !important; }
-      #SpicyLyricsPage.Fullscreen .Metadata .Artists span,
-      #SpicyLyricsPage.Fullscreen .Metadata .SongName span {
+      #SpicyLyricsPage.Fullscreen .Metadata:has(#releaseDate) {
+          overflow: visible !important;
+          text-align: center !important;
+          align-items: center !important;
+          height: auto !important;
+      }
+      #SpicyLyricsPage.Fullscreen .Metadata:has(#releaseDate) .Artists span,
+      #SpicyLyricsPage.Fullscreen .Metadata:has(#releaseDate) .SongName span {
           overflow: visible !important;
           mask-image: none !important;
           -webkit-mask-image: none !important;
       }
-      #releaseDate.brd-spicy-inline { margin-top: 4px !important; margin-left: 0 !important; flex-shrink: 0; white-space: nowrap; display: block; width: 100%; text-align: center; }
+      #releaseDate.brd-spicy-inline { margin-top: 4px !important; margin-left: 0 !important; flex-shrink: 0; white-space: normal; display: block; width: 100%; text-align: center; }
       
       #releaseDate.brd-pill { position: fixed; bottom: 105px; left: 16px; z-index: 9999; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 4px 14px; color: var(--spice-text, #fff); box-shadow: 0 4px 12px rgba(0,0,0,0.4); backdrop-filter: blur(8px); pointer-events: auto; }
       #releaseDate.brd-pill:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
