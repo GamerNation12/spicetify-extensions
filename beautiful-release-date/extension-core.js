@@ -11,7 +11,7 @@
 
   // VERSIONING (Semantic Versioning: MAJOR.MINOR.PATCH)
   // Version and changelog are dynamically fetched from the website on boot.
-  let BRD_VERSION = '1.11.61';
+  let BRD_VERSION = '1.11.62';
   let BRD_CHANGELOG_LINES = [
     "Added Spotify Search heuristic to find the true original release date of tracks, bypassing the 'Remastered' dates."
   ];
@@ -46,7 +46,6 @@
   const positions = [
     { value: ".main-nowPlayingWidget-nowPlaying:not(#upcomingSongDiv) .main-trackInfo-name", text: "Song name" },
     { value: ".main-nowPlayingWidget-nowPlaying:not(#upcomingSongDiv) .main-trackInfo-artists", text: "Artist" },
-    { value: ".main-nowPlayingWidget-nowPlaying", text: "Now Playing Bar" },
     { value: "top-header-pill", text: "Floating Pill (Above Track)" }
   ];
   const dateformat = [
@@ -318,13 +317,13 @@
     style.innerHTML = `
       /* BASE CSS (Structure & Layout) */
       #settingsMenu { 
-        display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-        padding: 24px; flex-direction: column; width: min(92vw, 460px); max-height: 90vh; z-index: 10001; gap: 16px; 
-        box-sizing: border-box; opacity: 0; overflow-y: auto;
+        display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); 
+        padding: 24px; flex-direction: column; width: min(90vw, 440px); z-index: 10001; gap: 16px; 
+        box-sizing: border-box; opacity: 0;
         transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s cubic-bezier(0.2, 0, 0, 1);
         font-family: var(--font-family, inherit);
       }
-      #settingsMenu.brd-m3-animate { transform: translate(-50%, -50%); opacity: 1; }
+      #settingsMenu.brd-m3-animate { transform: translate(-50%, -50%) scale(1); opacity: 1; }
       #settingsMenu * { box-sizing: border-box; }
       #brd-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; opacity: 0; transition: opacity 0.25s linear; backdrop-filter: blur(4px); }
       #brd-backdrop.brd-m3-animate { opacity: 1; }
@@ -354,7 +353,7 @@
       /* Tabs */
       .brd-tabs-header { display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
       .brd-tab-btn { display: flex; align-items: center; justify-content: center; gap: 6px; background: transparent; border: none; font-weight: 600; font-size: 0.85rem; padding: 6px 12px; cursor: pointer; border-radius: 8px; transition: 0.2s; flex: 1; text-align: center; }
-      .brd-tab-content { display: none; flex-direction: column; animation: brdFadeIn 0.3s cubic-bezier(0.2, 0, 0, 1); max-height: 70vh; overflow-y: auto; }
+      .brd-tab-content { display: none; flex-direction: column; animation: brdFadeIn 0.3s cubic-bezier(0.2, 0, 0, 1); }
       .brd-tab-content.brd-active { display: flex; }
       @keyframes brdFadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -493,10 +492,12 @@
       #releaseDate .brd-label { margin-left: 6px; font-size: 0.8em; opacity: 0.6; display: inline-flex; align-items: center; font-style: italic; }
       #releaseDate .brd-popularity svg, #releaseDate .brd-audio-features svg, #releaseDate .brd-label svg { margin-right: 4px; opacity: 0.9; }
       
-      #releaseDate .brd-pill { position: fixed; bottom: 105px; left: 16px; z-index: 9999; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 4px 14px; color: var(--spice-text, #fff); box-shadow: 0 4px 12px rgba(0,0,0,0.4); backdrop-filter: blur(8px); pointer-events: auto; }
+      #releaseDate.brd-pill { position: fixed; bottom: 105px; left: 16px; z-index: 9999; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 4px 14px; color: var(--spice-text, #fff); box-shadow: 0 4px 12px rgba(0,0,0,0.4); backdrop-filter: blur(8px); pointer-events: auto; }
       #releaseDate.brd-pill:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
       #releaseDate.brd-pill .brd-sep { display: none; }
       #releaseDate.brd-pill a { border: none !important; padding: 0; }
+      #releaseDate.brd-spicy-slide { display: block; width: 100%; text-align: center; margin-top: 4px; opacity: 0; animation: brdSlideIn 0.4s ease forwards; }
+      @keyframes brdSlideIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
       .brd-refresh { background: transparent; border: none; padding: 0; margin-left: 6px; cursor: pointer; display: inline-flex; align-items: center; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; color: inherit; }
 
       .brd-refresh:hover { opacity: 1; transform: rotate(90deg); }
@@ -1039,7 +1040,7 @@
       log('displayReleaseDate(): Got track details', { releaseDate, popularity, explicit });
       const lsPosition = localStorage.getItem('position');
       const spicyPage = document.querySelector('#SpicyLyricsPage');
-      const spicyFullscreen = !!document.fullscreenElement || !!spicyPage?.classList.contains('Fullscreen');
+      const spicyFullscreen = !!spicyPage?.classList.contains('Fullscreen');
       
       const trackUri = Spicetify.Player.data?.item?.uri;
       const trackId = trackUri?.includes(':track:') ? trackUri.split(':')[2] : null;
@@ -1053,41 +1054,32 @@
 
       let target;
       if (spicyFullscreen && localStorage.getItem('spicyLyricsFullscreen') !== 'false') {
-          // Render as pill on body — keeps Spicy Lyrics layout intact, no CSS overrides
-          target = document.body;
-          root.classList.add('brd-pill');
-          if (target) target.appendChild(root);
+          // Inject into Spicy Lyrics' own .Metadata column as a separate row
+          // below song name + artist — uses Spicy Lyrics' native layout, no CSS overrides
+          target = spicyPage?.querySelector('.Metadata');
+          if (target) {
+              root.classList.add('brd-spicy-slide');
+              target.appendChild(root);
+          } else {
+              setTimeout(() => {
+                  const retry = spicyPage?.querySelector('.Metadata');
+                  if (retry && !retry.querySelector('#releaseDate')) {
+                      root.classList.add('brd-spicy-slide');
+                      retry.appendChild(root);
+                  }
+              }, 200);
+          }
       } else if (lsPosition === 'top-header-pill') {
           target = document.body;
           root.classList.add('brd-pill');
           if (target) target.appendChild(root);
       } else {
           target = document.querySelector(lsPosition);
-          if (target) {
-              target.appendChild(root);
-          } else {
-              // Fallback: render as pill on body if position selector doesn't match
-              target = document.body;
-              root.classList.add('brd-pill');
-              target.appendChild(root);
-          }
+          if (target) target.appendChild(root);
       }
       
       if (!target && !spicyFullscreen) {
           Spicetify.showNotification("BRD Error: Could not find target container!");
-      }
-
-      // Auto-refresh: if in Spicy Lyrics fullscreen and release date element is missing, re-inject
-      if (spicyFullscreen && localStorage.getItem('spicyLyricsFullscreen') !== 'false') {
-          if (window.BRD_STATE.spicyAutoCheck) clearInterval(window.BRD_STATE.spicyAutoCheck);
-          window.BRD_STATE.spicyAutoCheck = setInterval(() => {
-              if (!spicyPage?.querySelector('#releaseDate')) {
-                  displayReleaseDate();
-              }
-          }, 3000);
-      } else if (window.BRD_STATE.spicyAutoCheck) {
-          clearInterval(window.BRD_STATE.spicyAutoCheck);
-          window.BRD_STATE.spicyAutoCheck = null;
       }
 
 
@@ -1254,8 +1246,6 @@
       if (window.BRD_STATE.interval) clearInterval(window.BRD_STATE.interval);
       if (window.BRD_STATE.observer) window.BRD_STATE.observer.disconnect();
       if (window.BRD_STATE.fullscreen) document.removeEventListener('fullscreenchange', window.BRD_STATE.fullscreen);
-      if (window.BRD_STATE.spicyObserver) window.BRD_STATE.spicyObserver.disconnect();
-      if (window.BRD_STATE.spicyAutoCheck) clearInterval(window.BRD_STATE.spicyAutoCheck);
       if (window.BRD_STATE.testPluginHandler) window.removeEventListener('testPluginToggle', window.BRD_STATE.testPluginHandler);
       if (document.getElementById('brd-style')) document.getElementById('brd-style').remove();
       if (document.getElementById('brd-backdrop')) document.getElementById('brd-backdrop').remove();
@@ -1321,20 +1311,6 @@
     const onFullscreenChange = () => displayReleaseDate();
     document.addEventListener('fullscreenchange', onFullscreenChange);
     window.BRD_STATE.fullscreen = onFullscreenChange;
-
-    // MutationObserver to catch Spicy Lyrics' custom fullscreen toggle
-    // (CSS class change that does NOT fire fullscreenchange)
-    let lastFullscreen = !!document.fullscreenElement || !!document.querySelector('#SpicyLyricsPage')?.classList.contains('Fullscreen');
-    const spicyObserver = new MutationObserver(() => {
-        const now = !!document.fullscreenElement || !!document.querySelector('#SpicyLyricsPage')?.classList.contains('Fullscreen');
-        if (now !== lastFullscreen) {
-            lastFullscreen = now;
-            displayReleaseDate();
-        }
-    });
-    const spicyPageEl = document.querySelector('#SpicyLyricsPage');
-    if (spicyPageEl) spicyObserver.observe(spicyPageEl, { attributes: true, attributeFilter: ['class'] });
-    window.BRD_STATE.spicyObserver = spicyObserver;
 
         
     // Dynamic reactivity for test plugin toggle overriding

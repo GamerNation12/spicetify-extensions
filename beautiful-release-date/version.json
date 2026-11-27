@@ -1,50 +1,8 @@
 {
-  "version": "1.11.61",
+  "version": "1.11.62",
   "changelogs": {
-    "1.11.61": [
-      "Fixed Spicy Lyrics fullscreen breaking layout: fullscreen mode now renders the release date as a floating pill on document.body (same as top-header-pill position) instead of injecting into Spicy Lyrics' .Metadata DOM. No CSS overrides, no layout breaks — the pill sits at bottom-left like normal."
-    ],
-    "1.11.60": [
-      "Reverted all CSS overrides on Spicy Lyrics fullscreen .Metadata/.Artists/.SongName that were smashing and overlapping lyrics text. Release date now injects into .Metadata as a child row using only JS — no CSS layout changes — so Spicy Lyrics' native layout is preserved."
-    ],
-    "1.11.59": [
-      "Fixed fullscreen inline release date still not centered and getting cut off: scoped overflow: visible + text-align: center + height: auto + align-items: center to .Metadata:has(#releaseDate) so the date row is never clipped and is properly centered below artist name."
-    ],
-    "1.11.58": [
-      "Fixed fullscreen inline release date still showing separator dot: spicyLyricsPosition setting was not passed into buildReleaseDateElement(), so the separator suppression never triggered in fullscreen mode. Now passes spicyLyricsPosition to buildReleaseDateElement() so the dot is correctly hidden on its own line below artist name."
-    ],
-    "1.11.57": [
-      "Fixed BRD Crash: IsPosition is not defined: lsPosition was referenced inside buildReleaseDateElement() but only exists in displayReleaseDate() scope. Now reads localStorage.getItem('position') directly inside buildReleaseDateElement()."
-    ],
-    "1.11.56": [
-      "Fixed fullscreen inline release date: removed separator dot when rendered on its own line below artist name, and ensured proper centering so long artist names no longer clip the release date."
-    ],
-    "1.11.55": [
-      "Fixed release date looking mixed into lyrics: changed fullscreen injection target from inside .Metadata .Artists/.SongName spans to .Metadata itself as a separate child row below both song name and artist name. No longer appears crammed into the artist text line."
-    ],
-    "1.11.54": [
-      "Added auto-refresh: when in Spicy Lyrics fullscreen, a 3-second check verifies #releaseDate is present; if missing (e.g., removed by Spicy Lyrics DOM changes), it automatically re-injects the release date so it never disappears."
-    ],
-    "1.11.53": [
-      "Fixed release date cut off by long artist names: added overflow: visible + mask-image removal on .Metadata/.Artists/.SongName and their spans when they contain #releaseDate, so long artist names with multiple artists no longer clip the release date."
-    ],
-    "1.11.52": [
-      "Fixed release date not showing in Spicy Lyrics fullscreen: added both .Metadata .Artists span AND .Metadata .SongName span as fallback targets (not just the selected position), and increased retry delay from 200ms to 500ms so Spicy Lyrics has time to finish its fullscreen DOM reconstruction before the release date is injected."
-    ],
-    "1.11.51": [
-      "Fixed pill not coming back after exiting Spicy Lyrics fullscreen: added MutationObserver to catch Spicy Lyrics' custom fullscreen CSS class toggles (which dont fire fullscreenchange), plus document.fullscreenElement detection, so displayReleaseDate() re-runs when entering/leaving fullscreen via any method."
-    ],
-    "1.11.50": [
-      "Added 'Now Playing Bar' position (non-Spicy-Lyrics): renders release date on Spotify's normal now playing widget container (.main-nowPlayingWidget-nowPlaying)."
-    ],
-    "1.11.49": [
-      "Fixed pill not coming back after closing fullscreen: added fallback to render as floating pill on body when position selector doesn't match."
-    ],
-    "1.11.48": [
-      "Added Spicy Lyrics fullscreen position setting (Layout tab > 'Spicy Lyrics Fullscreen Position'): choose to render the release date under the Artist or under the Song Name inside Spicy Lyrics fullscreen mode."
-    ],
-    "1.11.47": [
-      "Fixed settings popup going off-screen: added max-height: 90vh with overflow-y: auto to #settingsMenu and max-height: 70vh to tab contents so the menu never exceeds the viewport on small screens."
+    "1.11.62": [
+      "Fixed Spicy Lyrics fullscreen: release date now slides into .Metadata as a clean row below song name + artist using slide-in animation. No CSS layout overrides — Spicy Lyrics' native layout is fully preserved."
     ],
     "1.11.46": [
       "Reverted overflow: visible CSS on Spicy Lyrics fullscreen .Header/.Metadata/.SongName/.Artists that was clipping media controls off-screen. Fullscreen injection now uses JS-only span append with no CSS layout changes."
@@ -90,6 +48,6 @@
     ]
   },
   "changelog": [
-    "Reverted all CSS overrides on Spicy Lyrics fullscreen .Metadata/.Artists/.SongName that were smashing and overlapping lyrics text. Release date now injects into .Metadata as a child row using only JS — no CSS layout changes — so Spicy Lyrics' native layout is preserved."
+    "Fixed Spicy Lyrics fullscreen: release date now slides into .Metadata as a clean row below song name + artist using slide-in animation. No CSS layout overrides — Spicy Lyrics' native layout is fully preserved."
   ]
 }
