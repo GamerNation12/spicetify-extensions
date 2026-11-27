@@ -1,6 +1,9 @@
 {
-  "version": "1.11.64",
+  "version": "1.11.65",
   "changelogs": {
+    "1.11.65": [
+      "Fixed: bullet separator dot is now shown again when release date is injected into Spicy Lyrics fullscreen spans (built into lyrics UI)."
+    ],
     "1.11.64": [
       "Reverted to v9f658f7 stable base: fullscreen release date injects into Spicy Lyrics' own .Metadata .Artists span / .SongName span (built into lyrics UI). Added slide-in animation (brdSlideIn) so the date smoothly appears instead of popping in instantly. No CSS layout overrides."
     ],
